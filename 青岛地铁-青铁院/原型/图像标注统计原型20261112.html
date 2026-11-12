@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>标注统计 · 图像任务管理</title>
+<style>
+:root{--blue:#1259cf;--accent:#145fd7;--ink:#162641;--muted:#62718a;--line:#e6ecf3;--bg:#f3f6fa;--tint:#eef5ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Microsoft YaHei UI","PingFang SC",system-ui,sans-serif}
+button,input,select{font:inherit}button,a,summary,input,select{outline-offset:3px}button,summary{cursor:pointer}button{color:inherit}button[disabled]{cursor:default}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+[hidden]{display:none!important}.top{height:62px;background:#1257c8;color:#fff;display:flex;align-items:center;padding:0 26px;gap:16px}.brand-icon{display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffff57;border-radius:8px;background:#ffffff17}.brand-icon svg{width:19px;height:19px}.brand{font-size:17px;font-weight:700;letter-spacing:.04em}.app{border-left:1px solid #ffffff45;padding-left:16px;color:#e1edff}.account{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px}.avatar{display:grid;place-items:center;background:#e5efff;color:#184b9e;width:28px;height:28px;border-radius:50%;font-weight:700}.tenant{margin-left:10px;border:1px solid #ffffff54;padding:5px 12px;border-radius:5px}
+.shell{display:grid;grid-template-columns:194px minmax(0,1fr);min-height:calc(100vh - 62px)}.sidebar{padding-top:17px;background:#fff;border-right:1px solid var(--line);color:#394a66}.nav{display:block;padding:11px 21px}.nav svg{width:15px;height:15px;vertical-align:-2px;margin-right:9px}.nav-heading{font-weight:700}.nav-child{padding-left:47px}.nav-current{background:#edf4ff;color:#1359c6;font-weight:700;border-right:3px solid #1d66dc}.work{min-width:0;padding:18px 24px 34px;max-width:1740px;width:100%;margin:0 auto}.crumb{display:flex;align-items:center;gap:9px;color:#52647d;font-size:12px;margin:0 0 15px}.crumb [aria-current]{color:#293a55}.separator{color:#8b9bb0}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.heading-main{display:flex;align-items:center;gap:13px}.title-icon{width:46px;height:46px;flex:none;border:1px solid #d9e7fe;border-radius:10px;display:grid;place-items:center;background:#e9f2ff;color:#195dca}.title-icon svg{width:23px;height:23px}.heading-main h1{margin:0;font-size:25px;line-height:1.3;letter-spacing:.02em}.subtitle{margin:5px 0 0;color:var(--muted);font-size:13px}.head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.demo{color:#516480;font-size:12px;padding:3px 9px;background:#e8eef6;border-radius:20px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 13px;border:1px solid #d5deea;border-radius:6px;background:#fff;white-space:nowrap;font-size:13px;font-weight:600}.btn:hover{background:#f1f6fe;border-color:#aac3eb;text-decoration:none}.primary{color:#fff;background:var(--accent);border-color:var(--accent)}.primary:hover{background:#114eaf;color:#fff}.link-btn{padding:0;border:0;background:none;color:#135bc8;font-size:13px}.link-btn:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}.layout.no-notes{grid-template-columns:minmax(0,1fr)}.stack{display:grid;gap:15px;min-width:0}.card{background:#fff;border:1px solid var(--line);border-radius:9px;min-width:0}.card-title{display:flex;align-items:center;gap:7px;margin:0;font-size:15px;font-weight:700}.filters{padding:15px 17px 13px}.filters .card-title{margin-bottom:13px}.filter-grid{display:grid;grid-template-columns:minmax(240px,1.65fr) minmax(122px,1.05fr) repeat(3,minmax(112px,1fr));gap:10px}.field{min-width:0;display:grid;gap:5px;align-content:start}.field>label,.field-label{font-size:12px;font-weight:600;color:#3c4c64}.control{width:100%;height:35px;border:1px solid #d8e1ed;border-radius:6px;background:#fff;padding:0 8px;color:var(--ink);font-size:13px;min-width:0}.date-range{display:flex;align-items:center;gap:3px}.date-range .control{flex:1;min-width:0;padding:0 5px}.date-range span{color:#7b8ba2}.task-select{position:relative}.task-select summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:6px}.task-select summary::-webkit-details-marker{display:none}.task-select summary::after{content:"";width:6px;height:6px;flex:none;border-right:1.5px solid #60738d;border-bottom:1.5px solid #60738d;transform:rotate(45deg);margin:0 2px 4px}.task-select[open] summary{border-color:#7eacf1}.task-menu{position:absolute;top:41px;left:0;z-index:4;min-width:244px;padding:9px;background:#fff;border:1px solid #d8e4f4;border-radius:8px;box-shadow:0 9px 24px #203c6a24}.task-menu label{display:flex;align-items:center;gap:7px;padding:7px;border-radius:4px;font-size:13px;cursor:pointer}.task-menu label:hover{background:var(--tint)}.task-menu input{accent-color:var(--accent);margin:0}.task-tools{border-bottom:1px solid var(--line);margin-bottom:4px;padding:0 6px 6px;display:flex;justify-content:space-between;align-items:center}.filter-footer{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:12px}.filter-actions{display:flex;gap:7px;margin-left:auto}.small{font-size:12px;color:var(--muted)}.error{margin:7px 0 0;color:#ad2331;font-size:13px}
+.results-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px 10px;flex-wrap:wrap}.view-tabs{display:flex;align-items:center;gap:3px;padding:3px;border-radius:7px;background:#edf1f7}.view-tabs button{border:0;border-radius:5px;background:transparent;padding:6px 10px;font-size:13px;color:#4a5c78;white-space:nowrap}.view-tabs [aria-pressed=true]{background:#fff;color:#1559c5;font-weight:700;box-shadow:0 1px 3px #142e5420}.result-tools{display:flex;align-items:center;gap:8px}.scope{padding:0 16px 10px;color:#52647f;font-size:12px;overflow-wrap:anywhere}.table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}th,td{padding:10px 15px;border-top:1px solid #edf0f5;white-space:nowrap}th{background:#f5f7fb;color:#415471;font-weight:650;font-size:12px}td:first-child,th:first-child{padding-left:17px}.num{text-align:right;font-variant-numeric:tabular-nums}.total-col{font-weight:700;color:#1558bf}.table-scroll tbody tr:hover{background:#f8fbff}tfoot{font-weight:700;background:#f5f8fd}.share{display:inline-flex;align-items:center;justify-content:flex-end;gap:9px}.share-track{width:66px;height:5px;border-radius:5px;background:#e6edf8;display:inline-block;overflow:hidden}.share-fill{height:100%;display:block;border-radius:5px;background:#5690ee}.share-num{min-width:39px}.tag-code{display:inline-block;margin-left:7px;color:#607390;font-size:11px}.expand-row{display:inline-flex;gap:6px;align-items:center;text-align:left}.expand-row::before{content:"›";font-size:17px;line-height:1;transform:rotate(0);width:9px}.expand-row[aria-expanded=true]::before{transform:rotate(90deg)}.detail-row td{background:#f5f9ff;white-space:normal}.label-chip{display:inline-block;margin:2px 7px 2px 0;padding:3px 7px;border-radius:4px;background:#e7effd}.empty{padding:34px 18px;text-align:center;border-top:1px solid var(--line);color:var(--muted)}.empty strong{display:block;margin-bottom:5px;color:var(--ink)}.empty button{margin-top:9px}.table-footer{padding:10px 16px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.badge{width:19px;height:19px;flex:none;display:inline-grid;place-items:center;background:#e8f1ff;border:1px solid #c9dfff;border-radius:50%;color:#135bc8;font-size:11px;font-weight:700;vertical-align:middle}.hide-markers .badge.marker{display:none}.notes{padding:14px;background:#f8fbff;border-color:#d8e6f8}.notes-head{display:flex;gap:7px;align-items:center;justify-content:space-between}.notes-head h2{font-size:15px;margin:0}.notes-head span{font-size:11px;font-weight:600;color:#375a88;background:#e6effc;padding:2px 6px;border-radius:4px}.notes-intro{font-size:12px;color:var(--muted);margin:6px 0 5px}.note{padding:10px 0;border-bottom:1px solid #e4edf8}.note:last-child{border:0;padding-bottom:1px}.note h3{display:flex;align-items:center;gap:7px;margin:0;font-size:13px}.note p{margin:5px 0 0;padding-left:26px;color:#50637e;font-size:12px;line-height:1.65}.flash{outline:2px solid #6099ee;outline-offset:3px;animation:highlight 1.6s ease}@keyframes highlight{50%{outline-color:#a9c8f9}}
+.entry-card{padding:0 17px 15px}.entry-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 0;border-bottom:1px solid var(--line)}.entry-head h1{font-size:22px;margin:0}.entry-table{margin-top:15px}.entry-table td,.entry-table th{padding:13px 14px}.entry-table td:first-child{color:var(--muted)}.entry-actions{display:flex;align-items:center;gap:12px}.ghost-link{color:#65758c;font-size:13px}.track{width:78px;height:5px;background:#e7edf6;border-radius:9px;display:inline-block;margin-right:8px;vertical-align:middle;overflow:hidden}.track i{display:block;height:100%;background:#3a7de8}
+@media(max-width:1370px){.filter-grid{grid-template-columns:minmax(220px,1.7fr) repeat(2,minmax(115px,1fr))}.layout{grid-template-columns:minmax(0,1fr) 233px}.shell{grid-template-columns:166px minmax(0,1fr)}}
+@media(max-width:1050px){.layout{grid-template-columns:minmax(0,1fr)}.notes{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.notes-head,.notes-intro{grid-column:1/-1}.note:last-child{padding-bottom:10px}.work{padding:16px}.shell{grid-template-columns:143px minmax(0,1fr)}.nav{padding-left:14px}.nav-child{padding-left:37px}}
+@media(max-width:680px){.shell{display:block}.sidebar,.tenant,.app{display:none}.top{padding:0 13px;height:52px}.work{padding:12px}.page-heading{align-items:flex-start;flex-wrap:wrap}.title-icon{width:39px;height:39px}.heading-main h1{font-size:22px}.filter-grid{grid-template-columns:1fr 1fr}.date-field{grid-column:1/-1}.share-track{display:none}.notes{display:block}.entry-head{align-items:flex-start;flex-wrap:wrap}.filter-footer{align-items:flex-start}.filter-footer .small{padding-top:3px}}
+.person-select{position:relative}.person-select summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:6px}.person-select summary::-webkit-details-marker{display:none}.person-select summary::after{content:"";width:6px;height:6px;flex:none;border-right:1.5px solid #60738d;border-bottom:1.5px solid #60738d;transform:rotate(45deg);margin:0 2px 4px}.person-select[open] summary{border-color:#7eacf1}.person-summary{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.person-menu{position:absolute;top:41px;left:0;z-index:5;width:max(100%,230px);max-width:min(330px,calc(100vw - 30px));padding:10px;background:#fff;border:1px solid #d8e4f4;border-radius:8px;box-shadow:0 9px 24px #203c6a24}.person-search{width:100%;height:33px;border:1px solid #d8e1ed;border-radius:5px;padding:0 9px;color:var(--ink);font-size:13px}.person-search:focus{outline:2px solid #c5dcff;border-color:#86aeed}.person-menu-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 2px 5px;color:var(--muted);font-size:12px}.person-options{max-height:175px;overflow:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 0}.person-options label{display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;font-size:13px;cursor:pointer}.person-options label:hover{background:var(--tint)}.person-options input{accent-color:var(--accent);margin:0}.person-empty{margin:8px 4px}.person-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:8px}.person-actions .small{max-width:145px;line-height:1.45}.person-actions .btn{min-height:29px;padding:0 10px}.person-select-all,.person-clear{padding:0;border:0;background:none;color:var(--accent);font-size:12px}.person-select-all:hover,.person-clear:hover{text-decoration:underline}
+.status-picker .task-menu{left:auto;right:0;min-width:160px}
+.result-actions{max-width:100%;min-width:0;margin-left:auto;flex-wrap:wrap}
+.task-refinement{display:flex;align-items:center;gap:7px;min-width:0}
+.task-refinement .field-label{white-space:nowrap}
+.task-refinement .person-select{width:148px;min-width:0}
+.task-refinement .person-menu{left:auto;right:0;width:min(250px,calc(100vw - 80px))}
+.task-refinement .task-tools{padding:7px 2px}
+.task-refinement .task-tools label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.task-refinement input[type="checkbox"]{accent-color:var(--accent)}
+.results-footer,.pagination{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.results-footer{justify-content:space-between}
+.pagination{font-variant-numeric:tabular-nums}
+.pagination .control{width:auto;height:30px}
+.pagination .btn{min-height:30px;padding:0 9px}
+.pagination .btn:disabled{color:var(--muted);opacity:.55}
+@media(min-width:1371px){.filter-grid{grid-template-columns:minmax(240px,1.65fr) repeat(3,minmax(112px,1fr))}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v15h16M8 15v-3m5 3V8m5 7V5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-stack" viewBox="0 0 24 24"><path d="m12 4 8 4-8 4-8-4 8-4Zm-8 8 8 4 8-4M4 16l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="9.5" r="1.4" fill="currentColor"/><path d="m4 17 4-4 3 3 4.5-5 5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<header class="top"><span class="brand-icon"><svg aria-hidden="true"><use href="#i-image"/></svg></span><span class="brand">数据标注平台</span><span class="app">数据处理</span><div class="account"><span class="avatar" aria-hidden="true">J</span><span>jiqing</span><span class="tenant">测试租户</span></div></header>
+<div class="shell">
+<nav class="sidebar" aria-label="功能导航">
+  <span class="nav"><svg aria-hidden="true"><use href="#i-stack"/></svg>数据管理</span>
+  <span class="nav nav-heading"><svg aria-hidden="true"><use href="#i-image"/></svg>任务管理</span>
+  <a class="nav nav-child nav-current" href="#tasks">图像任务</a>
+  <span class="nav nav-child">文本任务</span><span class="nav nav-child">音频任务</span><span class="nav nav-child">视觉理解</span>
+  <span class="nav"><svg aria-hidden="true"><use href="#i-stack"/></svg>数据集管理</span><span class="nav"><svg aria-hidden="true"><use href="#i-chart"/></svg>数据测评</span>
+</nav>
+<main class="work">
+<section id="stats-page" aria-labelledby="stats-title">
+  <nav class="crumb" aria-label="当前位置"><span>任务管理</span><span class="separator">›</span><a href="#tasks">图像任务</a><span class="separator">›</span><span aria-current="page">标注统计</span></nav>
+  <div class="page-heading">
+    <div class="heading-main"><div class="title-icon"><svg aria-hidden="true"><use href="#i-chart"/></svg></div><div><h1 id="stats-title">标注统计</h1><p class="subtitle">汇总多个图像任务的标签数量，也可按标注人或审核人查看</p></div></div>
+    <div class="head-actions"><span class="demo">演示数据</span><a class="btn" href="#tasks">‹ 返回图像任务</a><button class="btn" type="button" data-notes aria-controls="stats-notes" aria-expanded="true">隐藏需求标注</button></div>
+  </div>
+  <div class="layout" data-layout>
+    <div class="stack">
+      <form class="card filters" id="filters">
+        <h2 class="card-title">筛选条件 <span class="badge marker">2</span><span class="badge marker">3</span></h2>
+        <div class="filter-grid">
+          <div class="field date-field"><span class="field-label">标注时间</span><div class="date-range"><input id="start" class="control" type="date" aria-label="开始日期"><span>至</span><input id="end" class="control" type="date" aria-label="结束日期"></div></div>
+          <div class="field"><span class="field-label" id="annotator-label">标注人（多选）</span><details class="person-select" id="annotator-picker"><summary class="control" aria-labelledby="annotator-label annotator-summary"><span class="person-summary" id="annotator-summary">全部标注人</span></summary><div class="person-menu"><input class="person-search" id="annotator-search" type="search" placeholder="搜索标注人" aria-label="搜索标注人"><div class="person-menu-actions"><span>支持同时选择多人</span><button class="person-select-all" type="button" data-select-visible="annotator">全选搜索结果</button></div><div class="person-options" id="annotator-options" role="group" aria-label="标注人选项"></div><p class="person-empty small" id="annotator-empty" hidden>没有匹配的人</p><div class="person-actions"><button class="person-clear" type="button" data-clear-person="annotator">清空选择</button><button class="btn" type="button" data-done-person="annotator">完成</button></div></div></details></div>
+          <div class="field"><span class="field-label" id="reviewer-label">审核人（多选）</span><details class="person-select" id="reviewer-picker"><summary class="control" aria-labelledby="reviewer-label reviewer-summary"><span class="person-summary" id="reviewer-summary">全部审核人</span></summary><div class="person-menu"><input class="person-search" id="reviewer-search" type="search" placeholder="搜索审核人" aria-label="搜索审核人"><div class="person-menu-actions"><span>支持同时选择多人</span><button class="person-select-all" type="button" data-select-visible="reviewer">全选搜索结果</button></div><div class="person-options" id="reviewer-options" role="group" aria-label="审核人选项"></div><p class="person-empty small" id="reviewer-empty" hidden>没有匹配的人</p><div class="person-actions"><button class="person-clear" type="button" data-clear-person="reviewer">清空选择</button><button class="btn" type="button" data-done-person="reviewer">完成</button></div></div></details></div>
+          <div class="field">
+            <span class="field-label" id="status-label">状态（多选）</span>
+            <details class="task-select status-picker" id="status">
+              <summary class="control" aria-labelledby="status-label status-summary"><span id="status-summary">全部</span></summary>
+              <div class="task-menu">
+                <div class="task-tools">
+                  <label><input type="checkbox" id="all-statuses" checked> 全部</label>
+                  <button id="done-statuses" class="link-btn" type="button">完成</button>
+                </div>
+                <div id="status-options" role="group" aria-label="可选状态"></div>
+              </div>
+            </details>
+          </div>
+        </div>
+        <div class="filter-footer"><span class="small">标注中按最近保存日期筛选，已提交的按最近提交日期筛选，包含起止当天</span><div class="filter-actions"><button class="btn" type="reset">重置</button><button class="btn primary" type="submit">查询</button></div></div>
+        <p class="error" id="filter-error" role="alert" hidden></p>
+      </form>
+      <section class="card" id="results" aria-label="统计结果">
+        <div class="results-head">
+          <div class="result-tools"><div class="view-tabs" aria-label="统计维度"><button type="button" data-view="label" aria-pressed="true">标签总量</button><button type="button" data-view="annotator" aria-pressed="false">按标注人</button><button type="button" data-view="reviewer" aria-pressed="false">按审核人</button></div><span class="badge marker">4</span></div>
+          <div class="result-tools result-actions">
+            <div class="task-refinement">
+              <span class="field-label" id="task-label">任务筛选</span><span class="badge marker">6</span>
+              <details class="person-select" id="task-picker">
+                <summary class="control" aria-labelledby="task-label task-summary"><span class="person-summary" id="task-summary">全部任务</span></summary>
+                <div class="person-menu">
+                  <input class="person-search" id="task-search" type="search" placeholder="搜索任务 ID 或名称" aria-label="搜索任务 ID 或名称">
+                  <div class="task-tools">
+                    <label><input type="checkbox" id="all-tasks"> 全部任务</label>
+                    <button id="done-tasks" class="link-btn" type="button">完成</button>
+                  </div>
+                  <div class="person-options" id="task-options" role="group" aria-label="任务选项"></div>
+                  <p class="person-empty small" id="task-no-match" role="status" hidden>没有匹配的任务</p>
+                </div>
+              </details>
+              <span class="small" id="no-available-tasks" hidden>本次查询没有可选任务</span>
+            </div>
+            <div class="result-tools" id="shape-control"><button type="button" class="btn" id="shape-toggle" aria-pressed="false" aria-controls="result-table">展开形状明细</button><span class="badge marker">5</span></div>
+          </div>
+        </div>
+        <div class="scope" id="scope" role="status" aria-live="polite"></div>
+        <div class="table-scroll" id="table-wrap"><table id="result-table" aria-label="标注数量统计"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+        <div class="empty" id="empty" hidden><strong>没有符合条件的标注</strong><span id="empty-hint"></span><br><button type="button" class="btn" id="clear-empty">重置筛选</button></div>
+        <div class="table-footer results-footer" id="table-footer">
+          <span id="result-count"></span>
+          <nav class="pagination" aria-label="统计结果分页">
+            <label for="page-size">每页</label>
+            <select class="control" id="page-size">
+              <option value="5">5 条</option>
+              <option value="10">10 条</option>
+              <option value="20">20 条</option>
+            </select>
+            <button class="btn" id="page-prev" type="button" aria-controls="result-table">上一页</button>
+            <span id="page-position" role="status"></span>
+            <button class="btn" id="page-next" type="button" aria-controls="result-table">下一页</button>
+            <span class="badge marker">7</span>
+          </nav>
+        </div>
+      </section>
+    </div>
+    <aside class="card notes" id="stats-notes" aria-labelledby="notes-title">
+      <div class="notes-head"><h2 id="notes-title">需求标注</h2><span>原型说明</span></div><p class="notes-intro">编号对应左侧交互，可点击定位。</p>
+      <div class="note"><h3><a class="badge" href="#tasks" aria-label="查看标注 1 的入口">1</a> 图像任务入口</h3><p>在「图像任务管理」右上角，与「绩效统计」并排。点击进入独立统计页。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="filters" aria-label="定位标注 2 的筛选区域">2</button> 初次查询</h3><p>标注时间默认为当月 1 日至月末。时间、标注人、审核人和状态取交集，点击「查询」后更新结果。重置恢复当月及其他默认条件。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="status" aria-label="定位标注 3 的状态筛选">3</button> 状态与人员归属</h3><p>状态默认「全部」，可组合勾选「标注中」「审核中」「审核完成」。标注人与审核人均支持搜索、多选。同一筛选项内匹配任一勾选值，各筛选项之间取交集。标注中按标注人归属，已提交的按实际提交人归属。已有审核人时按审核人归属，否则归入「未审核」。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="results" aria-label="定位标注 4 的汇总表">4</button> 总量与人员视图</h3><p>同一标准标签跨任务合计。每个标注实例计 1 次，标注中取最新保存版本，审核中和审核完成取最新提交版本。按人查看时，点姓名可展开该人员的标签构成。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="shape-control" aria-label="定位标注 5 的形状明细">5</button> 形状明细默认折叠</h3><p>表格以总数为主，可按需展开矩形、多边形、折线、点、整图标签等类型。各类型小计之和等于该行标注总数。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="task-label" aria-label="定位标注 6 的任务二次筛选">6</button> 任务二次筛选</h3><p>入口位于统计表工具栏的「展开形状明细」左侧。每次查询后，只列出本次有标注结果的任务并默认全选。可按任务 ID 或名称搜索，勾选后立即更新统计表。</p></div>
+      <div class="note"><h3><button type="button" class="badge" data-target="table-footer" aria-label="定位标注 7 的结果分页">7</button> 结果分页</h3><p>当前视图按标签或人员分组分页，默认每页 5 条。重新查询、调整任务或切换统计维度时返回第 1 页。合计和占比按全部筛选结果计算。</p></div>
+    </aside>
+  </div>
+</section>
+<section id="tasks-page" aria-labelledby="tasks-title" hidden>
+  <nav class="crumb" aria-label="当前位置"><span>任务管理</span><span class="separator">›</span><span aria-current="page">图像任务</span></nav>
+  <div class="layout" data-layout>
+    <div class="card entry-card">
+      <div class="entry-head"><h1 id="tasks-title">图像任务管理</h1><div class="entry-actions"><span class="ghost-link">绩效统计</span><a class="btn primary" id="stats-entry" href="#stats"><svg aria-hidden="true" width="15" height="15"><use href="#i-chart"/></svg>标注统计</a><span class="badge marker">1</span></div></div>
+      <div class="entry-table table-scroll"><table aria-label="演示图像任务"><thead><tr><th scope="col">ID</th><th scope="col">任务名称</th><th scope="col">标注进度</th><th scope="col">审核进度</th><th scope="col">创建时间</th></tr></thead><tbody id="tasks-rows"></tbody></table></div>
+      <div class="table-footer">共 <span id="tasks-count"></span> 条演示任务</div>
+    </div>
+    <aside class="card notes" id="entry-notes" aria-label="入口需求标注"><div class="notes-head"><h2>需求标注</h2><span>原型说明</span></div><div class="note"><h3><button type="button" class="badge" data-target="stats-entry" aria-label="定位标注 1 的标注统计入口">1</button> 新增标注统计入口</h3><p>放在「图像任务管理」右上角。进入后可按时间、人员和状态查询，再从结果中选择任务。</p></div></aside>
+  </div>
+</section>
+</main></div>
+<script>
+"use strict";
+const tasks = [
+  {id:54,name:"车站客流识别",created:"2026-10-06",progress:92,review:66},
+  {id:52,name:"站台屏蔽门检测",created:"2026-10-08",progress:83,review:55},
+  {id:51,name:"轨行区异物识别",created:"2026-10-10",progress:87,review:69},
+  {id:49,name:"列车进站场景",created:"2026-10-12",progress:76,review:51},
+  {id:44,name:"车厢视频抽帧",created:"2026-10-16",progress:94,review:71},
+  {id:42,name:"站厅安防巡检",created:"2026-10-20",progress:69,review:42}
+];
+const labels = [
+  {id:"pedestrian",name:"行人",weight:31},
+  {id:"train",name:"列车",weight:21},
+  {id:"platform_door",name:"屏蔽门",weight:16},
+  {id:"warning_line",name:"安全警示线",weight:11},
+  {id:"luggage",name:"行李",weight:9},
+  {id:"obstacle",name:"异物",weight:6},
+  {id:"sign",name:"导向标识",weight:4},
+  {id:"track",name:"轨道",weight:2}
+];
+const annotators = ["林晨","陈雪","周宁","徐璐","杨明"];
+const reviewers = ["赵悦","韩涛","顾妍"];
+const shapes = ["矩形","多边形","折线","点","整图标签","其他"];
+const statuses = {annotating:"标注中",reviewing:"审核中",reviewed:"审核完成"};
+const headings = {label:"标签",annotator:"标注人",reviewer:"审核人"};
+const get = id => document.getElementById(id);
+const number = value => value.toLocaleString("zh-CN");
+const counts = new Intl.NumberFormat("zh-CN",{style:"percent",minimumFractionDigits:1,maximumFractionDigits:1});
+const form = get("filters");
+const picker = get("task-picker");
+const statusPicker = get("status");
+const table = get("result-table");
+const pageSizeControl = get("page-size");
+const previousPage = get("page-prev");
+const nextPage = get("page-next");
+let view = "label";
+let page = 1;
+let showShapes = false;
+let showNotes = true;
+let applied;
+let queryResults = [];
+let filtered = [];
+const expanded = new Set();
+
+// A row represents a set of annotation instances sharing the same attributes.
+const records = tasks.flatMap((task, taskIndex) =>
+  Array.from({length:18}, (_, batch) => {
+    const startOffset = Number(task.created.slice(-2)) - 6;
+    const offset = startOffset + ((batch * 7 + taskIndex * 3) % (30 - startOffset));
+    const date = new Date(Date.UTC(2026,9,6 + offset)).toISOString().slice(0,10);
+    const annotator = annotators[(batch + taskIndex * 2) % annotators.length];
+    const stage = (batch + taskIndex) % 4;
+    const status = stage === 0 ? "annotating" : stage === 1 ? "reviewing" : "reviewed";
+    const reviewer = status === "annotating" ? "" : reviewers[(batch + taskIndex * 2) % reviewers.length];
+    return labels.flatMap((label, labelIndex) =>
+      shapes.map((shape, shapeIndex) => {
+        const weights = labelIndex === 3 || labelIndex === 7 ? [2,2,9,1,1,1] : [12,4,1,2,1,1];
+        const noise = (batch * 13 + taskIndex * 17 + labelIndex * 3 + shapeIndex * 5) % 11;
+        const quantity = Math.floor((label.weight * weights[shapeIndex] * (noise + 3)) / 520);
+        return {task:task.id,date,annotator,reviewer,status,label:label.id,shapeIndex,quantity};
+      }).filter(record => record.quantity > 0)
+    );
+  }).flat()
+);
+const personFilters = {annotator:new Set(),reviewer:new Set()};
+const personOptions = {annotator:annotators,reviewer:[...reviewers,"未审核"]};
+function updatePersonSummary(type) {
+  const selected = [...personFilters[type]];
+  get(type + "-summary").textContent = selected.length === 0 ? (type === "annotator" ? "全部标注人" : "全部审核人") :
+    selected.length === 1 ? selected[0] : "已选 " + selected.length + " 人";
+}
+function renderPersonOptions(type) {
+  const container = get(type + "-options");
+  container.replaceChildren();
+  for (const name of personOptions[type]) {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    const text = document.createElement("span");
+    checkbox.type = "checkbox";
+    checkbox.value = name;
+    checkbox.checked = personFilters[type].has(name);
+    text.textContent = name;
+    checkbox.addEventListener("change",() => {
+      if (checkbox.checked) personFilters[type].add(name);
+      else personFilters[type].delete(name);
+      updatePersonSummary(type);
+    });
+    label.append(checkbox,text);
+    container.append(label);
+  }
+}
+for (const type of ["annotator","reviewer"]) {
+  renderPersonOptions(type);
+  get(type + "-search").addEventListener("input",event => {
+    const query = event.target.value.trim().toLocaleLowerCase();
+    const labels = [...get(type + "-options").querySelectorAll("label")];
+    for (const label of labels) {
+      label.hidden = !label.textContent.toLocaleLowerCase().includes(query);
+    }
+    get(type + "-empty").hidden = labels.some(label => !label.hidden);
+  });
+  get(type + "-picker").addEventListener("keydown",event => {
+    if (event.key === "Escape") {
+      event.currentTarget.open = false;
+      event.currentTarget.querySelector("summary").focus();
+    }
+  });
+}
+document.querySelectorAll("[data-select-visible]").forEach(button => button.addEventListener("click",() => {
+  const type = button.dataset.selectVisible;
+  for (const label of get(type + "-options").querySelectorAll("label:not([hidden])")) {
+    const checkbox = label.querySelector("input");
+    checkbox.checked = true;
+    personFilters[type].add(checkbox.value);
+  }
+  updatePersonSummary(type);
+}));
+document.querySelectorAll("[data-clear-person]").forEach(button => button.addEventListener("click",() => {
+  const type = button.dataset.clearPerson;
+  personFilters[type].clear();
+  for (const checkbox of get(type + "-options").querySelectorAll("input")) checkbox.checked = false;
+  updatePersonSummary(type);
+}));
+document.querySelectorAll("[data-done-person]").forEach(button => button.addEventListener("click",() => {
+  const picker = get(button.dataset.donePerson + "-picker");
+  picker.open = false;
+  picker.querySelector("summary").focus();
+}));
+get("tasks-count").textContent = tasks.length;
+get("tasks-rows").innerHTML = tasks.map(task =>
+  '<tr><td>' + task.id + '</td><td>' + task.name + '</td>' +
+  [task.progress,task.review].map(value => '<td><span class="track" aria-hidden="true"><i style="width:' + value + '%"></i></span>' + value + '%</td>').join("") +
+  '<td>' + task.created + '</td></tr>'
+).join("");
+const taskOptions = get("task-options");
+const taskSearch = get("task-search");
+const allTasks = get("all-tasks");
+let taskChecks = [];
+get("status-options").innerHTML = Object.entries(statuses).map(([value,label]) =>
+  '<label><input type="checkbox" value="' + value + '" checked> ' + label + '</label>'
+).join("");
+const statusChecks = [...get("status-options").querySelectorAll("input")];
+const allStatuses = get("all-statuses");
+function chosenStatuses() {
+  return statusChecks.filter(box => box.checked).map(box => box.value);
+}
+function updateStatusSummary() {
+  const selected = chosenStatuses();
+  allStatuses.checked = selected.length === statusChecks.length;
+  allStatuses.indeterminate = selected.length > 0 && !allStatuses.checked;
+  get("status-summary").textContent = allStatuses.checked ? "全部" :
+    selected.length === 1 ? statuses[selected[0]] :
+    selected.length ? "已选 " + selected.length + " 项" : "请选择状态";
+}
+allStatuses.addEventListener("change",() => {
+  for (const box of statusChecks) box.checked = allStatuses.checked;
+  updateStatusSummary();
+});
+for (const box of statusChecks) box.addEventListener("change",updateStatusSummary);
+get("done-statuses").addEventListener("click",() => {
+  statusPicker.open = false;
+  statusPicker.querySelector("summary").focus();
+});
+function updateTaskResults() {
+  const selected = taskChecks.filter(box => box.checked);
+  const selectedIds = new Set(selected.map(box => Number(box.value)));
+  allTasks.checked = selected.length > 0 && selected.length === taskChecks.length;
+  allTasks.indeterminate = selected.length > 0 && !allTasks.checked;
+  get("task-summary").textContent = allTasks.checked ? "全部任务" :
+    selected.length === 1 ? selected[0].parentElement.textContent.trim() :
+    "已选 " + selected.length + " 项任务";
+  filtered = queryResults.filter(record => selectedIds.has(record.task));
+  page = 1;
+  expanded.clear();
+  renderResults();
+}
+function populateTaskOptions() {
+  const availableIds = new Set(queryResults.map(record => record.task));
+  taskOptions.replaceChildren();
+  taskChecks = tasks.filter(task => availableIds.has(task.id)).map(task => {
+    const label = document.createElement("label");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = task.id;
+    box.checked = true;
+    label.append(box, task.id + " · " + task.name);
+    taskOptions.append(label);
+    return box;
+  });
+  taskSearch.value = "";
+  get("task-no-match").hidden = true;
+  picker.hidden = !taskChecks.length;
+  get("no-available-tasks").hidden = taskChecks.length > 0;
+  updateTaskResults();
+}
+function selectAllTasks(checked) {
+  for (const box of taskChecks) box.checked = checked;
+  updateTaskResults();
+}
+taskSearch.addEventListener("input",() => {
+  const query = taskSearch.value.trim().toLocaleLowerCase();
+  const labels = [...taskOptions.children];
+  for (const label of labels) label.hidden = !label.textContent.toLocaleLowerCase().includes(query);
+  get("task-no-match").hidden = labels.some(label => !label.hidden);
+});
+allTasks.addEventListener("change",() => selectAllTasks(allTasks.checked));
+taskOptions.addEventListener("change",updateTaskResults);
+get("done-tasks").addEventListener("click",() => {
+  picker.open = false;
+  picker.querySelector("summary").focus();
+});
+document.addEventListener("click",event => {
+  if (!picker.contains(event.target)) picker.open = false;
+  if (!statusPicker.contains(event.target)) statusPicker.open = false;
+  for (const type of ["annotator","reviewer"]) {
+    const personPicker = get(type + "-picker");
+    if (!personPicker.contains(event.target)) personPicker.open = false;
+  }
+});
+for (const dropdown of [picker,statusPicker]) {
+  dropdown.addEventListener("keydown",event => {
+    if (event.key === "Escape") {
+      dropdown.open = false;
+      dropdown.querySelector("summary").focus();
+    }
+  });
+}
+function filterError(message) {
+  get("filter-error").textContent = message;
+  get("filter-error").hidden = !message;
+}
+function applyFilters() {
+  const start = get("start").value;
+  const end = get("end").value;
+  const selectedStatuses = chosenStatuses();
+  if (start && end && start > end) {
+    filterError("开始日期须早于或等于结束日期。");
+    get("start").focus();
+    return;
+  }
+  if (!selectedStatuses.length) {
+    filterError("请至少选择一个状态，也可勾选「全部」。");
+    statusPicker.open = true;
+    statusPicker.querySelector("summary").focus();
+    return;
+  }
+  filterError("");
+  picker.open = false;
+  statusPicker.open = false;
+  applied = {start,end,annotator:[...personFilters.annotator],reviewer:[...personFilters.reviewer],selectedStatuses};
+  queryResults = records.filter(record =>
+    (!start || record.date >= start) &&
+    (!end || record.date <= end) &&
+    (!applied.annotator.length || applied.annotator.includes(record.annotator)) &&
+    (!applied.reviewer.length || applied.reviewer.includes(record.reviewer || "未审核")) &&
+    selectedStatuses.includes(record.status)
+  );
+  populateTaskOptions();
+}
+function resetFilters() {
+  const monthParts = new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit"
+  }).formatToParts(new Date());
+  const year = monthParts.find(part => part.type === "year").value;
+  const month = monthParts.find(part => part.type === "month").value;
+  const lastDay = new Date(Date.UTC(Number(year),Number(month),0)).getUTCDate();
+  get("start").value = year + "-" + month + "-01";
+  get("end").value = year + "-" + month + "-" + lastDay;
+  for (const type of ["annotator","reviewer"]) {
+    personFilters[type].clear();
+    for (const checkbox of get(type + "-options").querySelectorAll("input")) checkbox.checked = false;
+    get(type + "-search").value = "";
+    for (const label of get(type + "-options").querySelectorAll("label")) label.hidden = false;
+    get(type + "-empty").hidden = true;
+    updatePersonSummary(type);
+  }
+  for (const box of statusChecks) box.checked = true;
+  updateStatusSummary();
+  applyFilters();
+}
+form.addEventListener("submit",event => {event.preventDefault();applyFilters();});
+form.addEventListener("reset",event => {event.preventDefault();resetFilters();});
+get("clear-empty").addEventListener("click",() => {
+  if (queryResults.length) {
+    selectAllTasks(true);
+    picker.querySelector("summary").focus();
+  } else {
+    resetFilters();
+    get("start").focus();
+  }
+});
+const viewButtons = [...document.querySelectorAll("[data-view]")];
+for (const button of viewButtons) button.addEventListener("click",() => {
+  view = button.dataset.view;
+  page = 1;
+  expanded.clear();
+  renderResults();
+});
+pageSizeControl.addEventListener("change",() => {
+  page = 1;
+  renderResults();
+});
+previousPage.addEventListener("click",() => {
+  page -= 1;
+  renderResults();
+});
+nextPage.addEventListener("click",() => {
+  page += 1;
+  renderResults();
+});
+get("shape-toggle").addEventListener("click",() => {
+  showShapes = !showShapes;
+  renderResults();
+});
+table.addEventListener("click",event => {
+  const button = event.target.closest("[data-person]");
+  if (!button) return;
+  const key = button.dataset.person;
+  if (expanded.has(key)) expanded.delete(key);
+  else expanded.add(key);
+  const detail = get(button.getAttribute("aria-controls"));
+  detail.hidden = !expanded.has(key);
+  button.setAttribute("aria-expanded",String(expanded.has(key)));
+});
+function groupRecords() {
+  const groups = new Map();
+  for (const record of filtered) {
+    const key = record[view] || "未审核";
+    if (!groups.has(key)) groups.set(key,{key,total:0,shapes:shapes.map(() => 0),labels:new Map()});
+    const group = groups.get(key);
+    group.total += record.quantity;
+    group.shapes[record.shapeIndex] += record.quantity;
+    group.labels.set(record.label,(group.labels.get(record.label) || 0) + record.quantity);
+  }
+  return [...groups.values()].sort((a,b) => b.total - a.total || a.key.localeCompare(b.key,"zh-CN"));
+}
+function tableRow(group, index, total) {
+  const label = labels.find(item => item.id === group.key);
+  const detailId = "detail-" + index;
+  const rowName = label ? label.name + '<span class="tag-code">' + label.id + '</span>' :
+    '<button class="link-btn expand-row" type="button" data-person="' + group.key + '" aria-controls="' + detailId + '" aria-expanded="' + expanded.has(group.key) + '">' + group.key + '</button>';
+  const shapeCells = showShapes ? group.shapes.map(value => '<td class="num">' + number(value) + '</td>').join("") : "";
+  const share = group.total / total;
+  const row = '<tr><td>' + rowName + '</td><td class="num total-col">' + number(group.total) + '</td>' + shapeCells +
+    '<td class="num"><span class="share"><span class="share-track" aria-hidden="true"><span class="share-fill" style="width:' + share * 100 + '%"></span></span><span class="share-num">' + counts.format(share) + '</span></span></td></tr>';
+  if (view === "label") return row;
+  const detail = [...group.labels.entries()].sort((a,b) => b[1] - a[1]).map(([key,value]) =>
+    '<span class="label-chip">' + labels.find(item => item.id === key).name + ' ' + number(value) + '</span>').join("");
+  return row + '<tr class="detail-row" id="' + detailId + '"' + (expanded.has(group.key) ? "" : " hidden") +
+    '><td colspan="' + (showShapes ? shapes.length + 3 : 3) + '"><strong>标签构成</strong>　' + detail + '</td></tr>';
+}
+function renderResults() {
+  const groups = groupRecords();
+  const total = groups.reduce((sum, group) => sum + group.total,0);
+  for (const button of viewButtons) button.setAttribute("aria-pressed",String(button.dataset.view === view));
+  get("shape-toggle").setAttribute("aria-pressed",String(showShapes));
+  get("shape-toggle").textContent = showShapes ? "收起形状明细" : "展开形状明细";
+  const taskScope = taskChecks.length ? get("task-summary").textContent : "无可选任务";
+  const period = applied.start || applied.end ? (applied.start || "不限起始") + " 至 " + (applied.end || "不限结束") : "全部时间";
+  const peopleScope = (name,selected) => selected.length ? name + " " + (selected.length === 1 ? selected[0] : "已选 " + selected.length + " 人") : "";
+  const statusScope = applied.selectedStatuses.length === statusChecks.length ? "全部状态" :
+    applied.selectedStatuses.map(status => statuses[status]).join("、");
+  get("scope").textContent = [period,taskScope,peopleScope("标注人",applied.annotator),
+    peopleScope("审核人",applied.reviewer),statusScope].filter(Boolean).join("　·　");
+  get("table-wrap").hidden = !groups.length;
+  get("empty").hidden = groups.length > 0;
+  get("empty-hint").textContent = queryResults.length ? "请选择要统计的任务。" : "可调整日期、人员或状态后重新查询。";
+  get("clear-empty").textContent = queryResults.length ? "恢复全选任务" : "重置筛选";
+  get("shape-control").hidden = !groups.length;
+  get("table-footer").hidden = !groups.length;
+  if (!groups.length) return;
+  const pageSize = Number(pageSizeControl.value);
+  const pageCount = Math.ceil(groups.length / pageSize);
+  page = Math.max(1,Math.min(page,pageCount));
+  const pageStart = (page - 1) * pageSize;
+  const pageGroups = groups.slice(pageStart,pageStart + pageSize);
+  previousPage.disabled = page === 1;
+  nextPage.disabled = page === pageCount;
+  get("page-position").textContent = "第 " + page + " / " + pageCount + " 页";
+  table.tHead.innerHTML = '<tr><th scope="col">' + headings[view] + '</th><th scope="col" class="num total-col">标注总数</th>' +
+    (showShapes ? shapes.map(shape => '<th scope="col" class="num">' + shape + '</th>').join("") : "") + '<th scope="col" class="num">占筛选后总量</th></tr>';
+  table.tBodies[0].innerHTML = pageGroups.map((group,index) => tableRow(group,pageStart + index,total)).join("");
+  const subtotals = showShapes ? shapes.map((_,index) =>
+    '<td class="num">' + number(groups.reduce((sum,group) => sum + group.shapes[index],0)) + '</td>').join("") : "";
+  table.tFoot.innerHTML = '<tr><td>合计</td><td class="num total-col">' + number(total) + '</td>' + subtotals + '<td class="num">100%</td></tr>';
+  get("result-count").textContent = "共 " + groups.length + (view === "label" ? " 类标签" : " 个" + headings[view] + "分组") + "，按标注总数降序排列";
+}
+function setNotes(visible) {
+  showNotes = visible;
+  get("stats-notes").hidden = !visible;
+  get("entry-notes").hidden = !visible;
+  document.querySelectorAll("[data-layout]").forEach(layout => layout.classList.toggle("no-notes",!visible));
+  document.body.classList.toggle("hide-markers",!visible);
+  const button = document.querySelector("[data-notes]");
+  button.setAttribute("aria-expanded",String(visible));
+  button.textContent = visible ? "隐藏需求标注" : "显示需求标注";
+}
+document.querySelector("[data-notes]").addEventListener("click",() => setNotes(!showNotes));
+for (const button of document.querySelectorAll("[data-target]")) button.addEventListener("click",() => {
+  const target = get(button.dataset.target);
+  if (target.hidden) {
+    get("empty").scrollIntoView({block:"nearest"});
+    return;
+  }
+  target.scrollIntoView({block:"nearest"});
+  target.classList.remove("flash");
+  requestAnimationFrame(() => target.classList.add("flash"));
+  setTimeout(() => target.classList.remove("flash"),1700);
+});
+function route() {
+  const tasksPage = location.hash === "#tasks";
+  get("stats-page").hidden = tasksPage;
+  get("tasks-page").hidden = !tasksPage;
+  document.title = (tasksPage ? "图像任务管理" : "标注统计 · 图像任务管理") + "原型";
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+resetFilters();
+route();
+</script>
+</body>
+</html>
