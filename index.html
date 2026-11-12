@@ -25,39 +25,40 @@
   .desc{margin-top:8px;color:var(--sub);font-size:14px}
   .meta{margin-top:14px;font-size:12px;color:#9aa1ab}
   .meta span+span::before{content:"·";margin:0 8px;color:#cfd4da}
-  section{margin-bottom:36px}
-  .sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
-  h2{font-size:14px;font-weight:600;letter-spacing:.5px}
-  .count{font-size:12px;color:#9aa1ab}
-  .group{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .group+.group{margin-top:12px}
-  .group-title{
-    padding:10px 18px;font-size:12px;color:var(--sub);
-    background:#fbfcfd;border-bottom:1px solid var(--line);
+  .project{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;margin-bottom:16px;
+  }
+  .project-head{
+    display:flex;align-items:baseline;gap:10px;
+    padding:14px 20px;border-bottom:1px solid var(--line);background:#fbfcfd;
+  }
+  .project-head h2{font-size:15px;font-weight:600}
+  .project-head .count{margin-left:auto;font-size:12px;color:#9aa1ab}
+  .sub{padding:6px 20px 12px}
+  .sub-label{
+    font-size:12px;color:var(--sub);letter-spacing:.3px;
+    padding:10px 0 6px;
   }
   ul{list-style:none}
   li+li{border-top:1px solid #f1f2f4}
   a.item{
     display:flex;align-items:center;gap:14px;
-    padding:14px 18px;color:var(--text);text-decoration:none;
-    transition:background .15s ease;
+    padding:11px 0;color:var(--text);text-decoration:none;
+    transition:color .15s ease;
   }
-  a.item:hover{background:#f7faff}
   a.item:hover .name{color:var(--accent)}
   .name{font-size:14px;transition:color .15s ease}
   .tag{
     margin-left:auto;flex-shrink:0;font-size:12px;color:var(--sub);
     font-variant-numeric:tabular-nums;
   }
-  .empty{
-    padding:22px 18px;color:#9aa1ab;font-size:13px;
-    background:var(--card);border:1px dashed var(--line);border-radius:10px;
-  }
-  footer{margin-top:56px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
+  .empty{font-size:13px;color:#9aa1ab;padding:10px 0}
+  footer{margin-top:48px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
   code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--sub)}
   @media (max-width:560px){
     .wrap{padding:36px 16px 60px}
-    a.item{flex-wrap:wrap;gap:6px}
+    a.item{flex-wrap:wrap;gap:4px}
     .tag{margin-left:0;width:100%}
   }
 </style>
@@ -67,42 +68,39 @@
 
   <header>
     <h1>设计原型目录</h1>
-    <p class="desc">按客户 / 项目分类归档的原型与文档，点击标题即可打开最新版本。</p>
+    <p class="desc">按客户 / 项目归档的原型与文档，点击标题即可打开最新版本。</p>
     <p class="meta">
       <span>更新于 2026-11-12</span>
-      <span>共 1 个原型 · 0 份文档</span>
+      <span>1 个项目 · 1 个原型 · 0 份文档</span>
     </p>
   </header>
 
-  <section>
-    <div class="sec-head">
-      <h2>原型</h2>
-      <span class="count">prototypes/</span>
+  <section class="project">
+    <div class="project-head">
+      <h2>青岛地铁-工地项目</h2>
+      <span class="count">青岛地铁-工地项目/</span>
     </div>
 
-    <div class="group">
-      <div class="group-title">青岛地铁-工地项目</div>
+    <div class="sub">
+      <div class="sub-label">原型</div>
       <ul>
         <li>
-          <a class="item" href="prototypes/青岛地铁-工地项目/人脸抓拍机布控库自维护设计稿20261111.html">
+          <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html">
             <span class="name">人脸抓拍机布控库自维护设计稿</span>
             <span class="tag">2026-11-11</span>
           </a>
         </li>
       </ul>
     </div>
-  </section>
 
-  <section>
-    <div class="sec-head">
-      <h2>文档</h2>
-      <span class="count">docs/</span>
+    <div class="sub">
+      <div class="sub-label">文档</div>
+      <div class="empty">暂无文档</div>
     </div>
-    <div class="empty">暂无文档</div>
   </section>
 
   <footer>
-    目录结构：<code>prototypes/&lt;客户&gt;-&lt;项目&gt;/</code> · <code>docs/&lt;客户&gt;-&lt;项目&gt;/</code>
+    目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code>
   </footer>
 
 </div>
