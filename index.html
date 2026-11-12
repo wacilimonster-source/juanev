@@ -1,242 +1,177 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <script src="assets/gate.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>设计原型目录</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>受保护页面</title>
 <style>
-  :root{
-    --bg:#f6f7f9;
-    --card:#ffffff;
-    --line:#e6e8ec;
-    --text:#1c2128;
-    --sub:#6b7280;
-    --accent:#1677ff;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font:14px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",Arial,sans-serif;
-    color:var(--text);background:var(--bg);
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 80px}
-  header{margin-bottom:40px}
-  h1{font-size:26px;font-weight:600;letter-spacing:-.3px}
-  .desc{margin-top:8px;color:var(--sub);font-size:14px}
-  .meta{margin-top:14px;font-size:12px;color:#9aa1ab}
-  .meta span+span::before{content:"·";margin:0 8px;color:#cfd4da}
-  .project{
-    background:var(--card);border:1px solid var(--line);border-radius:10px;
-    overflow:hidden;margin-bottom:16px;
-  }
-  .project-head{
-    display:flex;align-items:baseline;gap:10px;
-    padding:14px 20px;border-bottom:1px solid var(--line);background:#fbfcfd;
-  }
-  .project-head h2{font-size:15px;font-weight:600}
-  .project-head .count{margin-left:auto;font-size:12px;color:#9aa1ab}
-  .sub{padding:6px 20px 12px}
-  .sub-label{
-    font-size:12px;color:var(--sub);letter-spacing:.3px;
-    padding:10px 0 6px;
-  }
-  ul{list-style:none}
-  li+li{border-top:1px solid #f1f2f4}
-  a.item{
-    display:flex;align-items:center;gap:14px;
-    padding:11px 0;color:var(--text);text-decoration:none;
-    transition:color .15s ease;
-  }
-  a.item:hover .name{color:var(--accent)}
-  .name{font-size:14px;transition:color .15s ease}
-  .tag{
-    margin-left:auto;flex-shrink:0;font-size:12px;color:var(--sub);
-    font-variant-numeric:tabular-nums;
-  }
-  .badge{
-    flex-shrink:0;font-size:11px;color:var(--accent);background:#e8f1ff;
-    border-radius:4px;padding:1px 6px;line-height:1.5;
-  }
-  details.versions{margin:0 0 2px}
-  details.versions summary{
-    list-style:none;cursor:pointer;font-size:12px;color:var(--sub);
-    padding:6px 0 8px;user-select:none;
-  }
-  details.versions summary::-webkit-details-marker{display:none}
-  details.versions summary::before{
-    content:"▸";display:inline-block;margin-right:6px;transition:transform .15s;
-  }
-  details.versions[open] summary::before{transform:rotate(90deg)}
-  details.versions .item{padding:8px 0 8px 16px}
-  details.versions .name{font-size:13px;color:var(--sub)}
-  .updates{border-top:1px solid var(--line);background:#fcfcfd;padding:12px 20px 14px}
-  .updates-head{
-    display:flex;align-items:baseline;font-size:12px;color:var(--sub);
-    letter-spacing:.3px;margin-bottom:4px;
-  }
-  .updates-head a{margin-left:auto;color:var(--accent);text-decoration:none}
-  .updates-head a:hover{text-decoration:underline}
-  .updates ul{list-style:none}
-  .updates li{display:flex;gap:12px;padding:5px 0;font-size:13px;color:#4b5563}
-  .u-date{flex-shrink:0;color:#9aa1ab;font-variant-numeric:tabular-nums}
-  .u-text{min-width:0}
-  .empty{font-size:13px;color:#9aa1ab;padding:10px 0}
-  footer{margin-top:48px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
-  code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--sub)}
-  @media (max-width:560px){
-    .wrap{padding:36px 16px 60px}
-    a.item{flex-wrap:wrap;gap:4px}
-    .tag{margin-left:0;width:100%}
-  }
+  html,body{margin:0;height:100%;background:#f1efe8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  #sg{position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;visibility:visible}
+  .sg-card{background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:28px 24px;width:340px;max-width:100%;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+  .sg-t{font-size:15px;font-weight:500;color:#2c2c2a;margin:0 0 6px;text-align:center}
+  .sg-d{font-size:12px;color:#888780;margin:0 0 16px;text-align:center;word-break:break-all}
+  .sg-i{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.28);border-radius:8px;padding:10px 12px;font-size:14px;outline:none}
+  .sg-i:focus{border-color:#185fa5}
+  .sg-err{border-color:#e24b4a!important}
+  .sg-m{font-size:12px;color:#a32d2d;min-height:16px;margin:8px 0 0;text-align:center}
+  .sg-b{width:100%;margin-top:12px;background:#185fa5;color:#fff;border:0;border-radius:8px;padding:11px 0;font-size:14px;cursor:pointer}
+  .sg-b:active{background:#0c447c}
+  .sg-b:disabled{opacity:.55;cursor:default}
+  .sg-f{font-size:11px;color:#b4b2a9;margin:14px 0 0;text-align:center}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <header>
-    <h1>设计原型目录</h1>
-    <p class="desc">按客户 / 项目归档的原型与文档，点击标题即可打开最新版本。</p>
-    <p class="meta">
-      <span>更新于 2026-11-12</span>
-      <span>3 个项目 · 3 个原型 · 4 个版本</span>
-    </p>
-  </header>
-
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-工地项目</h2>
-      <span class="count">青岛地铁-工地项目/</span>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li>
-          <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112.html">
-            <span class="name">人脸抓拍机布控库自维护设计稿</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-          <details class="versions">
-            <summary>历史版本 (1)</summary>
-            <ul>
-              <li>
-                <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html">
-                  <span class="name">2026-11-11 版</span>
-                  <span class="tag">2026-11-11</span>
-                </a>
-              </li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">文档</div>
-      <div class="empty">暂无文档</div>
-    </div>
-
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-工地项目/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">新增「设备在线状态每日定时抓图」「人脸抓拍机按最近上报 72 小时判断在线」（需求 13、14）</span>
-        </li>
-        <li>
-          <span class="u-date">2026-11-11</span>
-          <span class="u-text">首版归档：人脸抓拍机与布控库自维护设计稿</span>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-青铁院</h2>
-      <span class="count">青岛地铁-青铁院/</span>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li>
-          <a class="item" href="青岛地铁-青铁院/原型/图像标注统计原型20261112.html">
-            <span class="name">图像标注统计原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">文档</div>
-      <div class="empty">暂无文档</div>
-    </div>
-
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-青铁院/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">首版归档：图像标注统计原型（标注统计入口、多维筛选、标签/人员汇总、形状明细、分页）</span>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-门户管理</h2>
-      <span class="count">青岛地铁-门户管理/</span>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li>
-          <a class="item" href="青岛地铁-门户管理/原型/门户页面原型20261112.html">
-            <span class="name">门户页面原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">文档</div>
-      <div class="empty">暂无文档</div>
-    </div>
-
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-门户管理/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">首版归档：门户首页与平台管理后台「用户管理」「角色管理」原型；模型市场、我的工单等模块仅保留菜单展示。</span>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <footer>
-    目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code><br>
-    版本规则：同名文件按日期沉淀，最新版作为入口，旧版保留可回溯。
-  </footer>
-
+<div id="sg">
+  <div class="sg-card">
+    <p class="sg-t">请输入访问口令</p>
+    <p class="sg-d" id="sgd"></p>
+    <input class="sg-i" id="sgi" type="password" autocomplete="off" placeholder="口令">
+    <p class="sg-m" id="sgm"></p>
+    <button class="sg-b" id="sgb" type="button">解锁</button>
+    <p class="sg-f">内容已加密存储，口令正确才能解密显示</p>
+  </div>
 </div>
+<script>
+(function () {
+  var PAYLOAD = "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";
+  var SALT = "Fv7HrMWTpUDb8E1Za/fFY4qv8Mrnj32grAnsX5he5X0=";
+  var IV = "zJc81jftRnfWwSj5";
+  var ITER = 600000;
+  var MODE = "html";
+  var DL_NAME = "";
+  var DL_MIME = "application/octet-stream";
+  var NOTE = "";
+  var LS = 'juanev_k1';
+
+  var card = document.getElementById('sg');
+  var input = document.getElementById('sgi');
+  var msg = document.getElementById('sgm');
+  var btn = document.getElementById('sgb');
+  var desc = document.getElementById('sgd');
+  if (NOTE) desc.textContent = NOTE; else desc.textContent = '';
+
+  function fromB64(b64) {
+    var bin = atob(b64), arr = new Uint8Array(bin.length), i;
+    for (i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+  function toB64(buf) {
+    var bytes = new Uint8Array(buf), s = '', i;
+    for (i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+
+  function loadKey() {
+    try {
+      var raw = localStorage.getItem(LS);
+      if (!raw) return null;
+      var v = JSON.parse(raw);
+      if (!v || typeof v.exp !== 'number' || Date.now() > v.exp) return null;
+      return v.k;
+    } catch (e) { return null; }
+  }
+  function saveKey(rawB64) {
+    try {
+      localStorage.setItem(LS, JSON.stringify({ k: rawB64, exp: Date.now() + 30 * 864e5 }));
+    } catch (e) {}
+  }
+
+  function derive(password) {
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
+      .then(function (base) {
+        return crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: fromB64(SALT), iterations: ITER, hash: 'SHA-256' },
+          base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']
+        );
+      });
+  }
+
+  function decrypt(key) {
+    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(IV) }, key, fromB64(PAYLOAD));
+  }
+
+  function showError(text) {
+    msg.textContent = text;
+    input.classList.add('sg-err');
+    input.focus();
+    input.select();
+    btn.disabled = false;
+  }
+
+  function render(buf) {
+    if (MODE === 'download') {
+      var blob = new Blob([buf], { type: DL_MIME });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = DL_NAME;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      card.innerHTML = '<div class="sg-card"><p class="sg-t">文件已解密</p>' +
+        '<p class="sg-d">' + DL_NAME + '</p>' +
+        '<p class="sg-m" style="color:#3b6d11">正在下载，如未自动开始请重新点开本页</p>' +
+        '<button class="sg-b" id="again" type="button">再次下载</button></div>';
+      var again = document.getElementById('again');
+      if (again) again.addEventListener('click', function () {
+        var b2 = new Blob([buf], { type: DL_MIME });
+        var u2 = URL.createObjectURL(b2);
+        var a2 = document.createElement('a');
+        a2.href = u2; a2.download = DL_NAME;
+        document.body.appendChild(a2); a2.click();
+        setTimeout(function () { URL.revokeObjectURL(u2); }, 60000);
+      });
+      return;
+    }
+    var html = new TextDecoder('utf-8').decode(buf);
+    document.open();
+    document.write(html);
+    document.close();
+  }
+
+  function tryCachedKey() {
+    var k = loadKey();
+    if (!k) return Promise.resolve(false);
+    return crypto.subtle.importKey('raw', fromB64(k), { name: 'AES-GCM' }, true, ['decrypt'])
+      .then(function (key) {
+        return decrypt(key).then(function (buf) {
+          render(buf);
+          return true;
+        }, function () { return false; });
+      })
+      .catch(function () { return false; });
+  }
+
+  function unlock() {
+    var pw = input.value;
+    if (!pw) { showError('请输入口令'); return; }
+    input.classList.remove('sg-err');
+    msg.textContent = '正在解密…';
+    btn.disabled = true;
+    derive(pw).then(function (key) {
+      return decrypt(key).then(function (buf) {
+        crypto.subtle.exportKey('raw', key).then(function (raw) { saveKey(toB64(raw)); }, function () {});
+        render(buf);
+      });
+    }).catch(function () {
+      msg.textContent = '口令不正确，请重试';
+      input.classList.add('sg-err');
+      input.focus();
+      input.select();
+      btn.disabled = false;
+    });
+  }
+
+  btn.addEventListener('click', unlock);
+  input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') unlock(); });
+
+  tryCachedKey().then(function (ok) {
+    if (!ok) {
+      msg.textContent = '';
+      setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+    }
+  });
+})();
+</script>
 </body>
 </html>
