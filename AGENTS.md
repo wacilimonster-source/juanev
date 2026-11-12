@@ -115,5 +115,7 @@ https://<GitHub用户名>.github.io/<仓库名>/<客户>-<项目>/原型/<文件
 ## 7. 远端与部署
 
 - 远端：`origin` → `https://github.com/wacilimonster-source/juanev.git`，主分支 `main`。
-- GitHub Pages：Deploy from a branch → `main` / `/ (root)`。
+- GitHub Pages：已开启，Deploy from a branch → `main` / `/ (root)`（build_type: legacy）。
 - 仓库根目录的 `index.html` 即站点首页，`.nojekyll` 已就位。
+- 本机访问 GitHub 需经系统代理 `http://127.0.0.1:7897`；`gh` CLI 已安装（2.103.3），
+  可用 `gh api` 管理仓库与 Pages。
