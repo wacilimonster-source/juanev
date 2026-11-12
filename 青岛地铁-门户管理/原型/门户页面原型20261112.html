@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青岛数智融合创新中心 · 人工智能平台门户原型</title>
+<!--
+  单文件门户原型（自包含，无外部依赖）
+  范围：门户首页 + 平台管理后台的「用户管理」「角色管理」
+  模型市场、我的工单、后台其余模块：菜单保留展示，不支持点击
+  用户管理 / 角色管理：按实际系统（2026-11-05 实测界面）绘制，字段与布局保持一致
+-->
+<style>
+:root{
+  --primary:#1a6dff; --primary-dark:#0f56d9; --primary-light:#e8f0ff;
+  --navy-1:#081a3f; --navy-2:#0d2a63; --navy-3:#123a8c; --cyan:#29c6ff;
+  --text-1:#1f2430; --text-2:#4b5568; --text-3:#8a93a6;
+  --bg:#f4f6fb; --border:#e6eaf2; --green:#16a34a;
+  --shadow:0 2px 12px rgba(15,40,90,.06); --shadow-hover:0 10px 30px rgba(15,40,90,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:14px}
+body{font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;color:var(--text-1);background:var(--bg);line-height:1.6}
+a{text-decoration:none;color:inherit}
+button,input,select{font-family:inherit;font-size:inherit;outline:none}
+[hidden]{display:none!important}
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+.is-off{opacity:.52;cursor:not-allowed!important}
+.is-off:hover{opacity:.68}
+
+/* ========== 门户：顶部导航（按实际系统：蓝色两行） ========== */
+.topbar{background:linear-gradient(90deg,#2a63d8,#3174e6);color:#fff;position:sticky;top:0;z-index:100}
+.topbar-inner{display:block}
+.topbar-row1{height:64px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+.brand::before{content:"";width:4px;height:24px;background:rgba(255,255,255,.92);border-radius:2px}
+.topbar-actions{display:flex;align-items:center;gap:16px}
+.admin-entry{background:#fff;color:#2a63d8;border-radius:8px;padding:8px 20px;font-size:14px;font-weight:600;cursor:pointer}
+.admin-entry:hover{background:#eef4ff}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:14px;color:#fff;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center}
+.topbar-row2{height:44px;display:flex;align-items:center}
+.nav{display:flex;gap:6px;align-items:center}
+.nav-link{padding:0 16px;height:44px;display:flex;align-items:center;gap:6px;font-size:15px;color:rgba(255,255,255,.85);cursor:pointer;white-space:nowrap}
+.nav-link:first-child{padding-left:0}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#fff;font-weight:600}
+.nav-link.is-off:hover{color:rgba(255,255,255,.7)}
+.nav-item{position:relative;height:44px;display:flex;align-items:center}
+.nav-menu{position:absolute;top:44px;left:0;width:340px;background:#fff;color:var(--text-1);border-radius:12px;box-shadow:0 16px 40px rgba(8,26,63,.24);padding:8px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:.18s;z-index:110}
+.nav-item:hover .nav-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.nm-item{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:8px}
+.nm-item:not(.is-off):hover{background:var(--primary-light)}
+.nm-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nm-tx{display:flex;flex-direction:column;line-height:1.45;flex:1}
+.nm-tx b{font-size:13.5px;font-weight:600}
+.nm-tx i{font-style:normal;font-size:11.5px;color:var(--text-3)}
+.sn-count{font-size:12px;color:var(--text-3);background:#f1f4fa;border-radius:10px;padding:1px 8px}
+
+/* ========== 门户：Hero（深蓝星空 + 弧线光效） ========== */
+.hero{background:radial-gradient(ellipse 55% 80% at 88% 12%,rgba(41,140,255,.22),transparent),radial-gradient(ellipse 50% 70% at 8% 95%,rgba(30,90,220,.28),transparent),linear-gradient(180deg,#0d2350,#0a1c46 60%,#102a63);color:#fff;padding:64px 0 72px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;width:1000px;height:1000px;left:-300px;bottom:-800px;border-radius:50%;border:1px solid rgba(90,160,255,.26);box-shadow:0 0 0 80px rgba(60,130,255,.03),0 0 0 170px rgba(60,130,255,.02);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.4;background-image:radial-gradient(rgba(255,255,255,.2) 1px,transparent 1px);background-size:30px 30px}
+.hero-inner{position:relative;z-index:1;text-align:center}
+.hero h1{font-size:42px;font-weight:700;letter-spacing:2px;margin-bottom:18px}
+.hero p.sub{font-size:15px;color:rgba(255,255,255,.82);max-width:900px;margin:0 auto;line-height:1.9}
+.cap-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:900px;margin:44px auto 0}
+.cap-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:22px 18px;text-align:center;backdrop-filter:blur(6px)}
+.cap-ic{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.14);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.cap-card h3{font-size:15px;margin-bottom:8px}
+.cap-card p{font-size:12px;color:rgba(255,255,255,.62);line-height:1.8}
+
+/* ========== 门户：区块 / 卡片（按实际系统 5 列） ========== */
+.section{padding:52px 0}
+.section-head{text-align:center;margin-bottom:30px}
+.section-title{font-size:26px;font-weight:700}
+.section-desc{color:var(--text-3);font-size:13px;margin-top:4px}
+.section.apps{background:linear-gradient(180deg,#f7fbff,#eaf3ff 55%,#f7fbff);padding:56px 0 64px}
+.section.ability{background:#fff;padding:56px 0 72px}
+.app-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.app-card{background:#fff;border-radius:12px;overflow:hidden;transition:.25s;display:flex;flex-direction:column;box-shadow:0 4px 18px rgba(30,80,160,.08);position:relative}
+.app-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px)}
+.app-cover{height:150px;background:#eaf2ff;position:relative}
+.app-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.badge-open{position:absolute;top:12px;right:12px;background:#fff;color:#5b6b82;font-size:12px;border-radius:14px;padding:3px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.app-body{padding:16px 14px;display:flex;flex-direction:column;flex:1}
+.app-body h3{font-size:15px;margin-bottom:8px}
+.app-body p{font-size:12px;color:#5a6678;line-height:1.85;min-height:112px}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px;align-content:flex-start}
+.tag{font-size:11.5px;border-radius:12px;padding:2px 9px;background:#eef4ff;color:#2a63d8;border:1px solid #dbe7ff}
+.tag.t-purple{background:#f4efff;color:#7c3aed;border-color:#e8dcff}
+.tag.t-green{background:#eafaf1;color:#16a34a;border-color:#d3f2df}
+.tag.t-orange{background:#fff5e8;color:#ea8600;border-color:#ffe6bf}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:9px 16px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:.2s;width:100%;margin-top:auto}
+.btn-primary{background:#2463eb;color:#fff}
+.btn-primary:hover{background:#1c54d0}
+.btn-wait{background:#9dbdf0;color:#fff;cursor:not-allowed}
+.btn-ghost{background:#f5f7fb;color:var(--text-3);border-color:var(--border)}
+.btn-ghost:hover{background:#eef2f8}
+.ability-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.ability-card{background:#fff;border:1px solid #e9edf3;border-radius:12px;padding:26px 16px;text-align:center;box-shadow:0 2px 12px rgba(20,60,120,.04)}
+.ab-ic{width:38px;height:38px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.ability-card h4{font-size:14px;margin-bottom:8px}
+.ability-card p{font-size:11.8px;color:var(--text-3);line-height:1.8}
+.footer{background:#0a1730;color:rgba(255,255,255,.45);text-align:center;padding:22px 0;font-size:12px}
+
+/* ========== 后台：顶部蓝条（按实际系统） ========== */
+.admin-topbar{background:#2a63d8;color:#fff;height:72px;position:sticky;top:0;z-index:100}
+.admin-topbar-inner{height:72px;display:flex;align-items:center;justify-content:space-between;max-width:1600px;margin:0 auto;padding:0 28px}
+.admin-brand{display:flex;align-items:center;gap:12px;font-size:21px;font-weight:600;letter-spacing:.5px}
+.admin-brand::before{content:"";width:4px;height:24px;background:#7fb0ff;border-radius:2px}
+.admin-right{display:flex;align-items:center;gap:18px}
+.admin-back{background:#fff;color:#2a63d8;border-radius:8px;padding:9px 20px;font-size:14px;cursor:pointer;border:none}
+.admin-back:hover{background:#eef4ff}
+.admin-user{display:flex;align-items:center;gap:8px;font-size:14px}
+.admin-user .avatar{background:rgba(255,255,255,.28);width:32px;height:32px}
+
+/* ========== 后台：布局 / 侧栏 ========== */
+.admin-shell{display:flex;min-height:calc(100vh - 72px);max-width:1600px;margin:0 auto}
+.admin-side{width:248px;flex-shrink:0;background:#fff;border-right:1px solid #e9edf3;padding:18px 12px 40px}
+.side-item{display:flex;align-items:center;gap:12px;height:50px;padding:0 14px;border-radius:8px;font-size:15px;color:#3b4658;cursor:pointer;margin-bottom:4px;position:relative}
+.side-item svg{width:19px;height:19px;flex-shrink:0}
+.side-item:hover{background:#f5f8ff}
+.side-item.active{background:#eaf1ff;color:#2463eb;font-weight:600}
+.side-item.active::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;background:#2463eb;border-radius:2px}
+.side-item.is-off{color:#9aa5b5}
+.side-item.is-off:hover{background:#fafbfd}
+.side-sub{padding:2px 0 6px 20px}
+.side-sub-item{display:flex;align-items:center;height:36px;padding:0 12px;font-size:13.5px;color:#9aa5b5;border-radius:6px;cursor:not-allowed}
+.side-sub-item::before{content:"";width:5px;height:5px;border-radius:50%;background:#c9d2df;margin-right:10px}
+.side-arrow{margin-left:auto;font-size:12px;color:#a9b3c2}
+.admin-main{flex:1;min-width:0;background:#f5f7fa;padding:0 28px 40px}
+.crumb-bar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.crumb{font-size:15px;color:#5a6678}
+.crumb b{color:#1f2430;font-weight:600}
+.proto-tag{font-size:12px;color:#6b7a90;background:#eaf0fa;border:1px solid #dbe5f5;border-radius:14px;padding:3px 12px;white-space:nowrap}
+
+/* ========== 后台：卡片 / 筛选 / 表格 ========== */
+.page-card{background:#fff;border:1px solid #e9edf3;border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.card-head{padding:20px 24px 16px;border-bottom:1px solid #edf1f5;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.card-head b{font-size:18px}
+.head-note{font-size:12.5px;color:var(--text-3)}
+.filter-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 24px}
+.filter-row input,.filter-row select{height:38px;border:1px solid #dbe2ec;border-radius:6px;padding:0 12px;background:#fff;color:#26364a;font-size:13.5px}
+.filter-row input{width:190px}
+.filter-row select{width:190px;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%238a93a6' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
+.filter-row input::placeholder{color:#a6b0be}
+.fbtn{height:38px;padding:0 22px;border-radius:6px;border:1px solid #dbe2ec;background:#fff;color:#425466;cursor:pointer;font-size:13.5px}
+.fbtn:hover{background:#f5f8ff}
+.fbtn.primary{background:#2463eb;border-color:#2463eb;color:#fff}
+.fbtn.primary:hover{background:#1c54d0}
+.grid-table{width:100%;border-collapse:collapse;font-size:13.5px;color:#27384d}
+.grid-table th{background:#f7f9fc;color:#5a6678;font-weight:600;text-align:left;padding:13px 14px;border-bottom:1px solid #edf1f5;white-space:nowrap}
+.grid-table td{padding:14px;border-bottom:1px solid #edf1f5;vertical-align:middle}
+.grid-table tbody tr:hover{background:#fafcff}
+.grid-table td.muted{color:#9aa5b5}
+.role-tag{display:inline-block;color:#2463eb;font-size:12.5px;line-height:1.5}
+.state{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.state i{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+.state.off i{background:#b6c0cd}
+.pager{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:16px 24px 20px;font-size:13px;color:#6b7a90;flex-wrap:wrap}
+.pager .total{margin-right:auto}
+.pager button{min-width:30px;height:30px;border:1px solid #dbe2ec;border-radius:6px;background:#fff;color:#425466;cursor:pointer;font-size:13px}
+.pager button:hover:not(:disabled){background:#eff5ff;border-color:#b8d0f8}
+.pager button.cur{background:#2463eb;border-color:#2463eb;color:#fff}
+.pager button:disabled{color:#c2cbd7;cursor:default}
+.pager select{height:30px;border:1px solid #dbe2ec;border-radius:6px;background:#fff;color:#425466;padding:0 6px;font-size:13px}
+.empty-row td{text-align:center;color:#9aa5b5;padding:36px 0!important}
+
+/* 用户管理：组织树 + 列表 */
+.user-layout{display:flex;align-items:stretch;min-height:520px}
+.org-panel{width:300px;flex-shrink:0;border-right:1px solid #edf1f5;padding:18px 0 24px}
+.org-title{font-size:16px;font-weight:600;padding:0 22px 14px;border-bottom:1px solid #edf1f5}
+.org-tree{list-style:none;padding:10px 10px 0}
+.org-tree li{margin-bottom:2px}
+.org-node{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:6px;font-size:13.5px;color:#3b4658;cursor:pointer;line-height:1.5}
+.org-node:hover{background:#f4f8ff}
+.org-node.active{background:#eaf1ff;color:#2463eb;font-weight:600}
+.org-node .caret{color:#9aa5b5;font-size:11px;flex-shrink:0;width:12px;padding-top:2px}
+.org-node.sub{padding-left:26px;font-size:13px}
+.user-main{flex:1;min-width:0}
+.user-main .filter-row{border-bottom:1px solid #edf1f5}
+.table-scroll{overflow-x:auto}
+
+/* ========== 需求标记（需求台账，R01 起） ========== */
+.req-tagged{position:relative;outline:2px dashed #e5484d;outline-offset:3px}
+.req-badge{position:absolute;top:8px;left:8px;z-index:3;background:#e5484d;color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;border-radius:14px;padding:3px 12px;box-shadow:0 3px 10px rgba(229,72,77,.35);cursor:pointer}
+.req-badge:hover{background:#c93b40}
+.req-inline{color:#d33b40;font-size:11.5px;font-weight:600;background:#fff1f1;border:1px dashed #f3b6b8;border-radius:6px;padding:4px 8px;text-align:center;margin:0 0 10px}
+.req-tagged h3{text-decoration:line-through;text-decoration-color:#e5484d;text-decoration-thickness:2px}
+.req-flash{animation:reqFlash 1.2s ease 2}
+@keyframes reqFlash{0%,100%{box-shadow:0 4px 18px rgba(30,80,160,.08)}50%{box-shadow:0 0 0 6px rgba(229,72,77,.28),0 8px 26px rgba(229,72,77,.35)}}
+.req-fab{position:fixed;right:22px;bottom:22px;z-index:200;background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:10px 16px;box-shadow:0 6px 22px rgba(15,40,90,.18);font-size:13.5px;font-weight:600;color:#243b5a;cursor:pointer;display:flex;align-items:center;gap:8px}
+.req-fab i{width:9px;height:9px;border-radius:50%;background:#e5484d;display:inline-block}
+.req-fab b{background:#e5484d;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px}
+.req-panel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:92vw;background:#fff;box-shadow:-10px 0 40px rgba(15,40,90,.2);z-index:210;transform:translateX(105%);transition:.25s;display:flex;flex-direction:column}
+.req-panel.open{transform:translateX(0)}
+.req-panel-head{padding:20px 22px 16px;border-bottom:1px solid #edf1f5}
+.req-panel-head h3{font-size:17px;display:flex;align-items:center;justify-content:space-between}
+.req-panel-head p{font-size:12px;color:#8a93a6;margin-top:4px}
+.req-close{border:none;background:#f1f4fa;width:26px;height:26px;border-radius:50%;cursor:pointer;color:#5a6678;font-size:16px;line-height:1}
+.req-list{padding:16px 18px;overflow:auto;flex:1}
+.req-item{border:1px solid #e6eaf2;border-left:3px solid #e5484d;border-radius:10px;padding:14px 14px 12px;margin-bottom:12px;cursor:pointer;transition:.2s}
+.req-item:hover{box-shadow:0 6px 18px rgba(15,40,90,.1);transform:translateX(-2px)}
+.req-item .ri-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.req-id{font-size:12px;font-weight:700;color:#e5484d;background:#fff1f1;border-radius:5px;padding:1px 7px}
+.req-type{font-size:11.5px;color:#7c3aed;background:#f4efff;border-radius:5px;padding:1px 7px}
+.req-status{margin-left:auto;font-size:11.5px;color:#ea8600;background:#fff5e8;border-radius:5px;padding:1px 7px}
+.req-title{font-size:14.5px;font-weight:600;margin-bottom:6px}
+.req-scope{font-size:12px;color:#5a6678;margin-bottom:6px}
+.req-detail{font-size:12px;color:#7a8798;line-height:1.7}
+.req-locate{font-size:11.5px;color:#2a63d8;margin-top:8px}
+.req-foot{border-top:1px solid #edf1f5;padding:14px 18px 18px;background:#fafbfd}
+.req-switches{display:flex;flex-direction:column;gap:10px}
+.req-sw{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#3b4658;cursor:pointer}
+.req-sw input{appearance:none;width:36px;height:20px;border-radius:12px;background:#cfd8e3;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.req-sw input:checked{background:#2a63d8}
+.req-sw input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.req-sw input:checked::after{left:18px}
+.req-hint{font-size:11.5px;color:#8a93a6;margin-top:12px;line-height:1.6}
+.req-preview-tip{display:none;max-width:1280px;margin:0 auto 18px;background:#fff1f1;border:1px dashed #f3b6b8;color:#c93b40;border-radius:8px;padding:10px 16px;font-size:13px}
+body.hide-req .req-badge,body.hide-req .req-inline,body.hide-req .req-preview-tip{display:none!important}
+body.hide-req .req-tagged{outline:none}
+body.hide-req .req-tagged h3{text-decoration:none}
+body.preview-req [data-req="R01"]{display:none}
+body.preview-req .app-grid{grid-template-columns:repeat(4,1fr)}
+body.preview-req .req-preview-tip{display:block}
+@media(max-width:1100px){body.preview-req .app-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:820px){body.preview-req .app-grid{grid-template-columns:1fr}.req-panel{width:100%}}
+
+/* 提示气泡 */
+.toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,14px);background:rgba(21,34,58,.94);color:#fff;font-size:13.5px;padding:10px 20px;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.24);opacity:0;pointer-events:none;transition:.22s;z-index:999;max-width:80vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:1100px){
+  .app-grid{grid-template-columns:repeat(3,1fr)}
+  .ability-grid{grid-template-columns:repeat(3,1fr)}
+  .hero h1{font-size:34px}
+  .admin-side{width:210px}
+  .org-panel{width:240px}
+}
+@media(max-width:820px){
+  .cap-cards{grid-template-columns:1fr}
+  .app-grid,.ability-grid{grid-template-columns:1fr}
+  .topbar-row1{height:auto;padding:10px 0;flex-wrap:wrap;gap:10px}
+  .topbar-row2{height:auto;padding-bottom:8px}
+  .nav-link,.nav-item{height:40px}
+  .nav-menu{top:40px}
+  .admin-shell{flex-direction:column}
+  .admin-side{width:100%;border-right:none;border-bottom:1px solid #e9edf3;display:flex;flex-wrap:wrap;gap:4px;padding:12px}
+  .side-item{height:40px;font-size:13.5px;margin:0}
+  .side-sub{display:none}
+  .user-layout{flex-direction:column}
+  .org-panel{width:100%;border-right:none;border-bottom:1px solid #edf1f5}
+  .org-tree{max-height:200px}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== 视图一：门户首页 ==================== -->
+<div id="view-portal" class="view">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-row1">
+        <a class="brand" href="#/portal">青岛数智融合创新中心</a>
+        <div class="topbar-actions">
+          <a class="admin-entry" href="#/admin/users">平台管理</a>
+          <span class="user-chip is-off" data-tip="演示原型不提供账号菜单，仅作展示">
+            <span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+            姜伟隆 <span style="font-size:11px">▾</span>
+          </span>
+        </div>
+      </div>
+      <div class="topbar-row2">
+        <nav class="nav">
+          <a class="nav-link active" href="#/portal">首页</a>
+          <div class="nav-item">
+            <span class="nav-link is-off" data-tip="「模型市场」不在本原型范围内，仅作菜单展示">模型市场
+              <span class="caret"><svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+            <div class="nav-menu">
+              <span class="nm-item is-off" data-tip="「模型服务」不在本原型范围内，仅作菜单展示">
+                <span class="nm-ic" style="background:#e8f0ff;color:#1a6dff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg></span>
+                <span class="nm-tx"><b>模型服务</b><i>生成式、判别式、向量表征、重排序</i></span>
+                <span class="sn-count">11</span>
+              </span>
+              <span class="nm-item is-off" data-tip="「开放数据集」不在本原型范围内，仅作菜单展示">
+                <span class="nm-ic" style="background:#e9f9ef;color:#16a34a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
+                <span class="nm-tx"><b>开放数据集</b><i>已标注 + 已审核的高质量标注数据</i></span>
+                <span class="sn-count">6</span>
+              </span>
+            </div>
+          </div>
+          <span class="nav-link is-off" data-tip="「我的工单」不在本原型范围内，仅作菜单展示">我的工单</span>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1>欢迎使用人工智能平台</h1>
+      <p class="sub">本平台助力企业提升 AI 能力的生产、应用与管理效能，构建 AI 基础能力底座并深度融合业务场景，核心覆盖应用使能、模型管理、数据管理、资源调度、平台治理五大能力。</p>
+      <div class="cap-cards">
+        <div class="cap-card">
+          <span class="cap-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/><circle cx="12" cy="12" r="2.2"/></svg></span>
+          <h3>智能体应用使能</h3><p>智能体创建、配置、管理与任务调度，支持API网关与知识库</p>
+        </div>
+        <div class="cap-card">
+          <span class="cap-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M10.6 12.8l-4.4 3.4M13.4 12.8l4.4 3.4"/></svg></span>
+          <h3>模型全生命周期</h3><p>覆盖算法开发、微调优化、评测纳管到推理部署</p>
+        </div>
+        <div class="cap-card">
+          <span class="cap-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
+          <h3>数据全链路服务</h3><p>从数据采集、预处理、标注到资产管理一站式闭环</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section apps">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-title">应用入口</div>
+        <div class="section-desc">选择对应能力中心，进入系统开展工作</div>
+      </div>
+      <div class="req-preview-tip">需求 R01 效果预览：已删除「CV数据标注」卡片，应用入口由 5 张变为 4 张（应用使能 / 数据管理 / 资源模型管理 / 人工智能评测）。关闭「预览」可回到带标记的现状。</div>
+      <div class="app-grid">
+        <div class="app-card">
+          <div class="app-cover"><img src="data:image/jpeg;base64,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" alt="应用使能"></div>
+          <div class="app-body">
+            <h3>应用使能</h3>
+            <p>提供智能体创建、配置、管理与任务调度，支持专家知识库、提示词、插件市场，实现智能体全生命周期管理，赋能业务智能化落地。</p>
+            <div class="tag-row"><span class="tag">智能体创建</span><span class="tag">专家知识库</span><span class="tag">提示词</span><span class="tag">插件市场</span></div>
+            <button class="btn btn-primary" data-demo="应用使能子系统入口未接入本原型">进入系统</button>
+          </div>
+        </div>
+        <div class="app-card req-tagged" data-req="R01">
+          <span class="req-badge" data-req-open="R01" title="点击查看需求 R01">R01 · 删除</span>
+          <div class="app-cover"><img src="data:image/jpeg;base64,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" alt="CV数据标注"></div>
+          <div class="app-body">
+            <h3>CV数据标注</h3>
+            <p>聚焦数据管理层的数据标注能力，提供标注工具、标注流程管理，支持人工标注与智能标注，高效支撑CV大模型数据标注需求。</p>
+            <div class="tag-row"><span class="tag t-purple">标注工具</span><span class="tag t-purple">人工标注</span><span class="tag t-purple">智能标注</span></div>
+            <div class="req-inline">拟删除 · 需求 R01</div>
+            <button class="btn btn-primary" data-demo="CV数据标注子系统入口未接入本原型">进入系统</button>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-cover"><img src="data:image/jpeg;base64,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" alt="数据管理"></div>
+          <div class="app-body">
+            <h3>数据管理</h3>
+            <p>数据管理层，覆盖数据采集、预处理、数据标注，以及数据资产管理。</p>
+            <div class="tag-row"><span class="tag">数据采集</span><span class="tag">数据处理</span><span class="tag">数据标注</span><span class="tag">数据资产</span></div>
+            <button class="btn btn-primary" data-demo="数据管理子系统入口未接入本原型">进入系统</button>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-cover"><img src="data:image/jpeg;base64,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" alt="资源模型管理"></div>
+          <div class="app-body">
+            <h3>资源模型管理</h3>
+            <p>资源模型管理，覆盖模型管理层（模型开发、模型微调、推理部署），底层支撑资源调度。</p>
+            <div class="tag-row"><span class="tag t-green">算法开发</span><span class="tag t-green">模型微调</span><span class="tag t-green">评测纳管</span><span class="tag t-green">资源调度</span></div>
+            <button class="btn btn-primary" data-demo="资源模型管理子系统入口未接入本原型">进入系统</button>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-cover"><img src="data:image/jpeg;base64,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" alt="人工智能评测"><span class="badge-open">待开放</span></div>
+          <div class="app-body">
+            <h3>人工智能评测</h3>
+            <p>平台构建了面向模型、数据和智能体的一体化评测能力，对大模型、数据集和智能体进行全过程评估，赋能模型能力提升、数据资产沉淀和智能体可靠运行。</p>
+            <div class="tag-row"><span class="tag t-orange">模型评测</span><span class="tag t-orange">数据评测</span><span class="tag t-orange">质量评估</span></div>
+            <button class="btn btn-wait is-off" data-tip="「人工智能评测」待开放，不在本原型范围内">待开放</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ability">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-title">平台能力</div>
+        <div class="section-desc">覆盖 AI 全生命周期的五大核心能力</div>
+      </div>
+      <div class="ability-grid">
+        <div class="ability-card">
+          <span class="ab-ic" style="background:#e8f1ff;color:#2a63d8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+          <h4>多源数据接入</h4><p>支持图像、视频、文本等多模态数据一站式接入</p>
+        </div>
+        <div class="ability-card">
+          <span class="ab-ic" style="background:#e6f8f8;color:#0e9aa7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="7" r="2"/><circle cx="12" cy="17" r="2"/><path d="M7.8 8.4l3 6.8M16.2 8.4l-3 6.8M8 7h8"/></svg></span>
+          <h4>高效模型训练</h4><p>覆盖算法开发、流程编排、模型微调与优化全链路</p>
+        </div>
+        <div class="ability-card">
+          <span class="ab-ic" style="background:#f2ebff;color:#7c3aed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 3l7 4-3 11-7 3-7-7 4-8 6-3z"/><path d="M10 14l4-4"/></svg></span>
+          <h4>一键智能部署</h4><p>模型快速部署即上线，支持多场景推理服务</p>
+        </div>
+        <div class="ability-card">
+          <span class="ab-ic" style="background:#e8f5ff;color:#1a86e0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4M9 12h.01M15 12h.01M9 16h6"/><circle cx="12" cy="3" r="1.2"/></svg></span>
+          <h4>智能体开发</h4><p>提供智能体创建、配置、管理与任务调度，支持提示词、知识库与插件市场</p>
+        </div>
+        <div class="ability-card">
+          <span class="ab-ic" style="background:#fff2e5;color:#ea8600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg></span>
+          <h4>全链路管理</h4><p>覆盖应用使能、模型管理、数据管理、资源调度全链路统一管控</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">青岛数智融合创新中心 版权所有</div>
+</div>
+
+<!-- ==================== 视图二：平台管理后台 ==================== -->
+<div id="view-admin" class="view" hidden>
+  <header class="admin-topbar">
+    <div class="admin-topbar-inner">
+      <div class="admin-brand">人工智能平台-平台管理</div>
+      <div class="admin-right">
+        <button class="admin-back" id="backPortal">门户首页</button>
+        <span class="admin-user is-off" data-tip="演示原型不提供账号菜单，仅作展示">
+          <span class="avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+          姜伟隆 <span style="font-size:11px">▾</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <div class="side-item" data-page="users" id="side-users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>用户管理
+      </div>
+      <div class="side-item" data-page="roles" id="side-roles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/></svg>角色管理
+      </div>
+      <div class="side-item is-off" data-tip="「日志管理」不在本原型范围内，仅作菜单展示">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>日志管理
+      </div>
+      <div class="side-item is-off" data-tip="「监控管理」不在本原型范围内，仅作菜单展示">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>监控管理
+      </div>
+      <div class="side-item is-off" data-tip="「模型市场管理」不在本原型范围内，仅作菜单展示">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5M3 17l9 5 9-5"/></svg>模型市场管理<span class="side-arrow">▾</span>
+      </div>
+      <div class="side-sub">
+        <div class="side-sub-item is-off" data-tip="「模型资产管理」不在本原型范围内，仅作菜单展示">模型资产管理</div>
+        <div class="side-sub-item is-off" data-tip="「数据集管理」不在本原型范围内，仅作菜单展示">数据集管理</div>
+        <div class="side-sub-item is-off" data-tip="「工单审批」不在本原型范围内，仅作菜单展示">工单审批</div>
+        <div class="side-sub-item is-off" data-tip="「企业台账」不在本原型范围内，仅作菜单展示">企业台账</div>
+      </div>
+      <div class="side-item is-off" data-tip="「可视化大屏」不在本原型范围内，仅作菜单展示">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>可视化大屏
+      </div>
+      <div class="side-item is-off" data-tip="「大屏管理」不在本原型范围内，仅作菜单展示">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M3 10h18M9 10v6"/></svg>大屏管理<span class="side-arrow">▾</span>
+      </div>
+      <div class="side-sub">
+        <div class="side-sub-item is-off" data-tip="「总览大屏配置」不在本原型范围内，仅作菜单展示">总览大屏配置</div>
+        <div class="side-sub-item is-off" data-tip="「数据车间配置」不在本原型范围内，仅作菜单展示">数据车间配置</div>
+        <div class="side-sub-item is-off" data-tip="「模型车间配置」不在本原型范围内，仅作菜单展示">模型车间配置</div>
+        <div class="side-sub-item is-off" data-tip="「智能体车间配置」不在本原型范围内，仅作菜单展示">智能体车间配置</div>
+        <div class="side-sub-item is-off" data-tip="「场景中心大屏配置」不在本原型范围内，仅作菜单展示">场景中心大屏配置</div>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="crumb-bar">
+        <div class="crumb">平台管理 / <b id="crumbLeaf">用户管理</b></div>
+        <span class="proto-tag">演示原型：仅「用户管理」「角色管理」可用，其余菜单仅展示</span>
+      </div>
+
+      <!-- 用户管理（按实际系统：左侧组织信息树 + 右侧只读用户列表） -->
+      <section class="page-card" id="page-users">
+        <div class="card-head"><b>用户管理</b><span class="head-note">共 18045 条（实测台账）· 数据由统一授权管控平台同步，仅提供查询 · 列表为演示样例</span></div>
+        <div class="user-layout">
+          <div class="org-panel">
+            <div class="org-title">组织信息</div>
+            <ul class="org-tree" id="orgTree"></ul>
+          </div>
+          <div class="user-main">
+            <div class="filter-row">
+              <input id="uAccount" type="text" placeholder="账号名">
+              <input id="uName" type="text" placeholder="姓名">
+              <input id="uPhone" type="text" placeholder="联系方式">
+              <button class="fbtn primary" id="uSearch">检索</button>
+              <button class="fbtn" id="uReset">重置</button>
+            </div>
+            <div class="table-scroll">
+              <table class="grid-table">
+                <thead><tr><th>ID</th><th>账号名</th><th>姓名</th><th>联系方式</th><th>邮箱</th><th>用户角色</th><th>状态</th></tr></thead>
+                <tbody id="userRows"></tbody>
+              </table>
+            </div>
+            <div class="pager">
+              <span class="total" id="userTotal">共 18045 条</span>
+              <button disabled>‹</button><button class="cur">1</button><button id="userNext">›</button>
+              <select><option>10 条/页</option></select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 角色管理（按实际系统：来源系统筛选 + 只读角色列表） -->
+      <section class="page-card" id="page-roles" hidden>
+        <div class="card-head"><b>角色管理</b><span class="head-note">共 38 条（实测快照）· 按来源系统集中纳管 · 仅提供查询，列表含演示样例</span></div>
+        <div class="filter-row">
+          <select id="rSource">
+            <option value="">来源系统</option>
+            <option value="CV模型开发">CV模型开发</option>
+            <option value="千帆系统">千帆系统</option>
+            <option value="应用使能">应用使能</option>
+            <option value="数据管理">数据管理</option>
+          </select>
+          <input id="rName" type="text" placeholder="角色名称">
+          <button class="fbtn primary" id="rSearch">检索</button>
+          <button class="fbtn" id="rReset">重置</button>
+        </div>
+        <div class="table-scroll">
+          <table class="grid-table">
+            <thead><tr><th>角色ID</th><th>角色名称</th><th>来源系统</th><th>更新时间</th></tr></thead>
+            <tbody id="roleRows"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="rolePager"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ==================== 需求台账 / 原型标记 ==================== -->
+<button class="req-fab" id="reqFab"><i></i>需求标记 <b id="reqCount">0</b></button>
+<aside class="req-panel" id="reqPanel">
+  <div class="req-panel-head">
+    <h3>需求标记 <button class="req-close" id="reqClose" title="关闭">×</button></h3>
+    <p>门户页面原型 · 需求与原型位置一一对应，点击条目可定位到标记</p>
+  </div>
+  <div class="req-list" id="reqList"></div>
+  <div class="req-foot">
+    <div class="req-switches">
+      <label class="req-sw">隐藏全部标记（还原原型原貌）<input type="checkbox" id="swHide"></label>
+      <label class="req-sw">预览 R01 删除后效果<input type="checkbox" id="swPreview"></label>
+    </div>
+    <div class="req-hint">新增需求：在原型目标元素上加 <code>data-req="Rxx"</code>，并在脚本的 REQUIREMENTS 数组追加一条，标记、清单与定位会自动生成。</div>
+  </div>
+</aside>
+
+<script>
+/* ================= 通用 ================= */
+var OFF_TIP = "该模块不在本原型范围内，仅作菜单展示";
+var toastTimer = null;
+function showToast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+}
+/* 禁用菜单：点击不跳转，仅提示 */
+document.addEventListener("click", function(e){
+  var off = e.target.closest(".is-off");
+  if(off){ e.preventDefault(); e.stopPropagation(); showToast(off.getAttribute("data-tip") || OFF_TIP); return; }
+  var demo = e.target.closest("[data-demo]");
+  if(demo){ showToast(demo.getAttribute("data-demo")); }
+}, true);
+
+/* ================= 路由：#/portal | #/admin/users | #/admin/roles ================= */
+function applyRoute(){
+  var h = location.hash || "#/portal";
+  var isAdmin = h.indexOf("#/admin") === 0;
+  document.getElementById("view-portal").hidden = isAdmin;
+  document.getElementById("view-admin").hidden = !isAdmin;
+  if(isAdmin){
+    var page = h.indexOf("roles") > -1 ? "roles" : "users";
+    switchPage(page);
+  }
+  window.scrollTo(0, 0);
+}
+function switchPage(page){
+  var users = page === "users";
+  document.getElementById("page-users").hidden = !users;
+  document.getElementById("page-roles").hidden = users;
+  document.getElementById("crumbLeaf").textContent = users ? "用户管理" : "角色管理";
+  document.getElementById("side-users").classList.toggle("active", users);
+  document.getElementById("side-roles").classList.toggle("active", !users);
+}
+window.addEventListener("hashchange", applyRoute);
+document.getElementById("backPortal").addEventListener("click", function(){ location.hash = "#/portal"; });
+document.querySelectorAll(".side-item[data-page]").forEach(function(el){
+  el.addEventListener("click", function(){ location.hash = "#/admin/" + el.getAttribute("data-page"); });
+});
+
+/* ================= 用户管理：组织树（15 个实测节点） ================= */
+var ORGS = [
+  "青岛地铁集团有限公司",
+  "青岛地铁运营有限公司","委外",
+  "青岛地铁集团有限公司第一建设分公司","青岛地铁集团有限公司第二建设分公司",
+  "青岛地铁集团有限公司第三建设分公司","青岛地铁集团有限公司西海岸建设分公司",
+  "青岛青铁置业发展有限公司（青岛公共住房建设投资有限公司）","青岛青铁商业发展有限公司",
+  "青岛青铁智慧城市服务运营管理有限公司","地空产融发展","轨道交通智能维保",
+  "睿思科（青岛）科技","青岛市地铁规划设计院","青铁环保科技"
+];
+var activeOrg = "";
+function renderOrgTree(){
+  document.getElementById("orgTree").innerHTML = ORGS.map(function(name, i){
+    var sub = i > 0 ? " sub" : "";
+    return '<li><div class="org-node' + sub + (activeOrg === name ? " active" : "") + '" data-org="' + name + '">' +
+      '<span class="caret">▸</span><span>' + name + '</span></div></li>';
+  }).join("");
+}
+document.getElementById("orgTree").addEventListener("click", function(e){
+  var node = e.target.closest(".org-node"); if(!node) return;
+  var org = node.getAttribute("data-org");
+  activeOrg = (activeOrg === org) ? "" : org;   // 再点一次取消选中，回到全量
+  renderOrgTree(); renderUsers();
+  if(activeOrg) showToast("已选择组织：" + activeOrg + "（演示样例按组织过滤）");
+});
+
+/* 用户列表：实测可核对的记录 + 演示样例（字段与实际系统一致） */
+var USERS = [
+  {id:611,   account:"w15120081167", name:"姜伟隆", phone:"15120081167", email:"", roles:["数据项目经理","系统管理员"], status:"启用", org:ORGS[0]},
+  {id:18045, account:"28000284",     name:"王飞飞", phone:"19206122931", email:"", roles:["数据标注员"],           status:"启用", org:ORGS[1]},
+  {id:18044, account:"28000283",     name:"李明明", phone:"19206122930", email:"", roles:["标注-审核员"],          status:"启用", org:ORGS[1]},
+  {id:18043, account:"28000282",     name:"张伟",   phone:"19206122929", email:"", roles:["标注-验收员"],          status:"启用", org:ORGS[4]},
+  {id:18042, account:"28000281",     name:"刘洋",   phone:"19206122928", email:"", roles:["项目经理"],             status:"启用", org:ORGS[3]},
+  {id:18041, account:"28000280",     name:"陈静",   phone:"19206122927", email:"", roles:["数据管理员"],           status:"启用", org:ORGS[2]},
+  {id:18040, account:"28000279",     name:"赵磊",   phone:"19206122926", email:"", roles:["算法工程师"],           status:"启用", org:ORGS[6]},
+  {id:18039, account:"28000278",     name:"孙倩",   phone:"19206122925", email:"", roles:["企业管理员"],           status:"停用", org:ORGS[8]},
+  {id:18038, account:"28000277",     name:"周凯",   phone:"19206122924", email:"", roles:["中心管理员"],           status:"启用", org:ORGS[9]},
+  {id:18037, account:"28000276",     name:"吴敏",   phone:"19206122923", email:"", roles:["使用者"],               status:"启用", org:ORGS[12]}
+];
+function renderUsers(){
+  var a = document.getElementById("uAccount").value.trim();
+  var n = document.getElementById("uName").value.trim();
+  var p = document.getElementById("uPhone").value.trim();
+  var list = USERS.filter(function(u){
+    return (!a || u.account.indexOf(a) > -1) && (!n || u.name.indexOf(n) > -1) &&
+           (!p || u.phone.indexOf(p) > -1) && (!activeOrg || u.org === activeOrg || activeOrg === ORGS[0]);
+  });
+  document.getElementById("userRows").innerHTML = list.length ? list.map(function(u){
+    return "<tr><td>" + u.id + "</td><td>" + u.account + "</td><td>" + u.name + "</td><td>" + u.phone +
+      "</td><td class='muted'>" + (u.email || "—") + "</td>" +
+      "<td>" + u.roles.map(function(r){ return "<span class='role-tag'>" + r + "</span>"; }).join("<br>") + "</td>" +
+      "<td><span class='state" + (u.status === "启用" ? "" : " off") + "'><i></i>" + u.status + "</span></td></tr>";
+  }).join("") : "<tr class='empty-row'><td colspan='7'>未检索到符合条件的用户（演示样例共 " + USERS.length + " 条）</td></tr>";
+  document.getElementById("userTotal").textContent = "共 18045 条" + (list.length < USERS.length ? "（当前显示 " + list.length + " 条演示样例）" : "");
+}
+document.getElementById("uSearch").addEventListener("click", renderUsers);
+document.getElementById("uReset").addEventListener("click", function(){
+  document.getElementById("uAccount").value = ""; document.getElementById("uName").value = "";
+  document.getElementById("uPhone").value = ""; activeOrg = ""; renderOrgTree(); renderUsers();
+});
+document.getElementById("userNext").addEventListener("click", function(){
+  showToast("实测台账共 18045 条；演示原型仅提供第 1 页样例数据");
+});
+["uAccount","uName","uPhone"].forEach(function(id){
+  document.getElementById(id).addEventListener("keydown", function(e){ if(e.key === "Enter") renderUsers(); });
+});
+
+/* ================= 角色管理：38 条（实测口径 + 演示样例） ================= */
+var ROLES = [];
+// 数据管理 10 条：实测可见记录（前 7 条为实测名称，其余为同来源演示样例）
+["admin管理员","中心管理员","企业管理员","项目经理","数据标注员","标注-审核员","标注-验收员","数据审核员","算法工程师","资源管理员"]
+  .forEach(function(name, i){ ROLES.push({id:32+i, name:name, src:"数据管理", time:"2026-08-11 17:07:24"}); });
+// 应用使能 1 条：实测记录
+ROLES.push({id:31, name:"使用者", src:"应用使能", time:"2026-06-30 18:49:32"});
+// 其余 27 条：CV模型开发 / 千帆系统 同步角色，演示样例
+["算法开发","模型训练","模型评测","数据标注","标注审核","标注验收","数据集管理","模型发布","推理服务","资源调度","任务管理","项目管理","运维管理","只读观察"]
+  .forEach(function(name, i){ ROLES.push({id:1+i, name:name, src:"CV模型开发", time:"2026-08-05 09:12:10"}); });
+["应用开发","提示词配置","知识库管理","智能体配置","插件管理","API调用","租户管理","审计查看","运营管理","应用审核","配额管理","普通成员","只读用户"]
+  .forEach(function(name, i){ ROLES.push({id:15+i, name:name, src:"千帆系统", time:"2026-07-28 14:26:05"}); });
+ROLES.sort(function(a,b){ return b.time.localeCompare(a.time) || a.id - b.id; });  // 默认按更新时间倒序，与实测首屏一致
+
+var rolePage = 1, roleSize = 10, roleFilter = {src:"", name:""};
+function filteredRoles(){
+  return ROLES.filter(function(r){
+    return (!roleFilter.src || r.src === roleFilter.src) && (!roleFilter.name || r.name.indexOf(roleFilter.name) > -1);
+  });
+}
+function renderRoles(){
+  var list = filteredRoles();
+  var pages = Math.max(1, Math.ceil(list.length / roleSize));
+  if(rolePage > pages) rolePage = pages;
+  var rows = list.slice((rolePage-1)*roleSize, rolePage*roleSize);
+  document.getElementById("roleRows").innerHTML = rows.length ? rows.map(function(r){
+    return "<tr><td>" + r.id + "</td><td>" + r.name + "</td><td>" + r.src + "</td><td>" + r.time + "</td></tr>";
+  }).join("") : "<tr class='empty-row'><td colspan='4'>未检索到符合条件的角色</td></tr>";
+
+  var btns = "";
+  for(var i=1;i<=pages;i++) btns += '<button data-p="' + i + '"' + (i===rolePage?' class="cur"':'') + '>' + i + '</button>';
+  document.getElementById("rolePager").innerHTML =
+    '<span class="total">共 ' + list.length + ' 条</span>' +
+    '<button data-p="' + (rolePage-1) + '"' + (rolePage===1?" disabled":"") + '>‹</button>' + btns +
+    '<button data-p="' + (rolePage+1) + '"' + (rolePage===pages?" disabled":"") + '>›</button>' +
+    '<select><option>10 条/页</option></select>';
+}
+document.getElementById("rolePager").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-p]"); if(!b || b.disabled) return;
+  rolePage = +b.getAttribute("data-p"); renderRoles();
+});
+document.getElementById("rSearch").addEventListener("click", function(){
+  roleFilter.src = document.getElementById("rSource").value;
+  roleFilter.name = document.getElementById("rName").value.trim();
+  rolePage = 1; renderRoles();
+});
+document.getElementById("rReset").addEventListener("click", function(){
+  document.getElementById("rSource").value = ""; document.getElementById("rName").value = "";
+  roleFilter = {src:"", name:""}; rolePage = 1; renderRoles();
+});
+document.getElementById("rName").addEventListener("keydown", function(e){ if(e.key === "Enter") document.getElementById("rSearch").click(); });
+
+/* ================= 需求标记台账 =================
+   一条需求 = 原型上一个 data-req 锚点 + 数组中一条记录；新增需求只需这两步。 */
+var REQUIREMENTS = [
+  {
+    id: "R01", type: "删除", status: "待评审",
+    title: "删除 CV数据标注卡片",
+    scope: "门户首页 / 应用入口 / 第 2 张卡",
+    detail: "删除后应用入口由 5 张卡变为 4 张：应用使能、数据管理、资源模型管理、人工智能评测；CV 数据标注能力不再在门户提供独立入口。平台管理后台菜单及用户管理 / 角色管理页面无对应项，本次无需同步调整。",
+    target: '[data-req="R01"]'
+  }
+];
+function renderReqList(){
+  document.getElementById("reqCount").textContent = REQUIREMENTS.length;
+  document.getElementById("reqList").innerHTML = REQUIREMENTS.map(function(r){
+    return '<div class="req-item" data-id="' + r.id + '">' +
+      '<div class="ri-top"><span class="req-id">' + r.id + '</span><span class="req-type">' + r.type + '</span><span class="req-status">' + r.status + '</span></div>' +
+      '<div class="req-title">' + r.title + '</div>' +
+      '<div class="req-scope">影响位置：' + r.scope + '</div>' +
+      '<div class="req-detail">' + r.detail + '</div>' +
+      '<div class="req-locate">→ 点击定位到原型标记</div></div>';
+  }).join("");
+}
+function openReqPanel(){ document.getElementById("reqPanel").classList.add("open"); }
+function closeReqPanel(){ document.getElementById("reqPanel").classList.remove("open"); }
+function locateReq(id, keepPanel){
+  var r = REQUIREMENTS.filter(function(x){ return x.id === id; })[0]; if(!r) return;
+  if(document.body.classList.contains("preview-req")){
+    document.getElementById("swPreview").checked = false; document.body.classList.remove("preview-req");
+  }
+  if(document.body.classList.contains("hide-req")){
+    document.getElementById("swHide").checked = false; document.body.classList.remove("hide-req");
+  }
+  if(!keepPanel) closeReqPanel();
+  if(location.hash.indexOf("#/admin") === 0) location.hash = "#/portal";
+  setTimeout(function(){
+    var el = document.querySelector(r.target); if(!el) return;
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    el.classList.remove("req-flash"); void el.offsetWidth; el.classList.add("req-flash");
+    showToast("已定位 " + r.id + "：" + r.title);
+  }, 260);
+}
+document.getElementById("reqFab").addEventListener("click", openReqPanel);
+document.getElementById("reqClose").addEventListener("click", closeReqPanel);
+document.getElementById("reqList").addEventListener("click", function(e){
+  var it = e.target.closest(".req-item"); if(it) locateReq(it.getAttribute("data-id"), false);
+});
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-req-open]"); if(!b) return;
+  openReqPanel(); locateReq(b.getAttribute("data-req-open"), true);
+});
+document.getElementById("swHide").addEventListener("change", function(){
+  document.body.classList.toggle("hide-req", this.checked);
+  showToast(this.checked ? "已隐藏需求标记，恢复原型原貌" : "已显示需求标记");
+});
+document.getElementById("swPreview").addEventListener("change", function(){
+  document.body.classList.toggle("preview-req", this.checked);
+  showToast(this.checked ? "预览：CV数据标注卡片已删除，应用入口变为 4 张" : "已退出预览，恢复带标记的现状");
+});
+renderReqList();
+
+/* ================= 初始化 ================= */
+renderOrgTree();
+renderUsers();
+renderRoles();
+applyRoute();
+</script>
+</body>
+</html>
