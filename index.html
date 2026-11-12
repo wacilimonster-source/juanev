@@ -53,6 +53,22 @@
     margin-left:auto;flex-shrink:0;font-size:12px;color:var(--sub);
     font-variant-numeric:tabular-nums;
   }
+  .badge{
+    flex-shrink:0;font-size:11px;color:var(--accent);background:#e8f1ff;
+    border-radius:4px;padding:1px 6px;line-height:1.5;
+  }
+  details.versions{margin:0 0 2px}
+  details.versions summary{
+    list-style:none;cursor:pointer;font-size:12px;color:var(--sub);
+    padding:6px 0 8px;user-select:none;
+  }
+  details.versions summary::-webkit-details-marker{display:none}
+  details.versions summary::before{
+    content:"▸";display:inline-block;margin-right:6px;transition:transform .15s;
+  }
+  details.versions[open] summary::before{transform:rotate(90deg)}
+  details.versions .item{padding:8px 0 8px 16px}
+  details.versions .name{font-size:13px;color:var(--sub)}
   .empty{font-size:13px;color:#9aa1ab;padding:10px 0}
   footer{margin-top:48px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
   code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--sub)}
@@ -71,7 +87,7 @@
     <p class="desc">按客户 / 项目归档的原型与文档，点击标题即可打开最新版本。</p>
     <p class="meta">
       <span>更新于 2026-11-12</span>
-      <span>1 个项目 · 1 个原型 · 0 份文档</span>
+      <span>1 个项目 · 1 个原型 · 1 份文档</span>
     </p>
   </header>
 
@@ -87,6 +103,7 @@
         <li>
           <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html">
             <span class="name">人脸抓拍机布控库自维护设计稿</span>
+            <span class="badge">最新</span>
             <span class="tag">2026-11-11</span>
           </a>
         </li>
@@ -95,12 +112,21 @@
 
     <div class="sub">
       <div class="sub-label">文档</div>
-      <div class="empty">暂无文档</div>
+      <ul>
+        <li>
+          <a class="item" href="青岛地铁-工地项目/文档/版本记录.md">
+            <span class="name">版本记录</span>
+            <span class="badge">最新</span>
+            <span class="tag">2026-11-12</span>
+          </a>
+        </li>
+      </ul>
     </div>
   </section>
 
   <footer>
-    目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code>
+    目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code><br>
+    版本规则：同名文件按日期沉淀，最新版作为入口，旧版保留可回溯。
   </footer>
 
 </div>
