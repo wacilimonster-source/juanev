@@ -1,177 +1,99 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<title>受保护页面</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本记录 · 青岛地铁-工地项目</title>
 <style>
-  html,body{margin:0;height:100%;background:#f1efe8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-  #sg{position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;visibility:visible}
-  .sg-card{background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:28px 24px;width:340px;max-width:100%;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.06)}
-  .sg-t{font-size:15px;font-weight:500;color:#2c2c2a;margin:0 0 6px;text-align:center}
-  .sg-d{font-size:12px;color:#888780;margin:0 0 16px;text-align:center;word-break:break-all}
-  .sg-i{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.28);border-radius:8px;padding:10px 12px;font-size:14px;outline:none}
-  .sg-i:focus{border-color:#185fa5}
-  .sg-err{border-color:#e24b4a!important}
-  .sg-m{font-size:12px;color:#a32d2d;min-height:16px;margin:8px 0 0;text-align:center}
-  .sg-b{width:100%;margin-top:12px;background:#185fa5;color:#fff;border:0;border-radius:8px;padding:11px 0;font-size:14px;cursor:pointer}
-  .sg-b:active{background:#0c447c}
-  .sg-b:disabled{opacity:.55;cursor:default}
-  .sg-f{font-size:11px;color:#b4b2a9;margin:14px 0 0;text-align:center}
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --line:#e6e8ec;
+    --text:#1c2128;
+    --sub:#6b7280;
+    --accent:#1677ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font:14px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",Arial,sans-serif;
+    color:var(--text);background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 24px 72px}
+  .back{
+    display:inline-block;margin-bottom:24px;font-size:13px;
+    color:var(--sub);text-decoration:none;
+  }
+  .back:hover{color:var(--accent)}
+  header{margin-bottom:24px}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.2px}
+  .desc{margin-top:6px;color:var(--sub);font-size:13px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    overflow:auto;
+  }
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  th,td{
+    text-align:left;padding:12px 16px;vertical-align:top;
+    border-bottom:1px solid #f1f2f4;
+  }
+  th{
+    font-size:12px;font-weight:500;color:var(--sub);letter-spacing:.3px;
+    background:#fbfcfd;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{white-space:nowrap;color:var(--sub);font-variant-numeric:tabular-nums}
+  td:nth-child(2){white-space:nowrap;color:var(--sub)}
+  td a{color:var(--text);text-decoration:none;border-bottom:1px solid #dbe4f5}
+  td a:hover{color:var(--accent);border-color:var(--accent)}
+  td:nth-child(3){min-width:240px}
+  td:nth-child(4){color:#4b5563}
+  .note{margin-top:14px;font-size:12px;color:#9aa1ab}
+  @media (max-width:560px){
+    .wrap{padding:28px 16px 56px}
+    th,td{padding:10px 12px}
+  }
 </style>
 </head>
 <body>
-<div id="sg">
-  <div class="sg-card">
-    <p class="sg-t">请输入访问口令</p>
-    <p class="sg-d" id="sgd"></p>
-    <input class="sg-i" id="sgi" type="password" autocomplete="off" placeholder="口令">
-    <p class="sg-m" id="sgm"></p>
-    <button class="sg-b" id="sgb" type="button">解锁</button>
-    <p class="sg-f">内容已加密存储，口令正确才能解密显示</p>
+<div class="wrap">
+
+  <a class="back" href="../../index.html">← 返回目录页</a>
+
+  <header>
+    <h1>青岛地铁-工地项目</h1>
+    <p class="desc">原型与文档版本记录 · 共 2 条</p>
+  </header>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px">日期</th>
+          <th style="width:64px">类型</th>
+          <th style="width:270px">文件</th>
+          <th>变更摘要</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026-11-12</td>
+          <td>原型</td>
+          <td><a href="../原型/人脸抓拍机布控库自维护设计稿20261112.html">人脸抓拍机布控库自维护设计稿</a></td>
+          <td>新增需求 13：设备在线状态改为每日凌晨定时抓图（默认 02:00、可配置、全量串行）；新增需求 14：人脸抓拍机按最近上报 72 小时判断在线，设备列表新增「最近上报时间」列；补充流程四及规则表。</td>
+        </tr>
+        <tr>
+          <td>2026-11-11</td>
+          <td>原型</td>
+          <td><a href="../原型/人脸抓拍机布控库自维护设计稿20261111.html">人脸抓拍机布控库自维护设计稿</a></td>
+          <td>首版归档。</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
+  <p class="note">表格只追加、不改历史行；同名文件按日期沉淀，最新版在目录页展示，旧版保留可回溯。</p>
+
 </div>
-<script>
-(function () {
-  var PAYLOAD = "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";
-  var SALT = "Fv7HrMWTpUDb8E1Za/fFY4qv8Mrnj32grAnsX5he5X0=";
-  var IV = "XFhFPJTPovEU7GD5";
-  var ITER = 600000;
-  var MODE = "html";
-  var DL_NAME = "";
-  var DL_MIME = "application/octet-stream";
-  var NOTE = "";
-  var LS = 'juanev_k1';
-
-  var card = document.getElementById('sg');
-  var input = document.getElementById('sgi');
-  var msg = document.getElementById('sgm');
-  var btn = document.getElementById('sgb');
-  var desc = document.getElementById('sgd');
-  if (NOTE) desc.textContent = NOTE; else desc.textContent = '';
-
-  function fromB64(b64) {
-    var bin = atob(b64), arr = new Uint8Array(bin.length), i;
-    for (i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return arr;
-  }
-  function toB64(buf) {
-    var bytes = new Uint8Array(buf), s = '', i;
-    for (i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-    return btoa(s);
-  }
-
-  function loadKey() {
-    try {
-      var raw = localStorage.getItem(LS);
-      if (!raw) return null;
-      var v = JSON.parse(raw);
-      if (!v || typeof v.exp !== 'number' || Date.now() > v.exp) return null;
-      return v.k;
-    } catch (e) { return null; }
-  }
-  function saveKey(rawB64) {
-    try {
-      localStorage.setItem(LS, JSON.stringify({ k: rawB64, exp: Date.now() + 30 * 864e5 }));
-    } catch (e) {}
-  }
-
-  function derive(password) {
-    var enc = new TextEncoder();
-    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
-      .then(function (base) {
-        return crypto.subtle.deriveKey(
-          { name: 'PBKDF2', salt: fromB64(SALT), iterations: ITER, hash: 'SHA-256' },
-          base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']
-        );
-      });
-  }
-
-  function decrypt(key) {
-    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(IV) }, key, fromB64(PAYLOAD));
-  }
-
-  function showError(text) {
-    msg.textContent = text;
-    input.classList.add('sg-err');
-    input.focus();
-    input.select();
-    btn.disabled = false;
-  }
-
-  function render(buf) {
-    if (MODE === 'download') {
-      var blob = new Blob([buf], { type: DL_MIME });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = DL_NAME;
-      document.body.appendChild(a); a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-      card.innerHTML = '<div class="sg-card"><p class="sg-t">文件已解密</p>' +
-        '<p class="sg-d">' + DL_NAME + '</p>' +
-        '<p class="sg-m" style="color:#3b6d11">正在下载，如未自动开始请重新点开本页</p>' +
-        '<button class="sg-b" id="again" type="button">再次下载</button></div>';
-      var again = document.getElementById('again');
-      if (again) again.addEventListener('click', function () {
-        var b2 = new Blob([buf], { type: DL_MIME });
-        var u2 = URL.createObjectURL(b2);
-        var a2 = document.createElement('a');
-        a2.href = u2; a2.download = DL_NAME;
-        document.body.appendChild(a2); a2.click();
-        setTimeout(function () { URL.revokeObjectURL(u2); }, 60000);
-      });
-      return;
-    }
-    var html = new TextDecoder('utf-8').decode(buf);
-    document.open();
-    document.write(html);
-    document.close();
-  }
-
-  function tryCachedKey() {
-    var k = loadKey();
-    if (!k) return Promise.resolve(false);
-    return crypto.subtle.importKey('raw', fromB64(k), { name: 'AES-GCM' }, true, ['decrypt'])
-      .then(function (key) {
-        return decrypt(key).then(function (buf) {
-          render(buf);
-          return true;
-        }, function () { return false; });
-      })
-      .catch(function () { return false; });
-  }
-
-  function unlock() {
-    var pw = input.value;
-    if (!pw) { showError('请输入口令'); return; }
-    input.classList.remove('sg-err');
-    msg.textContent = '正在解密…';
-    btn.disabled = true;
-    derive(pw).then(function (key) {
-      return decrypt(key).then(function (buf) {
-        crypto.subtle.exportKey('raw', key).then(function (raw) { saveKey(toB64(raw)); }, function () {});
-        render(buf);
-      });
-    }).catch(function () {
-      msg.textContent = '口令不正确，请重试';
-      input.classList.add('sg-err');
-      input.focus();
-      input.select();
-      btn.disabled = false;
-    });
-  }
-
-  btn.addEventListener('click', unlock);
-  input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') unlock(); });
-
-  tryCachedKey().then(function (ok) {
-    if (!ok) {
-      msg.textContent = '';
-      setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    }
-  });
-})();
-</script>
 </body>
 </html>

@@ -1,177 +1,93 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<title>受保护页面</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本记录 · 青岛地铁-青铁院</title>
 <style>
-  html,body{margin:0;height:100%;background:#f1efe8;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-  #sg{position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;visibility:visible}
-  .sg-card{background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:28px 24px;width:340px;max-width:100%;box-sizing:border-box;box-shadow:0 8px 30px rgba(0,0,0,.06)}
-  .sg-t{font-size:15px;font-weight:500;color:#2c2c2a;margin:0 0 6px;text-align:center}
-  .sg-d{font-size:12px;color:#888780;margin:0 0 16px;text-align:center;word-break:break-all}
-  .sg-i{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,.28);border-radius:8px;padding:10px 12px;font-size:14px;outline:none}
-  .sg-i:focus{border-color:#185fa5}
-  .sg-err{border-color:#e24b4a!important}
-  .sg-m{font-size:12px;color:#a32d2d;min-height:16px;margin:8px 0 0;text-align:center}
-  .sg-b{width:100%;margin-top:12px;background:#185fa5;color:#fff;border:0;border-radius:8px;padding:11px 0;font-size:14px;cursor:pointer}
-  .sg-b:active{background:#0c447c}
-  .sg-b:disabled{opacity:.55;cursor:default}
-  .sg-f{font-size:11px;color:#b4b2a9;margin:14px 0 0;text-align:center}
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --line:#e6e8ec;
+    --text:#1c2128;
+    --sub:#6b7280;
+    --accent:#1677ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font:14px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",Arial,sans-serif;
+    color:var(--text);background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 24px 72px}
+  .back{
+    display:inline-block;margin-bottom:24px;font-size:13px;
+    color:var(--sub);text-decoration:none;
+  }
+  .back:hover{color:var(--accent)}
+  header{margin-bottom:24px}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.2px}
+  .desc{margin-top:6px;color:var(--sub);font-size:13px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    overflow:auto;
+  }
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  th,td{
+    text-align:left;padding:12px 16px;vertical-align:top;
+    border-bottom:1px solid #f1f2f4;
+  }
+  th{
+    font-size:12px;font-weight:500;color:var(--sub);letter-spacing:.3px;
+    background:#fbfcfd;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{white-space:nowrap;color:var(--sub);font-variant-numeric:tabular-nums}
+  td:nth-child(2){white-space:nowrap;color:var(--sub)}
+  td a{color:var(--text);text-decoration:none;border-bottom:1px solid #dbe4f5}
+  td a:hover{color:var(--accent);border-color:var(--accent)}
+  td:nth-child(3){min-width:240px}
+  td:nth-child(4){color:#4b5563}
+  .note{margin-top:14px;font-size:12px;color:#9aa1ab}
+  @media (max-width:560px){
+    .wrap{padding:28px 16px 56px}
+    th,td{padding:10px 12px}
+  }
 </style>
 </head>
 <body>
-<div id="sg">
-  <div class="sg-card">
-    <p class="sg-t">请输入访问口令</p>
-    <p class="sg-d" id="sgd"></p>
-    <input class="sg-i" id="sgi" type="password" autocomplete="off" placeholder="口令">
-    <p class="sg-m" id="sgm"></p>
-    <button class="sg-b" id="sgb" type="button">解锁</button>
-    <p class="sg-f">内容已加密存储，口令正确才能解密显示</p>
+<div class="wrap">
+
+  <a class="back" href="../../index.html">← 返回目录页</a>
+
+  <header>
+    <h1>青岛地铁-青铁院</h1>
+    <p class="desc">原型与文档版本记录 · 共 1 条</p>
+  </header>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px">日期</th>
+          <th style="width:64px">类型</th>
+          <th style="width:270px">文件</th>
+          <th>变更摘要</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026-11-12</td>
+          <td>原型</td>
+          <td><a href="../原型/图像标注统计原型20261112.html">图像标注统计原型</a></td>
+          <td>首版归档：图像任务管理新增「标注统计」入口，支持按标注时间、标注人、审核人、状态组合筛选并二次选择任务；统计表按标签或人员汇总，可展开矩形/多边形/折线/点/整图标签等形状明细，结果支持分页。</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
+  <p class="note">表格只追加、不改历史行；同名文件按日期沉淀，最新版在目录页展示，旧版保留可回溯。</p>
+
 </div>
-<script>
-(function () {
-  var PAYLOAD = "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";
-  var SALT = "Fv7HrMWTpUDb8E1Za/fFY4qv8Mrnj32grAnsX5he5X0=";
-  var IV = "D4elKiVLS4I9T84l";
-  var ITER = 600000;
-  var MODE = "html";
-  var DL_NAME = "";
-  var DL_MIME = "application/octet-stream";
-  var NOTE = "";
-  var LS = 'juanev_k1';
-
-  var card = document.getElementById('sg');
-  var input = document.getElementById('sgi');
-  var msg = document.getElementById('sgm');
-  var btn = document.getElementById('sgb');
-  var desc = document.getElementById('sgd');
-  if (NOTE) desc.textContent = NOTE; else desc.textContent = '';
-
-  function fromB64(b64) {
-    var bin = atob(b64), arr = new Uint8Array(bin.length), i;
-    for (i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return arr;
-  }
-  function toB64(buf) {
-    var bytes = new Uint8Array(buf), s = '', i;
-    for (i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-    return btoa(s);
-  }
-
-  function loadKey() {
-    try {
-      var raw = localStorage.getItem(LS);
-      if (!raw) return null;
-      var v = JSON.parse(raw);
-      if (!v || typeof v.exp !== 'number' || Date.now() > v.exp) return null;
-      return v.k;
-    } catch (e) { return null; }
-  }
-  function saveKey(rawB64) {
-    try {
-      localStorage.setItem(LS, JSON.stringify({ k: rawB64, exp: Date.now() + 30 * 864e5 }));
-    } catch (e) {}
-  }
-
-  function derive(password) {
-    var enc = new TextEncoder();
-    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
-      .then(function (base) {
-        return crypto.subtle.deriveKey(
-          { name: 'PBKDF2', salt: fromB64(SALT), iterations: ITER, hash: 'SHA-256' },
-          base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']
-        );
-      });
-  }
-
-  function decrypt(key) {
-    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(IV) }, key, fromB64(PAYLOAD));
-  }
-
-  function showError(text) {
-    msg.textContent = text;
-    input.classList.add('sg-err');
-    input.focus();
-    input.select();
-    btn.disabled = false;
-  }
-
-  function render(buf) {
-    if (MODE === 'download') {
-      var blob = new Blob([buf], { type: DL_MIME });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = DL_NAME;
-      document.body.appendChild(a); a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-      card.innerHTML = '<div class="sg-card"><p class="sg-t">文件已解密</p>' +
-        '<p class="sg-d">' + DL_NAME + '</p>' +
-        '<p class="sg-m" style="color:#3b6d11">正在下载，如未自动开始请重新点开本页</p>' +
-        '<button class="sg-b" id="again" type="button">再次下载</button></div>';
-      var again = document.getElementById('again');
-      if (again) again.addEventListener('click', function () {
-        var b2 = new Blob([buf], { type: DL_MIME });
-        var u2 = URL.createObjectURL(b2);
-        var a2 = document.createElement('a');
-        a2.href = u2; a2.download = DL_NAME;
-        document.body.appendChild(a2); a2.click();
-        setTimeout(function () { URL.revokeObjectURL(u2); }, 60000);
-      });
-      return;
-    }
-    var html = new TextDecoder('utf-8').decode(buf);
-    document.open();
-    document.write(html);
-    document.close();
-  }
-
-  function tryCachedKey() {
-    var k = loadKey();
-    if (!k) return Promise.resolve(false);
-    return crypto.subtle.importKey('raw', fromB64(k), { name: 'AES-GCM' }, true, ['decrypt'])
-      .then(function (key) {
-        return decrypt(key).then(function (buf) {
-          render(buf);
-          return true;
-        }, function () { return false; });
-      })
-      .catch(function () { return false; });
-  }
-
-  function unlock() {
-    var pw = input.value;
-    if (!pw) { showError('请输入口令'); return; }
-    input.classList.remove('sg-err');
-    msg.textContent = '正在解密…';
-    btn.disabled = true;
-    derive(pw).then(function (key) {
-      return decrypt(key).then(function (buf) {
-        crypto.subtle.exportKey('raw', key).then(function (raw) { saveKey(toB64(raw)); }, function () {});
-        render(buf);
-      });
-    }).catch(function () {
-      msg.textContent = '口令不正确，请重试';
-      input.classList.add('sg-err');
-      input.focus();
-      input.select();
-      btn.disabled = false;
-    });
-  }
-
-  btn.addEventListener('click', unlock);
-  input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') unlock(); });
-
-  tryCachedKey().then(function (ok) {
-    if (!ok) {
-      msg.textContent = '';
-      setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    }
-  });
-})();
-</script>
 </body>
 </html>
