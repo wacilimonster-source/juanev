@@ -100,6 +100,9 @@ juanev/
 - **纯静态、零构建**：不引入 npm/构建工具/后端；浏览器直接打开即可运行。
 - **路径**：一律使用**相对路径**（如 `青岛地铁-工地项目/原型/xxx.html`）。
   Pages 部署在 `https://<user>.github.io/<repo>/` 子路径下，禁止以 `/` 开头的绝对路径。
+- **Markdown 例外**：Pages 直接访问 `.md` 会返回 `text/markdown` 并可能触发下载，
+  因此目录页里的 `.md` 条目链接到 GitHub 渲染页
+  （`https://github.com/wacilimonster-source/juanev/blob/main/<路径>`），其余资源仍用相对路径。
 - **中文文件名**：允许且必须保持可用；链接中直接写中文，不要做 URL 转义以外的改写。
 - **`.nojekyll`**：仓库根目录必须保留该文件，避免 Jekyll 忽略以下划线/特殊命名的文件。
 - **外部依赖**：原型中尽量内联样式与脚本；如需 CDN，使用 https 绝对地址。
