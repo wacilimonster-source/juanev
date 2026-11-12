@@ -69,6 +69,17 @@
   details.versions[open] summary::before{transform:rotate(90deg)}
   details.versions .item{padding:8px 0 8px 16px}
   details.versions .name{font-size:13px;color:var(--sub)}
+  .updates{border-top:1px solid var(--line);background:#fcfcfd;padding:12px 20px 14px}
+  .updates-head{
+    display:flex;align-items:baseline;font-size:12px;color:var(--sub);
+    letter-spacing:.3px;margin-bottom:4px;
+  }
+  .updates-head a{margin-left:auto;color:var(--accent);text-decoration:none}
+  .updates-head a:hover{text-decoration:underline}
+  .updates ul{list-style:none}
+  .updates li{display:flex;gap:12px;padding:5px 0;font-size:13px;color:#4b5563}
+  .u-date{flex-shrink:0;color:#9aa1ab;font-variant-numeric:tabular-nums}
+  .u-text{min-width:0}
   .empty{font-size:13px;color:#9aa1ab;padding:10px 0}
   footer{margin-top:48px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
   code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--sub)}
@@ -87,7 +98,7 @@
     <p class="desc">按客户 / 项目归档的原型与文档，点击标题即可打开最新版本。</p>
     <p class="meta">
       <span>更新于 2026-11-12</span>
-      <span>1 个项目 · 1 个原型 · 1 份文档</span>
+      <span>1 个项目 · 1 个原型 · 2 个版本</span>
     </p>
   </header>
 
@@ -123,13 +134,22 @@
 
     <div class="sub">
       <div class="sub-label">文档</div>
+      <div class="empty">暂无文档</div>
+    </div>
+
+    <div class="updates">
+      <div class="updates-head">
+        <span>最近更新</span>
+        <a href="青岛地铁-工地项目/文档/版本记录.html">全部记录 →</a>
+      </div>
       <ul>
         <li>
-          <a class="item" href="https://github.com/wacilimonster-source/juanev/blob/main/青岛地铁-工地项目/文档/版本记录.md" target="_blank" rel="noopener">
-            <span class="name">版本记录</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
+          <span class="u-date">2026-11-12</span>
+          <span class="u-text">新增「设备在线状态每日定时抓图」「人脸抓拍机按最近上报 72 小时判断在线」（需求 13、14）</span>
+        </li>
+        <li>
+          <span class="u-date">2026-11-11</span>
+          <span class="u-text">首版归档：人脸抓拍机与布控库自维护设计稿</span>
         </li>
       </ul>
     </div>
