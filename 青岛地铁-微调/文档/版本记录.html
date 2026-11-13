@@ -19,39 +19,62 @@
     color:var(--text);background:var(--bg);
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1000px;margin:0 auto;padding:40px 24px 72px}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 72px}
   .back{
     display:inline-block;margin-bottom:24px;font-size:13px;
     color:var(--sub);text-decoration:none;
   }
   .back:hover{color:var(--accent)}
-  header{margin-bottom:24px}
+  header{margin-bottom:22px}
   h1{font-size:22px;font-weight:600;letter-spacing:-.2px}
   .desc{margin-top:6px;color:var(--sub);font-size:13px}
-  .card{
+
+  .entry{
+    display:flex;gap:20px;
     background:var(--card);border:1px solid var(--line);border-radius:10px;
-    overflow:auto;
+    padding:18px 20px;margin-bottom:14px;
   }
-  table{width:100%;border-collapse:collapse;min-width:720px}
-  th,td{
-    text-align:left;padding:12px 16px;vertical-align:top;
-    border-bottom:1px solid #f1f2f4;
+  .entry .meta{flex:0 0 104px;padding-right:16px;border-right:1px solid #f1f2f4}
+  .entry .date{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .entry .type{margin-top:4px;font-size:12px;color:#9aa1ab}
+  .entry .body{flex:1;min-width:0}
+  .head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .file{
+    font-size:14px;color:var(--text);text-decoration:none;
+    border-bottom:1px solid #dbe4f5;
   }
-  th{
-    font-size:12px;font-weight:500;color:var(--sub);letter-spacing:.3px;
-    background:#fbfcfd;border-bottom:1px solid var(--line);white-space:nowrap;
+  .file:hover{color:var(--accent);border-color:var(--accent)}
+  .badge{
+    font-size:11px;color:var(--accent);background:#e8f1ff;
+    border-radius:4px;padding:1px 6px;line-height:1.5;
   }
-  tbody tr:last-child td{border-bottom:none}
-  td:first-child{white-space:nowrap;color:var(--sub);font-variant-numeric:tabular-nums}
-  td:nth-child(2){white-space:nowrap;color:var(--sub)}
-  td a{color:var(--text);text-decoration:none;border-bottom:1px solid #dbe4f5}
-  td a:hover{color:var(--accent);border-color:var(--accent)}
-  td:nth-child(3){min-width:240px}
-  td:nth-child(4){color:#4b5563}
-  .note{margin-top:14px;font-size:12px;color:#9aa1ab}
+  .badge.old{color:#8b95a4;background:#f2f4f6}
+  .ver{margin-left:auto;font-size:12px;color:#9aa1ab;font-variant-numeric:tabular-nums}
+
+  .changes{list-style:none;margin-top:10px}
+  .changes li{
+    padding:7px 0;font-size:13px;color:#4b5563;
+    border-top:1px dashed var(--line);
+  }
+  .changes li:first-child{border-top:none;padding-top:2px}
+  .req{
+    display:inline-block;margin-right:8px;padding:0 6px;
+    font-size:11px;border-radius:4px;vertical-align:1px;
+    color:var(--accent);background:#e8f1ff;
+  }
+  .req.mod{color:#ad6800;background:#fff4e0}
+  .req.doc{color:#5b6472;background:#f0f2f5}
+  .note{margin-top:16px;font-size:12px;color:#9aa1ab}
+
   @media (max-width:560px){
     .wrap{padding:28px 16px 56px}
-    th,td{padding:10px 12px}
+    .entry{flex-direction:column;gap:12px;padding:16px}
+    .entry .meta{
+      display:flex;align-items:baseline;gap:8px;
+      padding:0 0 8px;border-right:none;border-bottom:1px solid #f1f2f4;
+    }
+    .entry .type{margin-top:0}
+    .ver{margin-left:0}
   }
 </style>
 </head>
@@ -62,31 +85,50 @@
 
   <header>
     <h1>青岛地铁-微调</h1>
-    <p class="desc">原型与文档版本记录 · 共 1 条</p>
+    <p class="desc">原型与文档版本记录 · 共 2 个版本，新记录在最上方</p>
   </header>
 
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:110px">日期</th>
-          <th style="width:64px">类型</th>
-          <th style="width:270px">文件</th>
-          <th>变更摘要</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>2026-11-13</td>
-          <td>原型</td>
-          <td><a href="../原型/大模型微调交付版原型20261113.html">大模型微调交付版原型</a></td>
-          <td>首版归档：大模型微调交付版原型，数据集来自外部样本库接口，仅保留图像理解微调；覆盖快速微调、我的模型、微调数据集及超级管理员/租户管理员后台，支持改动说明与原型标记显隐。</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-13</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/大模型微调交付版原型20261113-v2.html">大模型微调交付版原型（v2）</a>
+        <span class="badge">最新</span>
+        <span class="ver">2026-11-13 版（v2）</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req mod">数据集 · 改动</span>平台数据集版本状态改为「下载中 → 转换中 → 转换成功」，异常状态为下载失败、转换失败，并补充对应演示版本</li>
+        <li><span class="req mod">数据集 · 改动</span>数据上传单个文件上限由 1 GB 调整为 5 GB，超限拦截、通过提示与上传说明同步更新</li>
+        <li><span class="req">管理后台 · 新增</span>资源分配新增「自动分配设置」，为新用户配置默认显卡、CPU、内存配额</li>
+        <li><span class="req">管理后台 · 新增</span>资源分配新增「批量分配」，按资源规格对全部用户统一分配并覆盖原配额</li>
+        <li><span class="req">管理后台 · 删除</span>超管新建租户删除「可分配存储空间（算法开发）」「可分配存储空间（大模型微调）」两组字段</li>
+        <li><span class="req">管理后台 · 删除</span>移除「实例资源配置」，租户管理员与超管后台均不再提供</li>
+        <li><span class="req doc">原型 · 调整</span>改动导航补齐条目并重排编号至 1–50，新增项在对应页面加角标</li>
+      </ul>
+    </div>
+  </article>
 
-  <p class="note">表格只追加、不改历史行；同名文件按日期沉淀，最新版在目录页展示，旧版保留可回溯。</p>
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-13</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/大模型微调交付版原型20261113.html">大模型微调交付版原型</a>
+        <span class="badge old">历史</span>
+        <span class="ver">2026-11-13 版（v1）</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req doc">归档</span>首版归档</li>
+      </ul>
+    </div>
+  </article>
+
+  <p class="note">记录只追加、不改历史；同名文件按日期沉淀，最新版作为目录页入口，旧版原样保留可回溯。</p>
 
 </div>
 </body>
