@@ -52,22 +52,18 @@
   .ver{margin-left:auto;font-size:12px;color:#9aa1ab;font-variant-numeric:tabular-nums}
 
   .changes{list-style:none;margin-top:10px}
-  .changes>li{padding:12px 0;border-top:1px dashed var(--line)}
-  .changes>li:first-child{border-top:none;padding-top:2px}
-  .chg-title{font-size:13px;font-weight:600;line-height:1.6}
+  .changes li{
+    padding:7px 0;font-size:13px;color:#4b5563;
+    border-top:1px dashed var(--line);
+  }
+  .changes li:first-child{border-top:none;padding-top:2px}
   .req{
     display:inline-block;margin-right:8px;padding:0 6px;
-    font-size:11px;font-weight:400;border-radius:4px;vertical-align:1px;
+    font-size:11px;border-radius:4px;vertical-align:1px;
     color:var(--accent);background:#e8f1ff;
   }
   .req.mod{color:#ad6800;background:#fff4e0}
   .req.doc{color:#5b6472;background:#f0f2f5}
-  .sub{
-    list-style:disc;margin:6px 0 0 18px;
-    font-size:13px;color:#4b5563;
-  }
-  .sub li{padding:2px 0}
-  .sub b{font-weight:600;color:#333}
   .note{margin-top:16px;font-size:12px;color:#9aa1ab}
 
   @media (max-width:560px){
@@ -104,29 +100,9 @@
         <span class="ver">2026-11-12 版（v2）</span>
       </div>
       <ul class="changes">
-        <li>
-          <div class="chg-title"><span class="req">需求 15 · 新增</span>人脸抓拍机默认绑定人脸算法</div>
-          <ul class="sub">
-            <li><b>生效时机</b>：手动添加、批量添加（含 Excel 导入）保存成功后，默认自动绑定 9808-人脸识别</li>
-            <li><b>沿用逻辑</b>：绑定关系、算法任务与取图配置沿用现有绑定逻辑，设备直接出现在人脸算法的输入源列表</li>
-            <li><b>异常处理</b>：9808 无可用实例时设备仍添加成功、暂不绑定；实例可用后重新保存设备即可补绑</li>
-          </ul>
-        </li>
-        <li>
-          <div class="chg-title"><span class="req">需求 16 · 新增</span>设置布控库后才开始分析</div>
-          <ul class="sub">
-            <li><b>分析前提</b>：设备有启用状态的布控库才开始分析；没有启用库时，抓拍回调只记录上报时间与在线状态，不推理、不报警、不保存抓拍图</li>
-            <li><b>生效入口</b>：添加时选库、输入源配置里设库、批量导入的库，任一入口生效即可；库全部停用或删除后自动停止分析</li>
-            <li><b>导入边界</b>：批量导入布控库只更新库，不触发算法绑定</li>
-          </ul>
-        </li>
-        <li>
-          <div class="chg-title"><span class="req doc">文档 · 调整</span>流程、规则与文案同步更新</div>
-          <ul class="sub">
-            <li>调整流程三、流程四与规则表，补充「无启用库不分析」的判断分支</li>
-            <li>各页面提示文案同步更新；布控库设置入口由「绑定人脸算法」改为「输入源配置」</li>
-          </ul>
-        </li>
+        <li><span class="req">需求 15 · 新增</span>人脸抓拍机添加（含 Excel 批量导入）后默认绑定 9808-人脸识别</li>
+        <li><span class="req">需求 16 · 新增</span>有启用状态的布控库才开始分析，无启用库时只记录上报与在线状态</li>
+        <li><span class="req doc">文档 · 调整</span>同步更新流程三/四、规则表与各处提示文案；布控库设置入口改为「输入源配置」</li>
       </ul>
     </div>
   </article>
@@ -143,30 +119,9 @@
         <span class="ver">2026-11-12 版（v1）</span>
       </div>
       <ul class="changes">
-        <li>
-          <div class="chg-title"><span class="req">需求 13 · 新增</span>设备在线状态改为每日凌晨定时抓图</div>
-          <ul class="sub">
-            <li><b>执行时间</b>：每天凌晨一次，默认 02:00，可配置</li>
-            <li><b>执行方式</b>：全量设备按 ID 顺序逐台抓图，单线程串行、不并发；单台失败不影响后续</li>
-            <li><b>结果判定</b>：抓图成功置在线，失败置离线；抓图繁忙或超时本次不更新状态</li>
-            <li><b>国标设备</b>：沿用现有国标状态同步，不参与抓图检测；手动抓图保留，仍即时刷新状态与缩略图</li>
-          </ul>
-        </li>
-        <li>
-          <div class="chg-title"><span class="req mod">需求 14 · 改动</span>人脸抓拍机按最近上报时间判断在线</div>
-          <ul class="sub">
-            <li><b>判定规则</b>：最近一次上报在 72 小时内为在线，超过 72 小时为离线</li>
-            <li><b>时间记录</b>：抓拍回调到达即记录上报时间，不依赖是否命中布控库</li>
-            <li><b>列表变化</b>：设备列表新增「最近上报时间」列，仅人脸抓拍机显示，其他设备显示 --</li>
-          </ul>
-        </li>
-        <li>
-          <div class="chg-title"><span class="req doc">文档 · 补充</span>流程与需求汇总同步更新</div>
-          <ul class="sub">
-            <li>新增「流程四：设备在线状态判断（每日定时）」流程图及判断规则表</li>
-            <li>需求汇总表新增「设备在线判断」一行，关联需求 13、14</li>
-          </ul>
-        </li>
+        <li><span class="req">需求 13 · 新增</span>设备在线状态改为每日凌晨定时抓图</li>
+        <li><span class="req mod">需求 14 · 改动</span>人脸抓拍机按最近上报时间判断在线，设备列表新增「最近上报时间」列</li>
+        <li><span class="req doc">文档 · 补充</span>新增流程四及判断规则表，需求汇总表增加「设备在线判断」</li>
       </ul>
     </div>
   </article>
@@ -183,12 +138,7 @@
         <span class="ver">2026-11-11 版</span>
       </div>
       <ul class="changes">
-        <li>
-          <div class="chg-title"><span class="req doc">归档</span>首版归档</div>
-          <ul class="sub">
-            <li>人脸抓拍机与布控库自维护设计稿首次归档</li>
-          </ul>
-        </li>
+        <li><span class="req doc">归档</span>首版归档</li>
       </ul>
     </div>
   </article>
