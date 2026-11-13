@@ -1,0 +1,929 @@
+<!-- 大模型微调交付版原型：数据集来自外部样本库接口，仅保留图像理解微调 -->
+<meta charset="utf-8"><title>大模型微调交付版原型</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:12px/1.5 "PingFang SC","Microsoft YaHei",sans-serif;color:#333;background:#f2f3f5}
+.hd{height:44px;background:#1660e0;color:#fff;display:flex;align-items:center;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:10}
+.logo{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}.logo i{width:24px;height:24px;border-radius:50%;background:#fff;opacity:.9}
+.mod{margin-left:24px;background:#fff;color:#333;padding:3px 12px;border-radius:2px}
+.hr{margin-left:auto;display:flex;gap:16px;align-items:center;position:relative}
+.ava{cursor:pointer;display:flex;align-items:center;gap:6px}.ava i{width:22px;height:22px;border-radius:50%;background:#c9d6f2}
+.dd{position:absolute;top:32px;right:0;left:auto;background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.15);display:none;min-width:210px}
+.dd a{display:block;padding:8px 12px;cursor:pointer}.dd a:hover{background:#f2f6ff}
+.newentry{display:flex!important;align-items:center;gap:5px;border:1px dashed #e34d59;background:#fff6f6;color:#c0392b;white-space:nowrap}
+.newentry .newtag{font-size:10px;line-height:15px;padding:0 4px;border-radius:2px;background:#e34d59;color:#fff}
+.dddemo{border-top:1px dashed #eee;margin-top:4px;padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;color:#aaa;font-size:11px}
+body.nochg .newentry{border-color:transparent;background:transparent;color:#333}
+body.nochg .newtag,body.nochg .dddemo{display:none}
+.newbox{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:1px dashed #e34d59;background:#fff8f8;border-radius:2px;padding:3px 8px}
+body.nochg .newbox{border-color:transparent;background:transparent}
+.tnt{background:#fff;color:#333;padding:3px 10px;border-radius:2px}
+.sd{position:fixed;top:44px;bottom:0;left:0;width:150px;background:#fff;border-right:1px solid #eee;padding-top:8px}
+.g{padding:9px 14px;font-weight:600}.it{padding:8px 0 8px 32px;cursor:pointer;color:#555}
+.it.on{color:#1660e0;background:#eef3ff;border-right:2px solid #1660e0}
+.gh{padding:2px 12px 4px 32px;display:flex;gap:4px}
+.ghost{display:inline-flex;align-items:center;gap:5px;border:1px dashed #e34d59;background:#fff6f6;color:#c0392b;padding:0 5px;border-radius:2px;font-size:11px;line-height:17px;white-space:nowrap}
+.ghost s{text-decoration:line-through;opacity:.85}
+.newv{display:inline-flex;align-items:center;gap:5px;border:1px dashed #e34d59;background:#fff6f6;color:#c0392b;padding:0 6px;border-radius:2px;line-height:22px;white-space:nowrap}
+body.nochg .newv{border-color:transparent;background:transparent;color:inherit;padding:0;gap:6px}
+.ghost-old{display:inline-flex;align-items:center;padding:0 5px;border:1px dashed #cfd4da;background:#fafafa;color:#9aa0a6;text-decoration:line-through;font-size:11px;line-height:17px;border-radius:2px;white-space:nowrap}
+body.nochg .ghost-old{display:none}
+.ghost-it{padding:3px 12px 3px 32px;display:flex;align-items:center;gap:6px}
+.ghost-g{display:flex;align-items:center;gap:6px;color:#c0392b}
+.ghost-row{margin:2px 0 6px}
+.ghost-line{margin:2px 0 0;color:#9aa0a6;font-size:11px;line-height:18px}
+.modbox{position:relative;border:1px dashed #e34d59;background:#fffcfc;border-radius:2px;padding:12px 12px 8px}
+.modbox .mbh{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+body.nochg .ghost-line,body.nochg .mbh,body.nochg .ann,body.nochg .ann-row{display:none}
+body.nochg .modbox{border-color:transparent;background:transparent}
+body.nochg .ghost,body.nochg .ghost-it,body.nochg .ghost-g,body.nochg .ghost-row{display:none}
+.gh.sep{margin:4px 0 2px;padding:10px 12px 6px 32px;border-top:1px dashed #e6e6e6}
+.mn{margin:44px 0 0 150px;padding:0 16px 16px}.bc{padding:8px 0;color:#999}
+.card{background:#fff;padding:16px 20px;margin-bottom:12px;position:relative}
+/* 改动角标：编号与「改动导航」一一对应 */
+.pnum{position:absolute;top:-9px;right:12px;display:flex;gap:4px;z-index:6}
+.pnum.inline{position:static;display:inline-flex;vertical-align:middle;margin-left:8px;top:auto;right:auto}
+.pn{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e34d59;color:#fff;font:600 11px/18px "PingFang SC","Microsoft YaHei",sans-serif;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25);font-style:normal;user-select:none;display:inline-block;border:1px solid rgba(255,255,255,.55)}
+.pn:hover{background:#cf3946}
+/* 改动说明小卡片（点角标弹出） */
+.pnc{position:fixed;z-index:60;width:390px;background:#fff;border:1px solid #eee;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px 10px;color:#333;font-weight:400;text-align:left}
+.pnc .ph{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding-right:14px}
+.pnc .pno{flex:none;min-width:20px;height:20px;border-radius:10px;background:#e34d59;color:#fff;font:600 11px/20px "PingFang SC","Microsoft YaHei",sans-serif;text-align:center}
+.pnc .pt{font-size:13px;font-weight:600;line-height:1.5}
+.dashx{display:inline-block;margin-left:4px;padding:0 4px;border:1px dashed #e0a03a;background:#fffdf6;color:#8a6d00;border-radius:2px}
+.pnc .pb{color:#555;line-height:1.8;font-size:12px;max-height:190px;overflow:auto;white-space:normal;word-break:break-word}
+.pnc .pf{margin-top:10px;padding-top:8px;border-top:1px solid #f0f0f0;text-align:right;font-size:12px}
+.pd{display:flex;gap:10px;margin:2px 0 8px}
+.pd .col{flex:1;min-width:0}
+.pd .lab{font-size:11px;color:#999;margin-bottom:3px}
+.pd .lab.r{color:#d33}
+.pd .old{background:#f7f8fa;border:1px solid #ececec;border-radius:2px;padding:5px 7px;color:#777;font-size:12px;line-height:1.65;word-break:break-word}
+.pd .new{border:1px solid #e34d59;background:#fff6f6;border-radius:2px;padding:5px 7px;color:#b3242f;font-size:12px;line-height:1.65;word-break:break-word}
+.pd .del{border:1px dashed #e34d59;background:#fff6f6;border-radius:2px;padding:5px 7px;color:#d33;font-size:12px;line-height:1.65;text-decoration:line-through;word-break:break-word}
+.pd .arw{color:#bbb;font-size:12px;align-self:center;margin-top:14px}
+.pnc .px{position:absolute;top:8px;right:9px;color:#bbb;cursor:pointer;font-size:12px;line-height:1}
+.pnc .px:hover{color:#666}
+body.nochg .pnum{display:none}
+.tt{font-size:18px;font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tt .x{margin-left:auto;font-size:12px;font-weight:400;color:#666}.tt .lk{font-size:12px;font-weight:400}
+.btn{display:inline-block;padding:5px 12px;border:1px solid #ccc;background:#fff;border-radius:2px;cursor:pointer;font-size:12px}
+.btn.p{background:#1660e0;border-color:#1660e0;color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}
+.lk{color:#1660e0;cursor:pointer;margin-right:10px}
+table{width:100%;border-collapse:collapse}th{background:#f5f6f8;text-align:left;font-weight:500;color:#666;padding:10px}
+td{padding:10px;border-bottom:1px solid #f0f0f0}
+.tag{display:inline-block;padding:0 6px;border-radius:2px;background:#eef3ff;color:#1660e0}
+.tag.g2{background:#e8f8ef;color:#1a9a50}.tag.o{background:#fff4e5;color:#d97a00}.tag.r{background:#fdecec;color:#d33}.tag.k{background:#f2f2f2;color:#888}
+.tabs{display:flex;gap:24px;border-bottom:1px solid #eee;margin-bottom:12px}.tabs span{padding:8px 0;cursor:pointer}
+.tabs .on{color:#1660e0;border-bottom:2px solid #1660e0}
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#666}.bar .sp{margin-left:auto}
+input,select,textarea{border:1px solid #ccc;padding:5px 8px;font:inherit;border-radius:2px;width:320px}
+input[type=checkbox],input[type=radio]{width:auto}
+.fm .row{display:flex;margin-bottom:16px}.fm label.l{width:130px;flex:none;text-align:right;padding:5px 12px 0 0;color:#666}
+.fm label.req:before{content:'* ';color:#d33}.tip{color:#999;margin-top:4px}
+.sec{font-size:14px;font-weight:600;margin:8px 0 14px;padding-left:8px;border-left:3px solid #1660e0}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 24px;color:#666}.info b{color:#333;font-weight:400}
+.stat{display:flex;gap:40px;margin-top:12px}.stat b{display:block;font-size:20px;color:#333}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.cell{border:1px solid #eee;position:relative;cursor:pointer}.cell img{width:100%;height:110px;object-fit:cover;display:block;background:#eee}
+.cell input{position:absolute;top:6px;left:6px}.cell p{padding:4px 6px;color:#666;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:20}
+.dw{position:fixed;top:0;right:0;bottom:0;width:620px;background:#fff;z-index:21;display:none;padding:20px;overflow:auto}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:4px;display:none;z-index:30}
+.note{background:#fffbe6;border:1px dashed #f0c040;padding:6px 10px;color:#8a6d00;margin-bottom:12px}
+body.nochg .chg,body.nochg .pmark{display:none}
+.fab{position:fixed;right:20px;bottom:20px;z-index:15}
+.pg{text-align:right;padding-top:10px;color:#999}
+/* 原型标记：只用于演示/说明，不属于产品界面，随「显示/隐藏改动说明」一起隐藏 */
+.pmark{display:inline-flex;align-items:center;gap:5px;padding:0 8px 0 3px;border:1px dashed #b79bf0;border-radius:10px;background:#f7f2ff;color:#7a4ce0;font-size:11px;line-height:18px;cursor:pointer;white-space:nowrap;vertical-align:middle;transition:background .15s,border-color .15s}
+.pmark:before{content:'原型';padding:0 4px;border-radius:7px;background:#7a4ce0;color:#fff;font-size:10px;line-height:14px;letter-spacing:.5px}
+.pmark:hover{background:#efe4ff;border-color:#7a4ce0}
+.upz{width:480px;border:1px dashed #bbb;padding:24px;text-align:center;cursor:pointer;color:#666;background:#fff;transition:border-color .15s,background .15s}
+.upz:hover{border-color:#1660e0;color:#1660e0}
+.upz.drag{border-color:#1660e0;background:#f2f6ff}
+.upz.err{border-color:#d33;background:#fef6f6;color:#d33}
+.upz.has{border-style:solid;border-color:#d9d9d9;background:#fafafa;color:#333;text-align:left;padding:14px 16px}
+</style>
+<div class="hd"><div class="logo"><i></i>CV微调</div><span class="ghost-old" style="margin-left:10px">极栈平台</span><span class="ghost" style="margin-left:4px">CV微调</span><span class="ghost" style="margin-left:6px"><s>大模型微调 ▾</s></span><span id="hdnum"></span><span class="mod chg" id="mod" style="display:none" title="交付版：隐藏左上角模块名与模块切换"></span><span class="btn" id="back" style="margin-left:8px;display:none;color:#333" onclick="syncRole('ta');go('dataset')">‹ 返回大模型微调</span><span class="btn" style="margin-left:16px;background:#fffbe6;border-color:#f0c040;color:#8a6d00" onclick="go('guide')">改动导航</span>
+<div class="hr"><span id="hrnum"></span><div class="ava" onclick="tg()"><i></i><span id="avn">admin0623</span> ▾<div class="dd" id="dd"><a class="newentry" onclick="goAdmin()">管理后台<span id="ddnum" class="pnum inline" style="margin-left:4px"></span><span class="newtag">新增入口</span></a><div class="dddemo">原型演示：<span class="pmark" onclick="event.stopPropagation();setRole('ta','dist')">租户管理员视角</span><span class="pmark" onclick="event.stopPropagation();setRole('su','setting')">超管视角</span></div><a>个人中心</a><a>退出登录</a></div></div><span class="tnt" id="tnt" style="display:none">20260623新建租户 ▾</span></div></div>
+<div class="sd" id="sd"></div>
+<div class="mn" id="mn"></div>
+<div class="mask" id="mask" onclick="closeDw()"></div><div class="dw" id="dw"></div><div class="toast" id="toast"></div>
+<button class="btn fab" id="fab" title="同时隐藏黄色改动说明与紫色「原型」标记" onclick="closePn();document.body.classList.toggle('nochg')">显示/隐藏改动说明</button>
+<script>
+const $=s=>document.querySelector(s);
+const IMG=(p,i)=>'https://trae-api-cn.mchost.guru/api/ide/v1/tool_text_to_image?prompt='+encodeURIComponent(p+', view '+i)+'&image_size=landscape_4_3';
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2000)}
+function tg(){const d=$('#dd');d.style.display=d.style.display=='block'?'none':'block'}
+function now(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `2026-10-26 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
+function tb(cols,rows){return `<table><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>${rows.length?rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${cols.length}" style="text-align:center;color:#999;padding:40px">暂无信息</td></tr>`}</table>`}
+const ST={'拉取中':'o','校验中':'o','校验成功':'g2','校验失败':'r','排队中':'o','运行中':'o','已完成':'g2','已完成/已保存':'g2','失败':'r','已标注':'g2','标注中':'o'};
+const tag=s=>`<span class="tag ${ST[s]||''}">${s}</span>`;
+// 地铁场景样例（图像理解 QA + 区域框，坐标为百分比）
+const SC=[
+{p:'subway station platform CCTV view, passengers waiting, realistic surveillance photo',q:'站台上是否有乘客越过黄色安全线？',a:'有，画面左侧一名乘客站在黄色安全线外侧，存在安全隐患。',d:[{x:12,y:40,w:14,h:42,c:'越线乘客',l:'person_over_line'}]},
+{p:'metro escalator crowded passengers CCTV footage realistic',q:'扶梯口客流是否拥挤？',a:'扶梯下口聚集约20人，客流较密集，建议引导分流。',d:[{x:30,y:35,w:40,h:50,c:'扶梯口人群',l:'crowd'}]},
+{p:'subway track with debris on rail, tunnel surveillance camera realistic',q:'轨行区是否有异物？',a:'有，右侧钢轨旁有一个塑料袋状异物。',d:[{x:60,y:62,w:12,h:12,c:'塑料袋',l:'foreign_object'}]},
+{p:'metro station corridor unattended luggage CCTV realistic',q:'通道内是否有无人看管的行李？',a:'通道中部有一个黑色行李箱，周边无人，疑似遗留物。',d:[{x:44,y:55,w:10,h:18,c:'黑色行李箱',l:'luggage'}]},
+{p:'subway ticket gates passengers passing, overhead surveillance realistic',q:'闸机处是否有翻越或尾随行为？',a:'未发现翻越行为，乘客均正常刷卡通行。',d:[]},
+{p:'metro platform screen doors open, train arriving, CCTV realistic',q:'屏蔽门状态是否正常？',a:'屏蔽门已全部打开，列车停靠到位，状态正常。',d:[{x:20,y:20,w:60,h:60,c:'屏蔽门',l:'psd'}]}];
+</script>
+<script>
+const SYNC={last:'2026-10-26 08:00:00',interval:'每 1 小时',ing:false,ok:true,msg:'新增 1 个批次'};
+let seed=7;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+// 样本库 -> 数据集；批次 -> 可选来源；多批次合成一个版本
+const DS=[
+{id:'05180',bdId:'F10023',name:'站台安全巡检样本库',sc:[0,3],sync:'2026-10-26 08:00:00',batches:[
+ {id:'B2026101501',name:'1015站台越线',total:120,marked:120,t:'2026-10-15 10:20:00'},
+ {id:'B2026101802',name:'1018遗留物',total:80,marked:80,t:'2026-10-18 16:02:11'}],versions:[]},
+{id:'05179',bdId:'F10019',name:'客流密度识别样本库',sc:[1,4],sync:'2026-10-26 08:00:00',batches:[
+ {id:'B2026100801',name:'早高峰扶梯',total:200,marked:200,t:'2026-10-08 09:12:30'},
+ {id:'B2026101205',name:'闸机通行',total:150,marked:150,t:'2026-10-12 14:30:00'}],versions:[]},
+{id:'05177',bdId:'F10011',name:'轨行区异物样本库',sc:[2,5],sync:'2026-10-26 08:00:00',batches:[
+ {id:'B2026092801',name:'隧道异物一期',total:90,marked:90,t:'2026-09-28 11:00:00'}],versions:[]}];
+DS.forEach(d=>{d.src='bd';d.fmt='视觉理解'});
+// 我的数据集：沿用现有手动创建+上传逻辑，数据格式新增「视觉理解」
+const FMT={'视觉理解':{acc:'.zip',tpl:'视觉理解说明 / zip模板（images/ + annotations/*.json，json 含 width、height、detect[]、qa[]）'}};
+DS.push({id:'04174',src:'local',name:'站台越线人工整理',fmt:'视觉理解',sc:[0,3],t:'2026-10-22 14:52:46',versions:[]},
+ {id:'04173',src:'local',name:'客流VQA补充',fmt:'视觉理解',sc:[1,4],t:'2026-10-22 14:20:39',versions:[]});
+function mkLocal(ds,file,n,ex,ratio,desc,st){const s=[];for(let i=0;i<Math.min(n,24);i++)s.push({id:'U'+ds.id+'-'+String(i+1).padStart(4,'0'),bid:file,k:ds.sc[i%ds.sc.length],v:i+30,set:'训练'});
+ const idx=s.map((_,i)=>i).sort(()=>rnd()-.5),nt=Math.round((s.length-ex)*ratio/100);
+ idx.slice(0,ex).forEach(i=>s[i].set='样例');idx.slice(ex,ex+nt).forEach(i=>s[i].set='测试');
+ const v={no:'V'+(ds.versions.length+1),bids:[],file,ex,ratio,desc,st,t:now(),s,total:s.length};ds.versions.unshift(v);return v}
+mkLocal(DS[3],'站台越线_1022.zip',20,3,10,'人工整理首版','校验成功');DS[3].versions[0].t='2026-10-22 14:52:46';
+mkLocal(DS[4],'客流vqa.json',16,2,10,'','校验成功');DS[4].versions[0].t='2026-10-22 14:20:39';
+function mkVer(ds,bids,ex,ratio,desc,st){
+ const bs=ds.batches.filter(b=>bids.includes(b.id));const s=[];
+ bs.forEach(b=>{const n=Math.min(b.marked,24);for(let i=0;i<n;i++){const k=ds.sc[(i+b.id.length)%ds.sc.length];s.push({id:b.id+'-'+String(i+1).padStart(4,'0'),bid:b.id,k,v:i,set:'训练'})}});
+ const idx=s.map((_,i)=>i).sort(()=>rnd()-.5);const nt=Math.round((s.length-ex)*ratio/100);
+ idx.slice(0,ex).forEach(i=>s[i].set='样例');idx.slice(ex,ex+nt).forEach(i=>s[i].set='测试');
+ const total=s.length;
+ const v={no:'V'+(ds.versions.length+1),bids,ex,ratio,desc,st,t:now(),s,total};ds.versions.unshift(v);return v}
+mkVer(DS[0],['B2026101501'],5,10,'首批站台越线','校验成功');DS[0].versions[0].t='2026-10-16 09:30:00';
+mkVer(DS[0],['B2026101501','B2026101802'],5,10,'合并越线+遗留物','校验成功');DS[0].versions[0].t='2026-10-19 10:05:12';
+mkVer(DS[1],['B2026100801','B2026101205'],8,15,'客流两批合并','校验成功');DS[1].versions[0].t='2026-10-13 15:00:00';
+const cnt=v=>{const c={训练:0,样例:0,测试:0};v.s.forEach(x=>c[x.set]++);return c};
+// 测试数据集（数据用途=测试数据），供模型评估选择；与现有系统一致，测评数据集只来自我的数据集
+DS.forEach(d=>d.use='微调数据');
+DS.push({id:'04175',src:'local',name:'站台越线测试集',fmt:'视觉理解',use:'测试数据',sc:[0,3],t:'2026-10-23 10:12:00',versions:[]});
+mkLocal(DS[5],'站台越线_test.json',12,1,10,'评估用','校验成功');DS[5].versions[0].t='2026-10-23 10:12:00';
+// 快速微调任务（字段与现有任务详情一致）
+const TASK=[
+{id:'00241',name:'站台越线VLM微调',type:'图像理解',desc:'越线+遗留物V2',base:'平台基础模型/星际大模型/星际大模型-4B',m:'QLoRA',qm:'HQQ',qb:8,ds:['平台数据集/站台安全巡检样本库/V2'],test:'当前训练集自动拆分',spec:'1卡 10核 15G',tb:1,save:1,saveAs:'新模型',mname:'站台越线VLM',mdesc:'越线+遗留物',st:'已完成/已保存',t:'2026-10-20 17:46:17'},
+{id:'00240',name:'客流密度微调',type:'图像理解',desc:'',base:'平台基础模型/星际大模型/星际大模型-4B',m:'LoRA',ds:['平台数据集/客流密度识别样本库/V1'],test:'当前训练集自动拆分',spec:'1卡 10核 15G',tb:0,save:0,st:'已完成/未保存',t:'2026-10-14 11:20:00'},
+{id:'00239',name:'遗留物识别微调',type:'图像理解',desc:'',base:'平台基础模型/星际大模型/星际大模型-4B',m:'LoRA',ds:['我的数据集/站台越线人工整理/V1'],test:'当前训练集自动拆分',spec:'1卡 10核 15G',tb:0,save:1,saveAs:'新模型',mname:'遗留物VLM',st:'异常',t:'2026-10-12 09:30:00'}];
+// 内置任务用的都是视觉理解（平台数据集 / 定制格式数据集）
+TASK.forEach(t=>t.df='视觉理解');
+// 我的模型：模型 -> 版本（版本状态 待合并/合并中/就绪/合并失败/压缩中/压缩失败/保存中）
+const MODEL=[
+{id:'0302',name:'站台越线VLM',base:'星际大模型/星际大模型-4B',t:'2026-10-20 18:01:18',vers:[{no:'V1',desc:'越线+遗留物',src:'站台越线VLM微调-241',st:'就绪',size:'8.48GB',t:'2026-10-20 18:01:18'}]},
+{id:'0301',name:'客流密度VLM',base:'星际大模型/星际大模型-4B',t:'2026-10-15 10:00:00',vers:[{no:'V2',desc:'',src:'客流密度微调-240',st:'就绪',size:'8.48GB',t:'2026-10-16 10:00:00'},{no:'V1',desc:'首版',src:'客流密度微调-236',st:'就绪',size:'8.48GB',t:'2026-10-15 10:00:00'}]}];
+const PLAT_MODEL=[{id:'014',name:'星际大模型',type:'图像理解',fw:'vllm',vc:1,t:'2026-06-15 10:41:11',vers:['星际大模型-4B']}];
+// 模型评估：type auto=自动化测评 / human=人工评测
+const EVAL=[
+{id:'1160',type:'auto',name:'越线模型评估',st:'已完成',models:['站台越线VLM/V1'],method:'自动规则测评',prog:'12/12',ds:'站台越线测试集/V1',t:'2026-10-21 14:00:00',res:{'准确率':'58.33','F1分数':'71.20','ROUGE-L':'71.05','BLEU-4':'62.10'}},
+{id:'0820',type:'human',name:'越线人工评测',st:'评测中',models:['站台越线VLM/V1'],method:'指标打分',prog:'0/12',ds:'站台越线测试集/V1',t:'2026-10-21 15:20:00'}];
+const MENU=[{g:'模型微调',its:[['finetune','快速微调']]},{g:'模型管理',its:[['models','我的模型']]},{g:'资产管理',its:[['dataset','微调数据集']]}];
+</script>
+<script>
+let dsTab='plat';
+function go(h){location.hash=h}
+function sd(cur){const it=(k,t)=>`<div class="it ${cur==k?'on':''}" onclick="go('${k}')">${t}</div>`;
+ const gh=(t,k)=>`<div class="ghost-it"><span class="ghost"><s>${t}</s></span>${k?pn(k):''}</div>`;
+ $('#sd').innerHTML=`<div class="g">模型微调</div>${it('finetune','快速微调')}`+
+  `<div class="g">模型管理</div>${it('models','我的模型')}${gh('体验中心','expc')}${gh('模型评估','eval-del')}`+
+  `<div class="g ghost-g"><s>模型服务</s> ${pn('svc')}</div>${gh('在线推理')}${gh('批量推理')}`+
+  `<div class="g">资产管理</div>${it('dataset','微调数据集')}`}
+const P={};
+const dl=d=>`<span class="lk" onclick="go('ds/${d.id}')">${d.name}</span>`,ops=d=>`<span class="lk" onclick="go('ds/${d.id}')">详情</span>`+(d.src=='local'?`<span class="lk" onclick="delDs('${d.id}')">删除</span>`:'');
+P.dataset=()=>{const plat=dsTab=='plat';
+ const result=`<span class="tag ${SYNC.ok?'g2':'r'}">${SYNC.ok?'同步成功':'同步失败'}</span> ${SYNC.msg}`;
+ const syncTxt=SYNC.ing?'<span class="tag o">同步中…</span>':`上次同步：${SYNC.last}（自动同步：${SYNC.interval}）　结果：${result}`;
+ const list=DS.filter(d=>d.src==(plat?'bd':'local'));
+ const rows=plat?list.map(d=>[d.id,dl(d),'图像理解','微调数据',d.fmt,d.batches.length,d.versions.length,d.sync,ops(d)]):
+  list.map(d=>[d.id,dl(d),'图像理解',d.use,d.fmt,d.versions.length,d.t,ops(d)]);
+ return `<div class="bc">资产管理 / 微调数据集</div><div class="card">${plat?'':pns('my-list')}<div class="tt">数据集<span class="x">◯ 剩余空间：1774.1 GB</span></div>
+ <div class="tabs"><span class="${plat?'on':''}" onclick="dsTab='plat';render()">平台数据集</span><span class="${plat?'':'on'}" onclick="dsTab='my';render()">我的数据集</span></div>
+ ${plat?
+ `<div class="bar"><div class="newbox"><button class="btn p" style="flex:none" onclick="syncNow()" ${SYNC.ing?'disabled':''}>立即同步</button><span style="min-width:0">${syncTxt}</span><span class="newtag">新增</span>${pn('bd-sync')}</div><span style="flex:none"><span class="pmark" onclick="syncFail()" title="原型标记：仅用于演示同步失败的展示效果，不属于产品功能；点右下角可隐藏">演示：同步失败</span></span><input placeholder="请输入数据集名称" style="width:200px;flex:none"></div>`
+ :
+ `<div class="bar"><button class="btn p" onclick="go('dsnew')">创建数据集</button><span class="sp"><input placeholder="请输入数据集名称" style="width:200px"></span></div>`}
+ ${tb(plat?['ID','数据集名称','数据类型','数据用途','数据格式','批次数'+pni('bd-cols'),'版本数量','同步时间','操作']:['ID','数据集名称','数据类型','数据用途','数据格式','版本数量','创建时间','操作'],rows)}<div class="pg">共${rows.length}条</div></div>`};
+function delDs(id){if(!confirm('确认删除该数据集？'))return;DS.splice(DS.findIndex(d=>d.id==id),1);render()}
+// 数据上传区（创建数据集/本地数据集新增版本共用）
+const UP_MAX=1024*1024*1024;              // 单个上传文件上限：1 GB
+const fs=b=>b>=1024*1024*1024?(b/1024/1024/1024).toFixed(2)+' GB':b>=1024*1024?(b/1024/1024).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const upBox=f=>`<div class="row"><label class="l req">数据上传</label><div>
+ <div class="modbox">
+  <div class="mbh"><span class="tag">修改</span>${pn('up-req')}</div>
+  <div id="upz" class="upz" onclick="$('#fil').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropUp(event)">点击这里或将文件拖拽到这里上传</div>
+  <input type="file" id="fil" accept=".zip" style="display:none" onchange="pickUp(this.files[0])">
+  <div class="tip" id="uperr" style="display:none;color:#d33"></div>
+  <div class="tip">导入要求：支持扩展名 <b id="acc">${FMT[f].acc}</b>，<b style="color:#d97a00">单个文件不超过 1 GB</b><span class="ghost-old" style="margin-left:6px">原 5G</span>，一次仅支持上传一个文件</div>
+  <div class="tip">下载数据格式说明及数据示例：<span class="lk" onclick="dlDoc()">视觉理解说明</span><span class="lk" onclick="dlZip()">zip模板</span></div>
+  <div class="ghost-line">原下载项：<span class="ghost-old">数据集格式说明 · 多模态数据集demo示例</span></div>
+ </div>
+ <div class="tip" style="margin-top:4px"><span class="pmark" onclick="demoBig()" title="原型标记：仅用于演示超过 1GB 时的拦截效果，不属于产品功能；点右下角可隐藏">演示：上传 1.2GB 文件被拦截</span></div></div></div>`;
+// 统一校验：扩展名 + 单个文件 1GB
+function upCheck(name,size){
+ const box=$('#upz'),err=$('#uperr');
+ box.classList.remove('err','has');box.innerHTML='点击这里或将文件拖拽到这里上传';
+ err.style.display='none';box.dataset.file='';box.dataset.size='';
+ const ext=(String(name).split('.').pop()||'').toLowerCase();
+ if(ext!=='zip'){box.classList.add('err');err.style.display='block';err.innerHTML='文件格式不支持：仅支持 .zip 压缩包';toast('仅支持 .zip 文件');return false}
+ if(size>UP_MAX){box.classList.add('err');err.style.display='block';
+  err.innerHTML=`文件大小 <b>${fs(size)}</b>，超过单个文件 1 GB 的上限，已拦截。请压缩或拆分后再上传`;toast('文件超过 1 GB，无法上传');return false}
+ box.classList.add('has');box.dataset.file=name;box.dataset.size=size;
+ box.innerHTML=`<div>已选择：<b>${name}</b> <span class="tip" style="margin:0">（${fs(size)}）</span></div>
+  <div class="tip" style="margin-top:6px;color:#1a9a50">✓ 已通过校验：zip 格式，单个文件 ≤ 1 GB</div>
+  <div style="margin-top:8px"><span class="lk" style="margin-right:16px" onclick="event.stopPropagation();$('#fil').click()">重新选择</span><span class="lk" onclick="event.stopPropagation();upClear()">移除</span></div>`;
+ return true}
+function upClear(){const box=$('#upz');box.classList.remove('has','err');box.dataset.file='';box.dataset.size='';
+ box.innerHTML='点击这里或将文件拖拽到这里上传';$('#uperr').style.display='none';$('#fil')&&($('#fil').value='')}
+function pickUp(file){if(!file)return;upCheck(file.name,file.size)}
+function dropUp(ev){ev.preventDefault();$('#upz').classList.remove('drag');const f=ev.dataTransfer.files[0];if(f)pickUp(f)}
+// 原型演示：模拟一个 1.2GB 的文件，验证超限拦截（不会真的读取本地文件）
+function demoBig(){upCheck('vlm_dataset_1.2g.zip',1.2*1024*1024*1024)}
+function fakeUp(){upCheck('vlm_dataset.zip',320*1024*1024)}
+// ===== 视觉理解数据集：格式说明与 zip 模板下载（文件内置在原型中，离线可用） =====
+const SAMPLE_JSON=`{
+    "width": "8192",
+    "height": "6144",
+    "detect": [
+        {
+            "xmin": "3754.78",
+            "ymin": "2715.40",
+            "xmax": "4307.82",
+            "ymax": "3623.73",
+            "data": [
+                { "label": "label", "value": "施工" },
+                { "label": "reference", "value": "占道施工" },
+                { "label": "caption", "value": "违规占道施工" }
+            ]
+        }
+    ],
+    "qa": [
+        { "human": "请对图片进行描述", "gpt": "" }
+    ]
+}`;
+const SAMPLE_JSON2=`{
+    "width": "8192",
+    "height": "6144",
+    "detect": [
+        {
+            "xmin": "3710.98",
+            "ymin": "3022.48",
+            "xmax": "4244.47",
+            "ymax": "3840.87",
+            "data": [
+                { "label": "caption", "value": "违规占道施工" },
+                { "label": "label", "value": "施工" },
+                { "label": "reference", "value": "占道施工" }
+            ]
+        }
+    ],
+    "qa": [
+        { "human": "请对图片进行描述", "gpt": "" }
+    ]
+}`;
+const DOC_MD=`# 视觉理解数据集格式说明
+
+## 一、压缩包结构
+
+上传一个 zip，内部直接放标注 json，不建子目录，文件名与对应图片同名：
+
+    dataset.zip
+    ├── DJI_20260226143342_0003_D.json     对应图片 DJI_20260226143342_0003_D.jpg
+    ├── DJI_20260226143355_0004_D.json
+    └── ...
+
+- 图片不在 zip 内，按 json 的文件名对应原图。
+- 一个 zip 内可以有多个 json，每个 json 对应一张图。
+- **单个 zip 不超过 1 GB**（上传限制）；超出请按批次拆分后分批上传。
+- 标注文件编码为 UTF-8。
+
+## 二、标注文件字段
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| width | string | 原图宽度（像素） |
+| height | string | 原图高度（像素） |
+| detect | array | 区域框列表，可为空数组 |
+| detect[].xmin/ymin/xmax/ymax | string | 区域框左上角、右下角坐标，单位为原图像素 |
+| detect[].data | array | 该区域的属性，用 label 字段区分类型 |
+| data[label=label].value | string | 标签 |
+| data[label=reference].value | string | 参考值 |
+| data[label=caption].value | string | 描述 |
+| qa | array | 问答列表，可为空数组 |
+| qa[].human | string | 问题 |
+| qa[].gpt | string | 答案 |
+
+## 三、示例标注文件（DJI_20260226143342_0003_D.json）
+
+    ${SAMPLE_JSON.replace(/\n/g,'\n    ')}
+
+## 四、说明
+
+- 一张图片可以只有问答、只有区域框，或两者都有。
+- 坐标使用原图像素值，不做归一化。
+`;
+function txtU8(t){return new TextEncoder().encode(t)}
+let CRC_T=null;
+function crc32(d){if(!CRC_T){CRC_T=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CRC_T[n]=c>>>0}}
+ let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=CRC_T[(c^d[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+// 最小 zip 打包（存储方式，不压缩）
+function zipFiles(files){const parts=[],cd=[];let off=0;const DOSDATE=0x5C21;
+ files.forEach(f=>{const name=txtU8(f.name),data=f.data,crc=crc32(data);
+  const lh=new Uint8Array(30+name.length),dv=new DataView(lh.buffer);
+  dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint16(6,0,true);dv.setUint16(8,0,true);
+  dv.setUint16(10,0,true);dv.setUint16(12,DOSDATE,true);dv.setUint32(14,crc,true);
+  dv.setUint32(18,data.length,true);dv.setUint32(22,data.length,true);
+  dv.setUint16(26,name.length,true);dv.setUint16(28,0,true);lh.set(name,30);
+  parts.push(lh,data);
+  const c=new Uint8Array(46+name.length),cv=new DataView(c.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0,true);cv.setUint16(10,0,true);
+  cv.setUint16(12,0,true);cv.setUint16(14,DOSDATE,true);cv.setUint32(16,crc,true);
+  cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);
+  cv.setUint16(28,name.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+  cv.setUint32(38,0,true);cv.setUint32(42,off,true);c.set(name,46);
+  cd.push(c);off+=lh.length+data.length});
+ const cdStart=off,cdLen=cd.reduce((a,c)=>a+c.length,0);
+ const eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+ ev.setUint32(0,0x06054b50,true);ev.setUint16(8,cd.length,true);ev.setUint16(10,cd.length,true);
+ ev.setUint32(12,cdLen,true);ev.setUint32(16,cdStart,true);
+ return new Blob(parts.concat(cd,[eocd]),{type:'application/zip'})}
+function dlFile(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast('已下载：'+name)}
+function dlDoc(){dlFile('视觉理解数据集格式说明.md',new Blob([DOC_MD],{type:'text/markdown;charset=utf-8'}))}
+function dlZip(){dlFile('视觉理解数据集模板.zip',zipFiles([
+ {name:'DJI_20260226143342_0003_D.json',data:txtU8(SAMPLE_JSON)},
+ {name:'DJI_20260226143355_0004_D.json',data:txtU8(SAMPLE_JSON2)}
+]))}
+P.dsnew=()=>`<div class="bc">资产管理 / 微调数据集 / 创建数据集</div><div class="card fm"><div class="tt">创建数据集 <span class="lk" onclick="go('dataset')">‹ 返回</span><span class="x">◯ 剩余空间：1774.1 GB</span></div>
+ <div class="sec">数据集信息</div>
+ <div class="row"><label class="l req">数据集名称</label><input id="dn" maxlength="30" placeholder="0/30"></div>
+ <div class="row"><label class="l req">数据类型</label><div style="padding-top:5px"><label class="newv" style="margin-right:6px"><input type="radio" checked> 图像理解</label><span class="ghost-old">文本生成</span>${pni('ds-format')}</div></div>
+ <div class="row ann-row"><label class="l">数据用途</label><div style="padding-top:5px"><span class="ghost"><s>微调数据 / 测试数据 / 推理数据</s></span> <span class="tip ann" style="margin:0">交付版取消该选择，统一按微调数据</span></div></div>
+ <div class="row"><label class="l req">数据格式</label><div style="padding-top:5px"><span class="newv">视觉理解</span> <span class="tip" style="margin:0">（仅支持视觉理解格式）</span><span class="ghost-old" style="margin-left:8px">sharegpt / alpaca</span>${pni('ds-fmt2')}</div></div>
+ <div class="sec">版本信息</div>${verFields()}${upBox('视觉理解')}
+
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subDs()">确定</button>&nbsp;<button class="btn" onclick="go('dataset')">取消</button></div></div>`;
+function verFields(){return `<div class="row"><label class="l req">样例集数量</label><div><input id="ex" type="number" value="5" min="1" max="200" placeholder="请输入1-200的整数"></div></div>
+ <div class="row"><label class="l req">测试集占比%</label><div><input id="ratio" type="number" value="10" min="10" max="50" placeholder="请输入10-50的整数"></div></div>
+ <div class="row"><label class="l">版本描述</label><textarea id="desc" rows="3" placeholder="请输入版本描述"></textarea></div>`}
+ function subDs(){const n=$('#dn').value.trim();if(!n)return toast('请输入数据集名称');const file=$('#upz').dataset.file;if(!file)return toast('请上传数据文件');
+ const d={id:String(4175+DS.length).padStart(5,'0'),src:'local',name:n,fmt:'视觉理解',use:'微调数据',sc:[0,1,2],t:now(),versions:[]};DS.push(d);dsTab='my';
+ const v=mkLocal(d,file,18,+$('#ex').value||0,+$('#ratio').value||0,$('#desc').value,'校验中');go('ds/'+d.id);setTimeout(()=>{v.st='校验成功';rf()},2500)}
+function syncNow(){SYNC.ing=true;render();setTimeout(()=>{SYNC.ing=false;SYNC.last=now();const d=DS[0];
+ if(!d.batches.find(b=>b.id=='B2026102604'))d.batches.push({id:'B2026102604',name:'1026站台补充',total:40,marked:40,t:now()});
+ DS.filter(x=>x.src=='bd').forEach(x=>x.sync=SYNC.last);SYNC.ok=true;SYNC.msg='新增 1 个批次，更新 2 个批次';toast('同步完成');rf()},1500)}
+// 同步失败：保留上次成功同步的数据，仅提示失败原因
+function syncFail(){SYNC.ing=true;render();setTimeout(()=>{SYNC.ing=false;SYNC.last=now();SYNC.ok=false;SYNC.msg='接口鉴权失败（token 失效），本次未同步任何数据，已有数据不受影响';rf()},1500)}
+const findDs=id=>DS.find(d=>d.id==id);
+// 版本列表列与现有系统一致
+const verTb=d=>tb(['版本号','状态','版本描述','样本数','图片数','文件格式','创建时间','操作'],d.versions.map(v=>
+  [v.no,tag(v.st),v.desc||'-',v.total,v.total,(d.src=='bd'||d.fmt=='sharegpt')?'json/图像':'zip/图像',v.t,v.st=='校验成功'?`<span class="lk" onclick="verDw('${d.id}','${v.no}')">详情</span><span class="lk" onclick="delVer('${d.id}','${v.no}')">删除</span>`:'-']));
+P.ds=(id)=>{const d=findDs(id);if(d.src=='local')return dsLocal(d);const ok=d.versions.filter(v=>v.st=='校验成功');
+ const used=b=>d.versions.filter(v=>v.bids.includes(b.id)).map(v=>v.no).join('、')||'-';
+ return `<div class="bc">资产管理 / 微调数据集 / 数据集详情</div>
+ <div class="card"><div class="tt">数据集详情 <span class="lk" onclick="go('dataset')">‹ 返回</span></div>
+ <div class="info"><span>数据集id：<b>${d.id}</b></span><span>数据集名称：<b>${d.name}</b></span><span>数据来源：<b>外部样本库（folderId ${d.bdId}）</b></span>
+ <span>数据类型：<b>图像理解</b></span><span>数据格式：<b>${d.fmt}</b></span><span>上次同步：<b>${d.sync}</b></span></div>
+ <div class="stat"><span><b>${d.versions.length}</b>版本数</span><span><b>${ok.length}</b>可用版本数</span><span><b>${d.batches.length}</b>批次数</span><span><b>${d.batches.reduce((a,b)=>a+b.total,0)}</b>样本数</span></div></div>
+ <div class="card">${pns('bd-batch')}<div class="sec">原始数据</div>
+ ${tb(['批次ID','批次名称','样本数','更新时间','已用于版本'],d.batches.map(b=>[b.id,b.name,b.total,b.t,used(b)]))}</div>
+ <div class="card"><div class="bar"><div class="sec" style="margin:0">版本信息</div><span class="sp"><button class="btn p" onclick="go('addver/${d.id}')">添加数据集版本</button></span></div>
+ ${verTb(d)}</div>`};
+function dsLocal(d){const ok=d.versions.filter(v=>v.st=='校验成功');
+ return `<div class="bc">资产管理 / 微调数据集 / 数据集详情</div>
+ <div class="card"><div class="tt">数据集详情 <span class="lk" onclick="go('dataset')">‹ 返回</span></div>
+ <div class="info"><span>数据集id：<b>${d.id}</b></span><span>数据集名称：<b>${d.name}</b></span><span>创建时间：<b>${d.t}</b></span>
+ <span>数据类型：<b>图像理解</b></span><span>数据格式：<b>${d.fmt}</b></span><span>数据集用途：<b>${d.use}</b></span></div>
+ <div class="stat"><span><b>${d.versions.length}</b>版本数</span><span><b>${ok.length}</b>可用版本数</span></div></div>
+ <div class="card"><div class="bar"><div class="sec" style="margin:0">版本信息</div><span class="sp"><button class="btn p" onclick="go('addlv/${d.id}')">添加数据集版本</button></span></div>${verTb(d)}</div>`}
+P.addlv=(id)=>{const d=findDs(id);
+ return `<div class="bc">资产管理 / 微调数据集 / 添加数据集版本</div><div class="card fm"><div class="tt">添加数据集版本 <span class="lk" onclick="go('ds/${id}')">‹ 返回</span></div>
+ <div class="sec">版本信息${pni('my-addver')}</div>${verFields()}${upBox(d.fmt)}
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subLv('${id}')">确定</button>&nbsp;<button class="btn" onclick="go('ds/${id}')">取消</button></div></div>`};
+function subLv(id){const file=$('#upz').dataset.file;if(!file)return toast('请上传数据文件');const d=findDs(id);
+ const v=mkLocal(d,file,18,+$('#ex').value||0,+$('#ratio').value||0,$('#desc').value,'校验中');go('ds/'+id);setTimeout(()=>{v.st='校验成功';rf()},2500)}
+function delVer(id,no){if(!confirm('确认删除版本 '+no+'？'))return;const d=findDs(id);d.versions=d.versions.filter(v=>v.no!=no);render()}
+</script>
+<script>
+P.addver=(id)=>{const d=findDs(id);
+ return `<div class="bc">资产管理 / 微调数据集 / 添加数据集版本</div><div class="card fm">${pns('convert','bd-addver')}<div class="tt">添加数据集版本 <span class="lk" onclick="go('ds/${id}')">‹ 返回</span></div>
+ <div class="sec">数据集信息</div><div class="row"><label class="l">数据集名称</label><div style="padding-top:5px">${d.name}（平台数据集 / 图像理解 / ${d.fmt}）</div></div>
+ <div class="sec">版本信息</div>
+ <div class="row"><label class="l req">原始数据</label><div style="width:640px">${tb(['','批次ID','批次名称','样本数','更新时间'],d.batches.map(b=>[`<input type="checkbox" class="bk" value="${b.id}" data-m="${b.total}" onchange="sumB()">`,b.id,b.name,b.total,b.t]))}
+ <div class="tip" id="bsum">已选 0 个批次，共 0 条样本</div><div class="tip">提交后会把所选批次的数据固化为版本；之后源端的变更不会影响该版本。</div></div></div>
+ <details style="margin:0 0 8px"><summary style="cursor:pointer;color:#1660e0;font-weight:400">数据转换说明：视觉理解 → sharegpt（点击查看规则与示例）</summary>
+ <div style="background:#f7f8fa;padding:10px 12px;line-height:1.9;color:#555;margin-top:8px">
+ <b>转换时机</b>：创建数据集版本时，系统拉取批次的标注数据（视觉理解格式），逐图转换并固化为版本。<br>
+ <b>输入</b>：每张图一个 json，含 width、height、detect[]（区域框）、qa[]（问答对）。<br>
+ <b>输出</b>：sharegpt 数组。<br>
+ <b>qa</b>：一条问答一条样本，user 为「&lt;image&gt; + 问题」，assistant 为答案，images 填图片文件名；没有问答不生成样本。<br>
+ <b>detect</b>：每张有区域框的图片生成一条区域信息样本，user 为「&lt;image&gt; 这张图里包含了哪些信息？」；assistant 先写「这张图片里有 N 个区域。」，再按 detect 顺序逐个写「区域1（bbox: [xmin, ymin, xmax, ymax]）的标签是{label}，参考值是{reference}，描述是{caption}。」；多个框写在同一段回答里。
+ </div>
+ <div class="tip" style="margin-top:8px">原始数据（视觉理解格式示例：3 个区域框 + 8 组问答）</div>
+ <pre style="background:#f7f8fa;padding:8px;max-height:200px;overflow:auto;font-size:11px">{
+  "width": "426", "height": "375",
+  "detect": [
+    { "xmin": "50.80", "ymin": "166.42", "xmax": "117.33", "ymax": "327.80",
+      "data": [ { "label": "label", "value": "person" },
+                { "label": "reference", "value": "行人" },
+                { "label": "caption", "value": "站在车旁的人" } ] },
+    { "xmin": "207.54", "ymin": "128.50", "xmax": "293.08", "ymax": "197.60",
+      "data": [ { "label": "label", "value": "car" },
+                { "label": "reference", "value": "黑色轿车" },
+                { "label": "caption", "value": "停在路边的黑色汽车" } ] },
+    { "xmin": "84.93", "ymin": "70.35", "xmax": "168.36", "ymax": "128.50",
+      "data": [ { "label": "label", "value": "rail" },
+                { "label": "reference", "value": "铁轨" },
+                { "label": "caption", "value": "画面右侧的铁轨" } ] }
+  ],
+  "qa": [
+    { "human": "图片中主要有哪些物体？", "gpt": "…" },
+    … 共 8 组问答（见转换结果前 8 条）
+  ]
+}</pre>
+ <div class="tip" style="margin-top:8px">转换结果（sharegpt，共 9 条：8 条问答样本 + 1 条区域信息样本）</div>
+ <pre style="background:#f7f8fa;padding:8px;max-height:320px;overflow:auto;font-size:11px">[
+  {"messages":[{"role":"user","content":"&lt;image&gt; 图片中主要有哪些物体？"},{"role":"assistant","content":"图片中主要有一辆停在路边的黑色汽车、一名站在车旁的人、一条铁轨、一棵树以及背景中的建筑物。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 这辆汽车是什么颜色？它的车牌号是多少？"},{"role":"assistant","content":"这辆汽车是黑色的，车牌号为“5373296”。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 图片拍摄于白天还是夜晚？"},{"role":"assistant","content":"图片拍摄于白天。根据明亮的光线和清晰的阴影可以判断，当时是白天。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 人与汽车之间是什么关系？"},{"role":"assistant","content":"这个人站在汽车的驾驶座一侧，手扶着车门，似乎正准备上车或刚刚下车，表明他/她是这辆车的驾驶员或乘客。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 铁轨位于汽车的哪一侧？"},{"role":"assistant","content":"铁轨位于汽车的右侧，两者之间隔着一片长有杂草的斜坡。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 背景中的建筑物是什么样的？"},{"role":"assistant","content":"背景中有一栋两层楼的白色建筑，屋顶为深色斜顶，并装有天窗。建筑周围有绿色的灌木丛。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 图片的整体氛围是怎样的？"},{"role":"assistant","content":"图片整体呈现出一种日常、平静的氛围。阳光明媚，场景看起来像是一个普通的郊区或城镇街道。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 如果这辆汽车突然启动并驶向铁轨，会发生什么？"},{"role":"assistant","content":"如果汽车突然启动并驶向铁轨，可能会撞上铁轨上的障碍物（如枕木），导致车辆严重损坏，甚至可能引发事故。由于铁轨旁边有建筑物，还可能对周边环境造成影响。"}],"images":["image_01.jpg"]},
+  {"messages":[{"role":"user","content":"&lt;image&gt; 这张图里包含了哪些信息？"},{"role":"assistant","content":"这张图片里有3个区域。区域1（bbox: [51, 166, 117, 328]）的标签是person，参考值是行人，描述是站在车旁的人。区域2（bbox: [208, 129, 293, 198]）的标签是car，参考值是黑色轿车，描述是停在路边的黑色汽车。区域3（bbox: [85, 70, 168, 129]）的标签是rail，参考值是铁轨，描述是画面右侧的铁轨。"}],"images":["image_01.jpg"]}
+]</pre>
+ <div class="tip">说明：问答按 qa 顺序逐条生成；区域框按 detect 数组顺序编号（区域1、区域2、区域3），多个框写在同一段回答里；bbox 为 [xmin, ymin, xmax, ymax] 的整数数组（原坐标为小数时四舍五入取整）。完整规则见交付文档《数据转换说明》。</div></details>
+ ${verFields()}
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subVer('${id}')">确定</button>&nbsp;<button class="btn" onclick="go('ds/${id}')">取消</button></div></div>`};
+function sumB(){const ck=[...document.querySelectorAll('.bk:checked')];$('#bsum').textContent=`已选 ${ck.length} 个批次，共 ${ck.reduce((a,c)=>a+ +c.dataset.m,0)} 条样本`}
+function subVer(id){const bids=[...document.querySelectorAll('.bk:checked')].map(c=>c.value);if(!bids.length)return toast('请至少选择一个批次');
+ const d=findDs(id);const v=mkVer(d,bids,+$('#ex').value||0,+$('#ratio').value||0,$('#desc').value,'拉取中');
+ toast('已提交，正在从样本库拉取标注数据');go('ds/'+id);
+ setTimeout(()=>{v.st='校验中';rf()},2000);setTimeout(()=>{v.st='校验成功';rf()},4000)}
+// 版本详情：与现有系统一致，复用「添加数据集版本」抽屉的只读态（数据集信息 / 版本信息 / 样例集）
+let vTab='1',vCur=null;
+const fr=(l,v)=>`<div class="row"><label class="l">${l}</label><div style="padding-top:5px">${v}</div></div>`;
+const imgName=x=>x.id+'.jpg';
+function verDw(id,no){vCur=[id,no];const d=findDs(id),v=d.versions.find(x=>x.no==no),ex=v.s.filter(x=>x.set=='样例');
+ const json=ex.map(x=>({messages:[{role:'user',content:'<image>'+SC[x.k].q},{role:'assistant',content:SC[x.k].a}],images:[imgName(x)]}));
+ $('#dw').innerHTML=`<div class="tt">${v.no}版本详情 ${pni('bd-verdetail')}<span class="x" style="cursor:pointer" onclick="closeDw()">✕</span></div><div class="fm">
+ <div class="sec">数据集信息</div>${fr('数据集名称',d.name)}${fr('数据用途','微调数据')}${fr('数据格式',d.fmt)}
+ <div class="sec">版本信息</div>${fr('版本号',v.no)}
+ ${d.src=='bd'?`<div class="chg">${fr('原始数据',v.bids.map(b=>b+' '+(d.batches.find(x=>x.id==b)||{}).name).join('<br>'))}</div>`:''}
+ ${fr('样例集数量',v.ex)}${fr('测试集占比%',v.ratio)}${fr('图片数',v.total)}${fr('文件格式',(d.src=='bd'||d.fmt=='sharegpt')?'json/图像':'zip/图像')}${fr('创建时间',v.t)}${fr('版本描述',v.desc||'-')}</div>
+ <div class="sec">样例集 <span class="tip" style="font-weight:400" title="样例集统一转换为json格式进行展示">ⓘ 样例集统一转换为json格式进行展示</span></div>
+ <div class="tabs"><span class="${vTab=='1'?'on':''}" onclick="vTab='1';verDw('${id}','${no}')">问答文件</span><span class="${vTab=='2'?'on':''}" onclick="vTab='2';verDw('${id}','${no}')">图像数据</span></div>
+ ${vTab=='1'?`<pre style="background:#f7f8fa;padding:10px;max-height:420px;overflow:auto;white-space:pre-wrap">${JSON.stringify(json,null,2).replace(/</g,'&lt;')}</pre>`
+ :`<div class="grid">${ex.map(x=>`<div class="cell" onclick="bigImg('${IMG(SC[x.k].p,x.v)}')"><img loading="lazy" src="${IMG(SC[x.k].p,x.v)}"><p>${imgName(x)}</p></div>`).join('')||'<div style="color:#999;padding:30px">暂无图像数据</div>'}</div><div class="pg">共${ex.length}条</div>`}
+ <div class="bar" style="margin-top:16px;border-top:1px solid #eee;padding-top:12px"><button class="btn" onclick="closeDw()">取消</button></div>`;
+ $('#mask').style.display=$('#dw').style.display='block'}
+function bigImg(u){const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:40;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+ o.innerHTML=`<img src="${u}" style="max-width:85%;max-height:85%">`;o.onclick=()=>o.remove();document.body.appendChild(o)}
+</script>
+<script>
+function closeDw(){$('#mask').style.display=$('#dw').style.display='none'}
+
+// ===== 公共：状态色、弹窗、下拉菜单、资源信息（与现有系统一致） =====
+Object.assign(ST,{'进行中':'o','已暂停':'o','已停止':'','已完成/未保存':'g2','异常':'r','待合并':'o','合并中':'o','就绪':'g2','合并失败':'r','压缩中':'o','压缩失败':'r','保存中':'o','推理中':'o','评测中':'o','报告生成中':'o','已失败':'r'});
+const RES='<span class="x">4/5 卡 显卡数　70/80 核 CPU　110/125G 内存</span>';
+const NAME_RE=/^(?!_)[\u4e00-\u9fa5A-Za-z0-9_]{2,30}$/,NAME_TIP='请输入2-30个字符，中英文、数字、下划线，且不能以下划线开头';
+const specs=()=>SPEC.map(s=>`${s[0]}卡 ${s[1]}核 ${s[2]}G`);
+function modal(title,body,onOk,okTxt='确定'){const m=document.createElement('div');m.id='mdl';
+ m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:25;display:flex;align-items:center;justify-content:center';
+ m.innerHTML=`<div class="card fm" style="width:560px;margin:0"><div class="tt" style="font-size:16px">${title}<span class="x lk" onclick="closeMd()">✕</span></div>${body}
+ <div style="text-align:right;margin-top:8px"><button class="btn" onclick="closeMd()">取消</button> <button class="btn p" id="mdOk">${okTxt}</button></div></div>`;
+ document.body.appendChild(m);$('#mdOk').onclick=()=>{if(onOk()!==false)closeMd()}}
+function closeMd(){const m=$('#mdl');m&&m.remove()}
+function opMenu(ev,items){ev.stopPropagation();closeOp();const r=ev.target.getBoundingClientRect(),m=document.createElement('div');m.id='opm';
+ m.style.cssText=`position:fixed;top:${r.bottom+4}px;left:${r.left-40}px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:22;min-width:96px`;
+ m.innerHTML=items.map(([t,ok,fn])=>`<div style="padding:7px 14px;${ok?'cursor:pointer':'color:#bbb;cursor:not-allowed'}" ${ok?`onclick="closeOp();${fn}"`:''}>${t}</div>`).join('');document.body.appendChild(m)}
+function closeOp(){const m=$('#opm');m&&m.remove()}
+document.addEventListener('click',closeOp);
+// ===== 快速微调 =====
+P.finetune=()=>`<div class="bc">模型微调 / 快速微调</div><div class="card"><div class="tt">快速微调${RES}${pni('ft-list')}</div>
+ <div class="bar"><button class="btn p" onclick="ftCopy=null;go('ftnew')">创建微调任务</button><span class="sp"><input placeholder="请输入任务名称" style="width:200px"></span></div>
+ ${tb(['id','任务名称','任务类型','任务描述','基础模型','微调方法','任务状态','创建时间','创建人','操作'],TASK.map(t=>[t.id,t.name,t.type,t.desc||'',t.base.split('/').pop(),t.m,tag(t.st),t.t,'admin0623',
+  `<span class="lk" onclick="go('ftdetail/${t.id}')">详情</span><span class="lk" onclick="ftMore(event,'${t.id}')">更多</span>`]))}<div class="pg">共${TASK.length}条</div></div>`;
+// 更多：按任务状态控制可用项（已完成/已保存、异常 只能删除；已完成/未保存 可保存模型——已在现有系统核对）
+function ftMore(ev,id){const t=TASK.find(x=>x.id==id),s=t.st;
+ opMenu(ev,[['暂停',s=='进行中',`ftSt('${id}','已暂停')`],['恢复',s=='已暂停',`ftSt('${id}','进行中')`],['停止',['排队中','进行中','已暂停'].includes(s),`ftSt('${id}','已停止')`],
+  ['保存模型',s=='已完成/未保存',`ftSave('${id}')`],['删除',true,`ftDel('${id}')`]])}
+function ftSt(id,s){TASK.find(x=>x.id==id).st=s;toast('操作成功');render()}
+function ftDel(id){if(!confirm('确认删除该微调任务？'))return;TASK.splice(TASK.findIndex(x=>x.id==id),1);toast('删除成功');render()}
+const imgModels=()=>MODEL;
+function saveAsFields(p){return `<div class="row"><label class="l req">模型保存为</label><div style="padding-top:5px"><label><input type="radio" name="${p}sa" value="0" checked onchange="saCh('${p}')"> 保存为新模型</label>　<label><input type="radio" name="${p}sa" value="1" onchange="saCh('${p}')"> 已有模型新版本</label></div></div>
+ <div class="row" id="${p}saN"><label class="l req">模型名称</label><input id="${p}mn" maxlength="30" placeholder="请输入模型名称"></div>
+ <div class="row" id="${p}saE" style="display:none"><label class="l req" title="仅保存至与本任务基础模型一致的我的模型下">模型名称 ⓘ</label><select id="${p}me">${imgModels().map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select></div>
+ <div class="row"><label class="l">版本描述</label><textarea id="${p}md" rows="3" maxlength="200" placeholder="请输入模型描述"></textarea></div>`}
+function saCh(p){const e=document.querySelector(`[name=${p}sa]:checked`).value=='1';$('#'+p+'saN').style.display=e?'none':'flex';$('#'+p+'saE').style.display=e?'flex':'none'}
+function readSave(p){const ex=document.querySelector(`[name=${p}sa]:checked`).value=='1';if(!ex&&!NAME_RE.test($('#'+p+'mn').value.trim())){toast(NAME_TIP);return null}
+ return {ex,name:ex?null:$('#'+p+'mn').value.trim(),mid:ex?$('#'+p+'me').value:null,desc:$('#'+p+'md').value}}
+// 任务完成后写入我的模型（新模型或已有模型新版本），版本先合并后就绪
+function saveModel(t,s){let m;if(s.ex){m=MODEL.find(x=>x.id==s.mid)}else{m={id:String(303+MODEL.length).padStart(4,'0'),name:s.name,base:'星际大模型/星际大模型-4B',t:now(),vers:[]};MODEL.unshift(m)}
+ const v={no:'V'+(m.vers.length+1),desc:s.desc,src:t.name+'-'+(+t.id),st:'合并中',size:'8.48GB',t:now()};m.vers.unshift(v);setTimeout(()=>{v.st='就绪';rf()},2500);return m}
+function ftSave(id){const t=TASK.find(x=>x.id==id);modal('保存模型',saveAsFields('sv'),()=>{const s=readSave('sv');if(!s)return false;saveModel(t,s);t.st='已完成/已保存';toast('操作成功');render()})}
+// 超参数：名称、默认值、可选项（取自现有系统任务详情与创建页）
+const HP=[['训练轮次','3',null,'迭代轮次（Epoch），控制模型训练过程中遍历整个数据集的次数。建议设置在1-5之间。'],
+ ['学习率','0.0001',null,'学习率（Learning Rate），控制模型参数更新步长的速度，平台已给出默认推荐值。'],
+ ['批次大小','1',null,'批次大小（Batch Size），每次训练迭代使用的样本数。'],
+ ['梯度积累步数','8',null,'梯度积累步数（Gradient Accumulation Steps），在执行一次梯度更新之前累积的小批次数。'],
+ ['学习率调整类型','cosine',['linear','cosine','polynomial','constant'],'学习率调整策略。'],
+ ['学习率预热比例','0.1',null,'学习率预热比例（Warmup Ratio），默认值建议0.1。'],
+ ['日志保存间隔','10',null,'日志保存间隔（Logging Interval），单位为step，影响loss曲线呈现。'],
+ ['Checkpoint保存间隔','500',null,'Checkpoint保存间隔数，单位为step。'],
+ ['序列长度','2048',null,'序列长度（Sequence Length），单条数据的最大长度，单位为token。'],
+ ['LoRA策略中的秩','8',['4','8','16','32','64','128','256'],'LoRA策略中的秩（LoRA Rank），决定低秩矩阵的复杂度。'],
+ ['图像分辨率','589824',['262144','589824','1048576'],'图像分辨率（image_max_pixels），常规识别选262144（512x512），细节识别可选589824（768x768）或1048576（1024x1024）。']];
+const MULTI=[['Z2','切分优化器状态+梯度','中','中','中大型'],['Z2_offload','Z2 + 优化器状态卸载到CPU','高','高','大型'],['Z3','切分优化器状态+梯度+参数','高','高','超大型'],['Z3_offload','Z3 + 参数/优化器卸载到CPU','最高','最高','超大型']];
+const kv=rows=>`<table>${rows.map(([k,v])=>`<tr><td style="width:180px;color:#666">${k}</td><td>${v}</td></tr>`).join('')}</table>`;
+let ftTab=0,ftCopy=null;
+P.ftdetail=(id)=>{const t=TASK.find(x=>x.id==id);if(!t)return P.finetune();
+ const tabs=['任务详情','过程可视化','训练日志','模型文件'];
+ const body=[()=>`<div class="sec">训练配置</div>${kv([['微调模型来源',t.base],['微调方法',t.m]].concat(t.qm?[['量化策略',t.qm],['量化位数',t.qb]]:[]))}
+  <div class="sec" style="margin-top:16px">超参数配置</div>${tb(['超参数','数值','说明'],HP.filter(h=>!(t.m=='全量微调'&&h[0].startsWith('LoRA'))).map(h=>[h[0],h[1],h[3]]))}
+  <div class="sec" style="margin-top:16px">数据集配置</div>${kv([['数据格式',t.df||'sharegpt'],['训练数据集',t.ds.map(x=>x.split('/').slice(1).join('/')+' 100%').join('<br>')],['验证数据集',t.test=='当前训练集自动拆分'?t.ds.join('<br>')+'<div class="tip">当前训练集自动拆分</div>':t.test]])}
+  <div class="sec" style="margin-top:16px">资源配置</div>${kv([['算力资源',t.spec]])}
+  <div class="sec" style="margin-top:16px">训练可视化配置</div>${kv([['是否开启TensorBoard',t.tb?'开启':'关闭']])}
+  <div class="sec" style="margin-top:16px">模型保存</div>${kv([['模型自动保存',t.save?'开启':'关闭']].concat(t.save?[['模型保存为',t.saveAs],['模型名称',t.mname],['版本描述',t.mdesc||'-']]:[]))}`,
+  ()=>{const pts=Array.from({length:40},(_,i)=>`${20+i*14},${30+150*Math.exp(-i/9)+((i*7)%5)}`).join(' ');
+   return `<div class="sec">训练指标</div><div class="tip">训练集损失(loss) / 训练步数(step)</div><svg width="600" height="210" style="border:1px solid #eee;margin-top:8px"><polyline points="${pts}" fill="none" stroke="#1660e0" stroke-width="2"/></svg>
+   <div style="margin-top:8px">${t.tb?'<button class="btn" onclick="toast(\'原型：TensorBoard 同现有\')">查看 TensorBoard</button>':''}</div>`},
+  ()=>`<pre style="background:#1e1e1e;color:#ddd;padding:12px;height:300px;overflow:auto">[INFO] load base model 星际大模型-4B\n[INFO] dataset loaded: ${t.ds.join(', ')}\n${Array.from({length:8},(_,i)=>`[INFO] epoch ${1+(i>>2)} step ${(i+1)*10} loss ${(1.8-i*0.15).toFixed(4)} lr 1e-4`).join('\n')}\n[INFO] ${t.st}</pre>`,
+  ()=>fileTree()];
+ return `<div class="bc">模型微调 / 快速微调 / 任务详情</div><div class="card">${pns('ft-detail')}<div class="tt">任务详情 <span class="lk" onclick="go('finetune')">‹ 返回</span></div>
+ <div class="tt" style="font-size:16px">${t.name} ${tag(t.st)}<span class="x"><button class="btn" onclick="ftCopy='${t.id}';go('ftnew')">复制任务</button></span></div>
+ <div class="info"><span>任务id：<b>${t.id}</b></span><span>基础模型：<b>${t.base.split('/').slice(1).join('/')}</b></span><span>任务类型：<b>${t.type}</b></span>
+ <span>创建时间：<b>${t.t}</b></span><span>创建人：<b>admin0623</b></span><span>任务描述：<b>${t.desc||'-'}</b></span></div></div>
+ <div class="card"><div class="tabs">${tabs.map((x,i)=>`<span class="${ftTab==i?'on':''}" onclick="ftTab=${i};render()">${x}</span>`).join('')}</div>${body[ftTab]()}</div>`};
+const fileTree=()=>`<div style="background:#f7f8fa;padding:8px 10px">/models/finetune/task_xxx/merged　<span class="tip">8.48GB</span></div>
+ ${tb(['文件名','文件大小'],[['config.json','1.2KB'],['generation_config.json','0.3KB'],['model-00001-of-00002.safetensors','4.97GB'],['model-00002-of-00002.safetensors','3.51GB'],['tokenizer.json','10.9MB'],['preprocessor_config.json','0.6KB']])}`;
+// 创建微调任务（与现有创建页字段一致；任务类型固定图像理解）
+const baseOpts=()=>`<optgroup label="平台基础模型"><option value="平台基础模型/星际大模型/星际大模型-4B">星际大模型/星际大模型-4B</option></optgroup>
+ <optgroup label="我的模型">${MODEL.flatMap(m=>m.vers.filter(v=>v.st=='就绪').map(v=>`<option value="我的模型/${m.name}/${v.no}">${m.name}/${v.no}</option>`)).join('')}</optgroup>`;
+// 只支持视觉理解数据集：列出所有用途为微调数据的可用版本（平台数据集版本在创建时已转换）
+const ftDsList=()=>DS.filter(d=>d.use=='微调数据').flatMap(d=>d.versions.filter(v=>v.st=='校验成功').map(v=>`${d.src=='bd'?'平台数据集':'我的数据集'}/${d.name}/${v.no}`));
+// 测试集来源：平台数据集的可用版本 + 我的数据集中用途为测试数据的版本
+const allTestDs=()=>DS.flatMap(d=>d.src=='bd'
+ ? d.versions.filter(v=>v.st=='校验成功').map(v=>`平台数据集/${d.name}/${v.no}`)
+ : (d.use=='测试数据'?d.versions.filter(v=>v.st=='校验成功').map(v=>`我的数据集/${d.name}/${v.no}`):[]));
+const testDsList=(ex=[])=>allTestDs().filter(x=>!ex.includes(x));
+const ckBody=(list,on)=>['平台数据集','我的数据集'].map(g=>{const its=list.filter(x=>x.startsWith(g));
+ return its.length?`<div class="tip" style="margin:2px 0">${g}</div>`+its.map(x=>`<label style="display:block;padding:2px 0"><input type="checkbox" value="${x}" ${on?`onchange="${on}"`:''}> ${x.split('/').slice(1).join('/')}</label>`).join(''):''}).join('');
+const ckList=(id,list,on)=>`<div id="${id}" style="width:420px;max-height:150px;overflow:auto;border:1px solid #ccc;padding:6px 8px">${ckBody(list,on)}</div>`;
+P.ftnew=()=>`<div class="bc">模型微调 / 快速微调 / 任务创建</div><div class="card fm"><div class="tt">任务信息 <span class="lk" onclick="go('finetune')">‹ 返回</span>${RES}</div>
+ <div class="sec">基本信息</div>
+ <div class="row"><label class="l req">任务名称</label><input id="tn" maxlength="30" placeholder="${NAME_TIP}"></div>
+ <div class="row"><label class="l req">任务类型</label><div style="padding-top:5px"><label class="newv" style="margin-right:6px"><input type="radio" checked> 图像理解</label><span class="ghost-old">文本生成</span>${pni('ft-new')}</div></div>
+ <div class="row"><label class="l">任务描述</label><textarea id="td" rows="3" maxlength="200" placeholder="请输入任务描述"></textarea></div>
+ <div class="row"><label class="l req" title="仅支持选择平台预置基础模型以及我的模型中基于平台基础模型微调后的模型，不支持上传的第三方模型微调。">选择基础模型 ⓘ</label>${pni('ft-base')}<select id="fb" onchange="$('#fsa1').disabled=false"><option value="">请选择基础模型</option>${baseOpts()}</select></div>
+ <div class="sec">训练配置</div>
+ <div class="row"><label class="l req">微调方法</label><div style="padding-top:5px">${['LoRA','QLoRA','全量微调'].map((m,i)=>`<label><input type="radio" name="m" value="${m}" ${i?'':'checked'} onchange="ftM()"> ${m}</label>　`).join('')}</div></div>
+ <div id="fq" style="display:none"><div class="row"><label class="l req">量化策略</label><div style="padding-top:5px"><label><input type="radio" name="qm" value="bitsandbytes" checked> bitsandbytes</label>　<label><input type="radio" name="qm" value="HQQ"> HQQ</label></div></div>
+ <div class="row"><label class="l req">量化位数</label><div style="padding-top:5px"><label><input type="radio" name="qb" value="4" checked> 4-bit</label>　<label><input type="radio" name="qb" value="8"> 8-bit</label></div></div></div>
+ <div class="row"><label class="l req">超参数配置</label><div style="flex:1">${tb(['超参数','数值','说明'],HP.map(h=>[h[0],h[2]?`<select style="width:160px" ${h[0].startsWith('LoRA')?'class="lr"':''}>${h[2].map(o=>`<option ${o==h[1]?'selected':''}>${o}</option>`).join('')}</select>`:`<input style="width:160px" value="${h[1]}">`,`<span class="tip" style="margin:0">${h[3]}</span>`]))}</div></div>
+ <div class="sec">数据集配置</div>
+ <div class="row"><label class="l req">数据格式</label><div style="padding-top:5px"><span class="newv">视觉理解</span> <span class="tip" style="margin:0">（仅支持视觉理解数据集）</span><span class="ghost-old" style="margin-left:8px">sharegpt / alpaca</span>${pni('ft-fmt')}</div></div>
+ <div class="row"><label class="l req">微调数据集</label><div><div id="fds" style="width:420px;max-height:150px;overflow:auto;border:1px solid #ccc;padding:6px 8px">${ckBody(ftDsList(),'ftDs()')}</div>
+ <div class="tip">只列视觉理解数据集中校验成功的版本；平台数据集版本在创建时已转换为 sharegpt </div></div></div>
+ <div id="fdsMore" style="display:none">
+ <div class="row"><label class="l req">自定义数据采样</label><label style="padding-top:5px"><input type="checkbox" id="fsr" onchange="ftDs()"> 开启</label></div>
+ <div class="row" id="fsrT" style="display:none"><label class="l"></label><div style="flex:1" id="fsrTb"></div></div>
+ <div class="row"><label class="l req">测试数据集</label><div style="padding-top:5px"><label><input type="radio" name="ts" value="0" checked onchange="ftTs()"> 当前训练集自动拆分</label>　<label><input type="radio" name="ts" value="1" onchange="ftTs()"> 自定义测试集</label></div></div>
+ <div class="row" id="ftsC" style="display:none"><label class="l"></label><div>${pni('bd-testds')}<div id="ftsl" style="width:420px;max-height:150px;overflow:auto;border:1px solid #ccc;padding:6px 8px">${ckBody(testDsList())}</div>
+ <div class="tip">可选平台数据集的版本，或我的数据集中用途为测试数据的版本；不能与微调数据集重复</div><span class="lk" onclick="go('dsnew')">创建测试数据集</span></div></div></div>
+ <div class="sec">资源配置</div>
+ <div class="row"><label class="l req">算力资源</label><div><select id="fspec" onchange="ftSpec()"><option value="">请选择算力资源</option>${specs().map(s=>`<option>${s}</option>`).join('')}</select></div></div>
+ <div class="row" id="fmc" style="display:none"><label class="l req" title="调试建议：优先尝试Z2，若显存不足再选用Offload（如Z2→Z2_offload→Z3→Z3_offload）">多卡策略配置 ⓘ</label><div style="flex:1">${tb(['','多卡训练调度模式','核心原理','显卡优化级别','通信开销','适用模型规模'],MULTI.map((r,i)=>[`<input type="radio" name="mc" ${i?'':'checked'}>`,...r]))}</div></div>
+ <div class="sec">训练可视化配置</div>
+ <div class="row"><label class="l">是否开启TensorBoard</label><label style="padding-top:5px"><input type="checkbox" id="ftb"> 开启</label></div>
+ <div class="sec">模型保存</div>
+ <div class="row"><label class="l" title="自动保存开启，训练完成后自动将模型保存到我的模型中">模型自动保存 ⓘ</label><div style="padding-top:5px"><label><input type="radio" name="as" value="1" checked onchange="$('#fsv').style.display=this.checked?'block':'none'"> 是</label>　<label><input type="radio" name="as" value="0" onchange="$('#fsv').style.display=this.checked?'none':'block'"> 否</label></div></div>
+ <div id="fsv">${saveAsFields('f').replace('value="1" onchange','value="1" id="fsa1" disabled onchange')}</div>
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subFt()">确认并启动</button>&nbsp;<button class="btn" onclick="go('finetune')">取消</button></div></div>`;
+function ftM(){const m=document.querySelector('[name=m]:checked').value;$('#fq').style.display=m=='QLoRA'?'block':'none';document.querySelectorAll('.lr').forEach(e=>e.closest('tr').style.display=m=='全量微调'?'none':'')}
+function ftChecked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(c=>c.value)}
+function ftDs(){const sel=ftChecked('fds');$('#fdsMore').style.display=sel.length?'block':'none';const on=$('#fsr').checked;$('#fsrT').style.display=on&&sel.length?'flex':'none';
+ if($('#ftsl'))$('#ftsl').innerHTML=ckBody(testDsList(sel));
+ if(on)$('#fsrTb').innerHTML=tb(['数据集','字符数','样本数','采样率 ⓘ','数据占比'],sel.map(x=>{const n=x.split('/'),d=DS.find(y=>y.name==n[1]),v=d.versions.find(y=>y.no==n[2]);
+  return [x.split('/').slice(1).join('/'),v.total*120,v.total,'<input type="number" value="1" min="0.01" max="10" step="0.01" style="width:90px">',Math.round(100/sel.length)+'%']}))}
+function ftTs(){$('#ftsC').style.display=document.querySelector('[name=ts]:checked').value=='1'?'flex':'none'}
+function ftSpec(){const s=$('#fspec').value;$('#fmc').style.display=s&&+s[0]>1?'flex':'none'}
+function subFt(){const n=$('#tn').value.trim();if(!NAME_RE.test(n))return toast(NAME_TIP);if(!$('#fb').value)return toast('请选择基础模型');
+ const ds=ftChecked('fds');if(!ds.length)return toast('请选择微调数据集');
+ const ts=document.querySelector('[name=ts]:checked').value=='1';const tl=ftChecked('ftsl');if(ts&&!tl.length)return toast('请选择数据集');
+ if(ts&&tl.some(x=>ds.includes(x)))return toast('测试数据集不能与微调数据集重复');
+ if(!$('#fspec').value)return toast('请选择算力资源');const auto=document.querySelector('[name=as]:checked').value=='1';let sv=null;if(auto){sv=readSave('f');if(!sv)return}
+ const m=document.querySelector('[name=m]:checked').value;
+ const t={id:String(242+TASK.length).padStart(5,'0'),name:n,type:'图像理解',desc:$('#td').value,base:$('#fb').value,df:'视觉理解',m,qm:m=='QLoRA'?document.querySelector('[name=qm]:checked').value:null,qb:document.querySelector('[name=qb]:checked').value,
+  ds,test:ts?tl.join('<br>'):'当前训练集自动拆分',spec:$('#fspec').value,tb:$('#ftb').checked?1:0,save:auto?1:0,saveAs:sv&&sv.ex?'已有模型新版本':'新模型',mname:sv?(sv.ex?MODEL.find(x=>x.id==sv.mid).name:sv.name):'',mdesc:sv?sv.desc:'',st:'排队中',t:now()};
+ TASK.unshift(t);toast('创建成功');go('finetune');setTimeout(()=>{t.st='进行中';rf()},1500);
+ setTimeout(()=>{if(t.st!='进行中')return;if(auto){saveModel(t,sv);t.st='已完成/已保存'}else t.st='已完成/未保存';rf()},5000)}
+// ===== 我的模型（我的模型 / 平台基础模型 两个页签） =====
+let mTab=0;
+P.models=()=>{const tabs=['我的模型','平台基础模型'];let t='';
+ if(mTab==0)t=`<div class="bar"><button class="btn p" onclick="go('mnew')">创建模型</button><span class="sp"><input placeholder="请输入模型名称" style="width:200px"></span></div>
+  ${tb(['id','模型名称','模型类型','基础模型','版本数量','创建时间','创建人','操作'+pni('mdl-exp')],MODEL.map(m=>[m.id,m.name,'图像理解',m.base.split('/').pop(),m.vers.length,m.t,'admin0623',`<span class="lk" onclick="mdTab=0;go('mdetail/${m.id}')">详情</span><span class="lk" onclick="delModel('${m.id}')">删除</span>`]))}<div class="pg">共${MODEL.length}条</div>`;
+ if(mTab==1)t=tb(['id','模型名称','模型类型','推理框架','版本数量','创建时间','操作'],PLAT_MODEL.map(m=>[m.id,m.name,m.type,m.fw,m.vc,m.t,`<span class="lk" onclick="platDw('${m.id}')">详情</span>`]));
+ return `<div class="bc">模型管理 / 我的模型</div><div class="card"><div class="tt">我的模型<span class="x">◯ 剩余空间：900 GB</span></div>
+ <div class="tabs">${tabs.map((x,i)=>`<span class="${mTab==i?'on':''}" onclick="mTab=${i};render()">${x}</span>`).join('')}<span class="ghost" style="margin-left:12px;align-self:center"><s>共享模型</s></span>${pn('mdl-share')}${pni('mdl-list')}</div>${t}</div>`};
+function delModel(id){const m=MODEL.find(x=>x.id==id);
+ if(!confirm('当前模型将被删除，无法恢复，请确认是否删除?'))return;MODEL.splice(MODEL.indexOf(m),1);toast('删除成功');render()}
+function platDw(id){const m=PLAT_MODEL.find(x=>x.id==id);$('#dw').innerHTML=`<div class="tt">模型详情<span class="x lk" onclick="closeDw()">✕</span></div>
+ ${kv([['模型名称',m.name],['模型类型',m.type],['推理框架',m.fw],['创建时间',m.t]])}<div class="sec" style="margin-top:16px">版本信息</div>${tb(['版本号','参数规模','精度'],m.vers.map(v=>[v,'4B','bf16']))}`;$('#mask').style.display=$('#dw').style.display='block'}
+// 模型详情：版本列表（详情/导出/压缩/删除）
+let mdTab=0;
+P.mdetail=(id)=>{const m=MODEL.find(x=>x.id==id);if(!m)return P.models();const vs=m.vers;
+ return `<div class="bc">模型管理 / 我的模型 / 模型详情</div><div class="card"><div class="tt">模型详情 <span class="lk" onclick="go('models')">‹ 返回</span></div>
+ <div class="tt" style="font-size:16px">${m.name}</div>
+ <div class="info"><span>模型id：<b>${m.id}</b></span><span>创建时间：<b>${m.t}</b></span><span>基础模型：<b>${m.base}</b></span><span>创建人：<b>admin0623</b></span><span>模型类型：<b>图像理解</b></span></div>
+ <div class="stat"><span><b>${vs.length}</b>版本数</span><span><b>${vs[0]?vs[0].t:'-'}</b>最新版本日期</span><span><b>${vs.length?vs[vs.length-1].t:'-'}</b>最早版本日期</span></div></div>
+ <div class="card"><div class="bar"><div class="sec" style="margin:0">版本信息</div><span class="sp"><button class="btn p" onclick="go('mver/${m.id}')">添加模型版本</button></span></div>
+ ${tb(['版本号','版本描述','版本来源','版本状态','文件大小','创建时间','操作'],vs.map(v=>[v.no,v.desc||'-',v.src,tag(v.st),v.size,v.t,
+  v.st=='就绪'?`<span class="lk" onclick="verInfo('${m.id}','${v.no}')">详情</span><span class="lk" onclick="mExport('${m.id}','${v.no}')">导出</span><span class="lk" onclick="mCompress('${m.id}','${v.no}')">压缩</span><span class="lk" onclick="mDelVer('${m.id}','${v.no}')">删除</span>`:`<span class="lk" onclick="verInfo('${m.id}','${v.no}')">详情</span>`]))}</div>`};
+const mv=(id,no)=>MODEL.find(x=>x.id==id).vers.find(v=>v.no==no);
+function verInfo(id,no){const m=MODEL.find(x=>x.id==id),v=mv(id,no);$('#dw').innerHTML=`<div class="tt">版本详情<span class="x lk" onclick="closeDw()">✕</span></div>
+ <div class="sec">模型信息</div>${kv([['模型名称',m.name],['模型id',m.id],['模型版本',v.no],['模型状态',tag(v.st)],['版本描述',v.desc||'-'],['版本来源',v.src],['版本创建时间',v.t]])}
+ <div class="sec" style="margin-top:16px">模型文件</div>${fileTree()}`;$('#mask').style.display=$('#dw').style.display='block'}
+function mExport(id,no){modal('模型导出',`<div class="row"><label class="l">复制模型路径</label><div><input readonly value="/models/finetune/${id}/${no}/merged"> <span class="lk" onclick="toast('复制成功')">复制</span></div></div>
+ <div class="row"><label class="l">下载模型到本地</label><span class="lk" style="padding-top:5px" onclick="toast('原型：开始下载')">下载</span></div>`,()=>true,'关闭')}
+function mCompress(id,no){modal('模型压缩',`<div class="row"><label class="l req" title="直接对预训练模型进行后训练量化（PTQ），校准阶段需少量数据（已内置），量化时间较长">量化策略 ⓘ</label><div style="padding-top:5px"><label><input type="radio" checked> GPTQ</label></div></div>
+ <div class="row"><label class="l req">量化位数</label><div style="padding-top:5px"><label><input type="radio" name="cb" checked> 4</label>　<label><input type="radio" name="cb"> 8</label></div></div>
+ <div class="tip" style="padding-left:130px">GPU端推理优选GPTQ，其4-bit量化在175B参数模型上仍能保持&lt;1%的精度损失，推理速度提升2-4倍；</div>`,()=>{const v=mv(id,no);v.st='压缩中';render();setTimeout(()=>{v.st='就绪';rf()},2500);toast('操作成功')})}
+function mDelVer(id,no){const m=MODEL.find(x=>x.id==id),v=mv(id,no);
+ if(!confirm('当前模型版本将被删除，无法恢复，且引用该模型的微调任务将无法保存模型，请确认是否删除?\n已部署的在线推理服务不受影响'))return;m.vers=m.vers.filter(x=>x!==v);toast('删除成功');render()}
+// 创建模型 / 添加模型版本（与现有「【添加模型】模型信息」页一致，模型类型固定图像理解）
+const doneTasks=()=>TASK.filter(t=>t.type=='图像理解'&&t.st.startsWith('已完成'));
+function mForm(mid){const m=mid&&MODEL.find(x=>x.id==mid);
+ return `<div class="bc">模型管理 / 我的模型 / ${m?'添加模型版本':'创建模型'}</div><div class="card fm">${m?'':pns('mdl-new')}<div class="tt">${m?'【添加模型版本】'+m.name:'【添加模型】模型信息'} <span class="lk" onclick="history.back()">‹ 返回</span><span class="x">◯ 剩余空间：900 GB</span></div>
+ ${m?'':`<div class="sec">模型信息</div>
+ <div class="row"><label class="l req">模型名称</label><input id="mname" maxlength="30" placeholder="请输入模型名称"></div>
+ <div class="row"><label class="l req">模型类型</label><div style="padding-top:5px"><label class="newv" style="margin-right:6px"><input type="radio" checked> 图像理解</label><span class="ghost-old">文本生成</span></div></div>`}
+ <div class="sec">版本信息</div>
+ <div class="row"><label class="l">版本描述</label><textarea id="mvd" rows="4" maxlength="200" placeholder="请输入版本描述"></textarea></div>
+ <div class="row"><label class="l req" title="${m?'仅支持从已有微调任务中选择与该基础模型、模型类型一致的任务创建模型版本':'仅支持从已有微调任务中选择创建模型版本'}">版本来源 ⓘ</label><select id="mts" onchange="$('#mfile').style.display=this.value?'flex':'none'"><option value="">请选择已有微调任务</option>${doneTasks().map(t=>`<option value="${t.id}">${+t.id}  ${t.name}</option>`).join('')}</select></div>
+ <div class="row" id="mfile" style="display:none"><label class="l">模型文件</label><div style="flex:1;max-width:640px">${fileTree()}</div></div>
+ <div class="sec">模型合并配置</div>
+ <div class="row"><label class="l req" title="用户根据平台算力资源使用情况，灵活选择GPU或CPU进行模型合并：GPU显卡充足时，建议优先选择GPU进行合并，合并速度快；GPU显卡不足时，可选择CPU资源进行合并，合并消耗大量时间。">算力资源类型 ⓘ</label><div style="padding-top:5px"><label><input type="radio" name="dev" value="gpu" checked onchange="$('#mspec').style.display='flex'"> GPU</label>　<label><input type="radio" name="dev" value="cpu" onchange="$('#mspec').style.display='none'"> CPU</label></div></div>
+ <div class="row" id="mspec"><label class="l req">资源规格</label><select id="mrs"><option value="">请选择资源规格</option>${specs().map(s=>`<option>${s}</option>`).join('')}</select></div>
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subModel('${mid||''}')">确定</button>&nbsp;<button class="btn" onclick="history.back()">取消</button></div></div>`}
+P.mnew=()=>mForm();P.mver=(id)=>mForm(id);
+function subModel(mid){let m=mid&&MODEL.find(x=>x.id==mid);
+ if(!m){const n=$('#mname').value.trim();if(!n)return toast('请输入模型名称');if(!NAME_RE.test(n))return toast(NAME_TIP)}
+ const tid=$('#mts').value;if(!tid)return toast('请选择已有微调任务');const gpu=document.querySelector('[name=dev]:checked').value=='gpu';if(gpu&&!$('#mrs').value)return toast('请选择资源规格');
+ const t=TASK.find(x=>x.id==tid);if(!m){m={id:String(303+MODEL.length).padStart(4,'0'),name:$('#mname').value.trim(),base:'星际大模型/星际大模型-4B',t:now(),vers:[]};MODEL.unshift(m)}
+ const v={no:'V'+(m.vers.length+1),desc:$('#mvd').value,src:t.name+'-'+(+t.id),st:'合并中',size:'8.48GB',t:now()};m.vers.unshift(v);
+ toast('创建成功');setTimeout(()=>{v.st='就绪';rf()},gpu?2500:5000);history.back()}
+// ===== 模型评估（自动化测评 / 人工评测，与现有一致） =====
+let evTab='auto';
+P.eval=()=>{const auto=evTab=='auto',list=EVAL.filter(e=>e.type==evTab);
+ return `<div class="bc">模型管理 / 模型评估</div><div class="card">${pns('eval-del')}<div class="tt">模型评估</div>
+ <div class="tabs"><span class="${auto?'on':''}" onclick="evTab='auto';render()">自动化测评</span><span class="${auto?'':'on'}" onclick="evTab='human';render()">人工评测</span></div>
+ <div class="bar"><button class="btn p" onclick="go('evalnew/${evTab}')">创建评估任务</button></div>
+ ${tb(['ID','任务名称','任务状态','评估模型',auto?'测评方法':'评测方法',auto?'测评进度':'评测进度','创建时间','操作'],list.map(e=>[e.id,e.name,tag(e.st),e.models.join('、'),e.method,e.prog,e.t,
+  (!auto&&e.st=='评测中'?`<span class="lk" onclick="toast('原型：在线评测页同现有')">在线评测</span>`:'')+`<span class="lk" onclick="go('evdetail/${e.id}')">详情</span><span class="lk" onclick="delEval('${e.id}')">删除</span>`]))}<div class="pg">共${list.length}条</div></div>`};
+function delEval(id){if(!confirm('确认删除？'))return;EVAL.splice(EVAL.findIndex(e=>e.id==id),1);toast('删除成功');render()}
+P.evdetail=(id)=>{const e=EVAL.find(x=>x.id==id);if(!e)return P.eval();
+ return `<div class="bc">模型管理 / 模型评估 / 任务详情</div><div class="card">${pns('eval-del')}<div class="tt">任务详情 <span class="lk" onclick="go('eval')">‹ 返回</span></div>
+ <div class="tt" style="font-size:16px">${e.name} ${tag(e.st)}<span class="x"><button class="btn" onclick="toast('原型：复制任务同现有')">复制任务</button></span></div>
+ <div class="info"><span>任务id：<b>${e.id}</b></span><span>任务类型：<b>图像理解</b></span><span>创建时间：<b>${e.t}</b></span><span>测评进度：<b>${e.prog}</b></span><span>评估样本总量：<b>${e.prog.split('/')[1]}</b></span></div></div>
+ <div class="card"><div class="tabs"><span class="on">评估报告</span><span onclick="toast('原型：评估详情同现有')">评估详情</span></div>
+ ${kv([['评估模型',e.models.join('、')],[e.type=='auto'?'测评方法':'评测方法',e.method],['测评数据集',e.ds]])}
+ <div style="margin-top:12px">${e.res?tb(Object.keys(e.res).map(k=>k+' (%)'),[Object.values(e.res)]):'<div class="tip">提示：测评任务未完成，暂无数据。</div>'}</div></div>`};
+// 创建自动化测评 / 创建人工评测
+const AUTO_IDX=['准确率','F1分数','ROUGE-1','ROUGE-2','ROUGE-L','BLEU-4','关键词匹配','语义相似度'];
+const INFER=[['温度','0.95','temperature: 较高的数值会使输出更加随机，而较低的数值会使其更加集中和确定，取值0-1。'],['多样性','0.7','top_p: 影响输出文本的多样性，建议该参数和temperature只设置一个，取值0-1。'],
+ ['频率惩罚','1','repetition_penalty: 对生成重复token的惩罚系数。取值大于1减少重复；等于1保持原有策略；小于1增加重复。'],['最大token数','1024','max_tokens: 决定了生成文本的最大长度，取值0-8192。']];
+let evIdx=[];
+const evModelOpts=()=>`<option value="">请选择待评估模型</option><optgroup label="我的模型">${MODEL.flatMap(m=>m.vers.filter(v=>v.st=='就绪').map(v=>`<option>${m.name}/${v.no}</option>`)).join('')}</optgroup><optgroup label="平台基础模型"><option>星际大模型/星际大模型-4B</option></optgroup>`;
+P.evalnew=(type)=>{const auto=type!='human';evIdx=[];
+ return `<div class="bc">模型管理 / 模型评估 / ${auto?'创建自动化测评':'创建人工评测'}</div><div class="card fm">${pns('eval-del')}<div class="tt">${auto?'创建自动化测评':'创建人工评测'} <span class="lk" onclick="go('eval')">‹ 返回</span>${RES}</div>
+ <div class="sec">基本信息</div>
+ <div class="row"><label class="l req">任务名称</label><input id="en" maxlength="30" placeholder="请输入中英文、数字、下划线，2-30个字符，不能以下划线开头"></div>
+ <div class="row"><label class="l req">任务类型</label><div style="padding-top:5px"><label><input type="radio" checked> 图像理解</label></div></div>
+ <div class="row"><label class="l">任务描述</label><textarea id="ed" rows="3" maxlength="200" placeholder="请输入任务描述"></textarea></div>
+ <div class="sec">评估对象配置</div>
+ ${auto?`<div class="row"><label class="l req">评估对象</label><div style="padding-top:5px"><label><input type="radio" name="eo" value="1" checked onchange="evAB()"> 单模型</label>　<label><input type="radio" name="eo" value="2" onchange="evAB()"> AB模型</label></div></div>`
+  :`<div class="row"><label class="l req">评测方法</label><div style="padding-top:5px"><label><input type="radio" name="eo" value="1" checked onchange="evAB()"> 指标打分</label>　<label><input type="radio" name="eo" value="2" onchange="evAB()"> AB对战</label></div></div>`}
+ <div class="row" id="evS"><label class="l req">待评估模型</label><select id="em" onchange="evM()">${evModelOpts()}</select></div>
+ <div class="row" id="evAB" style="display:none"><label class="l req">待评估模型</label><div>A模型 <select id="emA" style="width:240px" onchange="evM()">${evModelOpts()}</select><br><span style="display:inline-block;margin-top:6px">B模型 </span><select id="emB" style="width:240px;margin-top:6px" onchange="evM()">${evModelOpts()}</select></div></div>
+ <div class="row"><label class="l req">数据格式</label><div style="padding-top:5px"><label><input type="radio" checked> sharegpt</label></div></div>
+ <div class="row"><label class="l req">测评数据集</label><div>${ckList('evds',testDsList())}<div class="tip">可选平台数据集，或我的数据集中用途为测试数据的版本</div><span class="lk" onclick="go('dsnew')">创建测试数据集</span></div></div>
+ <div class="sec">推理参数配置</div>
+ <div class="row"><label class="l">推理参数配置</label><label style="padding-top:5px"><input type="checkbox" id="eip" disabled onchange="$('#eipT').style.display=this.checked?'flex':'none'"> 开启</label><span class="tip" style="margin:5px 0 0 8px">选择待评估模型后可开启</span></div>
+ <div class="row" id="eipT" style="display:none"><label class="l"></label><div style="flex:1">${tb(['序号','参数','参数值','参数说明'],INFER.map((r,i)=>[i+1,r[0],`<input style="width:120px" value="${r[1]}">`,`<span class="tip" style="margin:0">${r[2]}</span>`]))}</div></div>
+ ${auto?`<div class="sec">测评方法配置</div>
+ <div class="row"><label class="l req">测评方法</label><div style="flex:1">
+  <label style="display:block"><input type="checkbox" id="emR" onchange="$('#emRB').style.display=this.checked?'block':'none'"> <b>自动规则测评</b> <span class="tip">计算模型预测结果与真实标注文本的相似度指标，例如：准确率、F 1、ROUGE、BLUE等，适合事实性答案测评、标准选择题或简单问答场景。</span></label>
+  <div id="emRB" style="display:none;margin:6px 0 10px 20px"><div class="tip">自动规则测评指标</div>${AUTO_IDX.map(x=>`<label><input type="checkbox" class="ai" value="${x}"> ${x}</label>　`).join('')}
+   <div class="tip" style="margin-top:8px">停用词设置</div><select style="width:240px"><option>请选择停用词表</option></select> <span class="lk" onclick="toast('原型：新建停用词表同现有')">新建停用词表</span>　<label title="根据词频或TF-IDF值动态选择停用词"><input type="checkbox"> 动态过滤 ⓘ</label></div>
+  <label style="display:block"><input type="checkbox" id="emJ" onchange="$('#emJB').style.display=this.checked?'block':'none'"> <b>第三方裁判员</b> <span class="tip">基于第三方裁判员模型对模型预测的结果与真实标注文本的相似度及合理性的评估，支持自定义评估维度及指标。</span></label>
+  <div id="emJB" style="display:none;margin:6px 0 0 20px"><div class="tip">裁判员模型</div><select id="ejm" style="width:240px">${evModelOpts().replace('请选择待评估模型','请选择裁判员模型')}</select>
+   <div class="tip" style="margin-top:8px">裁判员打分模板</div><select id="ejt" style="width:240px"><option value="">请选择裁判员打分模板</option><option>图像理解通用打分</option></select> <span class="lk" onclick="toast('原型：添加模板同现有')">添加模板</span></div></div></div>`
+ :`<div id="evScore"><div class="sec">打分指标配置</div>
+ <div class="row"><label class="l req">人工打分指标</label><div><select style="width:240px" onchange="if(this.value){evIdx=[['准确性',5,'回答是否与图像内容一致'],['完整性',5,'']];evIdxR()}"><option value="">请选择</option><option>0806新建</option><option>260922</option></select> <span class="lk" onclick="toast('原型：新建人工打分模板同现有')">新建人工打分模板</span></div></div>
+ <div class="row"><label class="l"></label><div style="flex:1"><div id="evIdxT"></div><span class="lk" onclick="evIdxAdd()">添加指标</span> <span id="evIdxN">已添加 0/5</span></div></div></div>
+ <div id="evABm" style="display:none"><div class="sec">AB对战指标配置</div><div class="row"><label class="l">人工AB对战指标</label><div style="flex:1">${tb(['序号','指标名称','指标说明'],[[1,'A胜出','A模型比B模型好'],[2,'平局','AB模型一样好或一样差'],[3,'B胜出','B模型比A模型好']])}</div></div></div>`}
+ <div class="sec">资源配置</div>
+ <div class="row"><label class="l req">算力资源</label><select id="ers"><option value="">请选择算力资源</option>${specs().map(s=>`<option>${s}</option>`).join('')}</select></div>
+ <div class="row"><label class="l"></label><button class="btn p" onclick="subEval('${auto?'auto':'human'}')">确认并启动</button>&nbsp;<button class="btn" onclick="go('eval')">取消</button></div></div>`};
+function evAB(){const ab=document.querySelector('[name=eo]:checked').value=='2';$('#evS').style.display=ab?'none':'flex';$('#evAB').style.display=ab?'flex':'none';
+ if($('#evScore')){$('#evScore').style.display=ab?'none':'block';$('#evABm').style.display=ab?'block':'none'}evM()}
+function evM(){const ab=document.querySelector('[name=eo]:checked').value=='2';const ok=ab?$('#emA').value&&$('#emB').value:$('#em').value;$('#eip').disabled=!ok;if(!ok){$('#eip').checked=false;$('#eipT').style.display='none'}}
+function evIdxR(){$('#evIdxT').innerHTML=tb(['序号','指标名称','满分值','指标说明','操作'],evIdx.map((r,i)=>[i+1,`<input style="width:140px" maxlength="10" value="${r[0]}" placeholder="请输入指标名称" onchange="evIdx[${i}][0]=this.value">`,
+ `<select style="width:70px" onchange="evIdx[${i}][1]=+this.value">${[3,4,5].map(n=>`<option ${n==r[1]?'selected':''}>${n}</option>`).join('')}</select>`,`<input style="width:220px" maxlength="30" value="${r[2]}" placeholder="请输入指标说明，非必填" onchange="evIdx[${i}][2]=this.value">`,
+ `<span class="lk" style="color:#d33" onclick="evIdx.splice(${i},1);evIdxR()">删除</span>`]));$('#evIdxN').textContent=`已添加 ${evIdx.length}/5`}
+function evIdxAdd(){if(evIdx.length>=5)return toast('最多添加5个指标');evIdx.push(['',5,'']);evIdxR()}
+function subEval(type){const n=$('#en').value.trim();if(!n)return toast('请输入任务名称');if(!NAME_RE.test(n))return toast(NAME_TIP);
+ const ab=document.querySelector('[name=eo]:checked').value=='2';const models=ab?[$('#emA').value,$('#emB').value]:[$('#em').value];
+ if(ab&&!(models[0]&&models[1]))return toast('请同时选择A模型和B模型');if(!models[0])return toast('请选择待评估模型');
+ const ds=ftChecked('evds');if(!ds.length)return toast('请选择评测数据集');let method;
+ if(type=='auto'){const r=$('#emR').checked,j=$('#emJ').checked;if(!r&&!j)return toast('请选择测评方法');
+  if(r&&!document.querySelectorAll('.ai:checked').length)return toast('请选择自动化规则测评指标');if(j&&!$('#ejm').value)return toast('请选择裁判员模型');if(j&&!$('#ejt').value)return toast('请选择裁判员打分模板');
+  method=[r&&'自动规则测评',j&&('裁判员（'+(ab?'AB对战':'竞技打分')+'）')].filter(Boolean).join('、')}
+ else{method=ab?'AB对战':'指标打分';if(!ab&&!evIdx.length)return toast('请输入人工打分指标');if(!ab&&evIdx.some(r=>!r[0]))return toast('请输入指标名称')}
+ if(!$('#ers').value)return toast('请选择算力资源');
+ const e={id:String(1161+EVAL.length),type,name:n,st:'排队中',models,method,prog:'0/12',ds:ds.map(x=>x.split('/').slice(1).join('/')).join('、'),t:now()};
+ EVAL.unshift(e);evTab=type;toast('创建成功');go('eval');setTimeout(()=>{e.st='推理中';rf()},1500);
+ setTimeout(()=>{if(type=='human'){e.st='评测中'}else{e.st='已完成';e.prog='12/12';e.res={'准确率':'61.20','F1分数':'73.40','ROUGE-L':'72.80','BLEU-4':'63.50'}}rf()},4000)}
+// 管理后台：超管与租户管理员看到的菜单不同，原型可在头像菜单切换身份
+let ROLE='ta';
+const ADM={
+ su:[{g:'系统管理',its:[['setting','界面配置'],['ability','功能配置'],['empower','系统授权']]},{g:'平台管理',its:[['tenant','租户管理'],['user','用户管理'],['audit','审计日志']]}],
+ ta:[{g:'资源管理',its:[['dist','资源分配'],['spec','资源规格']]},{g:'系统管理',its:[['ability','功能配置']]},{g:'平台管理',its:[['user','用户管理'],['role','角色管理']]}]};
+const ADMNOTE={su:'交付版改动（超管）：隐藏 总览、开发工具管理、应用管理、文档管理；界面配置去掉未用模块的平台名称；功能配置只保留可见水印；新增审计日志菜单',
+ ta:'交付版改动（租户管理员）：隐藏 总览、项目管理、实例管理、开发工具管理、应用管理；功能配置只保留「大模型微调」空间配置与「可见水印」'};
+function syncRole(r){ROLE=r;$('#avn').textContent=r=='su'?'Administrator':'admin0623';$('#tnt').textContent=(r=='su'?'超级管理员':'20260623新建租户')+' ▾'}
+function setRole(r,page){syncRole(r);nav('admin/'+(page||ADEF[r]))}
+function goAdmin(){setRole(ROLE,ADEF[ROLE])}
+const SPEC=[[1,10,15],[3,10,15],[2,10,15],[1,40,30]];
+const ADIST=[['ft_user01','2/2 卡　20/20 核　30/30 G','2026-10-10 09:00:00'],['ft_user02','1/3 卡　10/40 核　15/45 G','2026-10-12 14:20:00']];
+let WM='是';
+function sdAdm(cur){const gh=(t,k)=>`<div class="ghost-it"><span class="ghost"><s>${t}</s></span>${k?pn(k):''}</div>`;
+ const ghosts=ROLE=='su'?gh('总览','sumenu')+gh('开发工具管理')+gh('应用管理')+gh('文档管理')
+  :gh('总览','tamenu')+gh('项目管理')+gh('开发工具管理')+gh('应用管理');
+ $('#sd').innerHTML=`<div class="g" style="color:#1660e0">${ROLE=='su'?'超级管理员':'租户管理员'}视角</div>`+ghosts+ADM[ROLE].map(m=>`<div class="g">${m.g}</div>`+m.its.map(([k,t])=>`<div class="it ${cur==k?'on':''}" onclick="go('admin/${k}')">${t}</div>`).join('')).join('')}
+const res=(t,c,g,m)=>`<div class="card" style="width:460px;box-shadow:0 2px 8px rgba(0,0,0,.06)"><div class="sec" style="border:0;padding:0">${t}</div>
+ <div style="display:flex;gap:16px"><span style="background:#e8f8f0;padding:8px 14px"><b style="font-size:18px">${c}卡</b> 显卡数</span><span style="background:#eaf1fd;padding:8px 14px"><b style="font-size:18px">${g}核</b> CPU</span><span style="background:#f3edfb;padding:8px 14px"><b style="font-size:18px">${m}G</b> 内存</span></div></div>`;
+const AP={
+ dist:()=>`<div class="bc">资源管理 / 资源分配</div><div class="card">${pns('ta-res')}<div class="tt">资源分配</div>
+  ${res('累计已分配资源',3,30,45)}${res('总资源',5,80,125)}
+  <div class="bar"><button class="btn p" onclick="toast('原型：分配资源弹窗同现有')">分配资源</button><span class="sp"><input placeholder="请输入用户名" style="width:200px"></span></div>
+  ${tb(['用户名','剩余可用资源/分配总资源','分配时间','操作'],ADIST.map(r=>[...r,'<span class="lk">编辑</span><span class="lk">回收</span>']))}</div>`,
+ spec:()=>`<div class="bc">资源管理 / 资源规格</div><div class="card">${pns('ta-res')}<div class="tt">资源规格</div>
+  <div class="bar"><button class="btn p" onclick="addSpec()">创建规格</button></div>
+  ${tb(['序号','显卡数 CPU 内存','操作'],SPEC.map((s,i)=>[i+1,`${s[0]}卡　${s[1]}核　${s[2]}G`,`<span class="lk">编辑</span><span class="lk" onclick="SPEC.splice(${i},1);render()">删除</span>`]))}</div>`,
+ ability:()=>`<div class="bc">系统管理 / 功能配置</div><div class="card fm"><div class="tt">功能配置</div>
+  <div class="sec">空间配置 <span class="tip" style="font-weight:400">*以下配置为单租户上限，数值为0时为无限大</span>${pni('ta-ability')}</div>
+  <div style="font-weight:600;margin:8px 0">大模型微调</div>
+  <div style="display:flex;gap:40px;padding-left:12px"><div><div class="tip">微调数据集存储空间</div><div style="margin-top:6px"><input type="number" value="2000" style="width:120px"> GB　<span class="tip">已用 225.9 GB</span></div></div>
+ <div><div class="tip">我的模型存储空间</div><div style="margin-top:6px"><input type="number" value="1000" style="width:120px"> GB　<span class="tip">已用 100 GB</span></div></div></div>
+ <div class="ghost-row" style="padding-left:12px;margin-top:16px"><span class="ghost"><s>算法开发：数据集存储空间 5.0 GB　大文件存储空间 10.0 GB　最大创建套件数量 10</s></span></div>
+ <div class="sec" style="margin-top:20px">数据安全配置</div>
+ <div style="padding-left:12px"><div class="tip">可见水印 <span title="开启后平台页面展示用户名水印">ⓘ</span></div><div style="margin-top:6px">${['是','否'].map(v=>`<label><input type="radio" name="wm" ${WM==v?'checked':''} onchange="WM='${v}'"> ${v}</label>　`).join('')}</div></div>
+ <div class="ghost-row" style="padding-left:12px;margin-top:14px"><span class="ghost"><s>实例资源配置：编码实例自动停用时间 8 小时</s></span>${pni('ta-inst')}</div>
+  <div style="margin-top:24px"><button class="btn p" onclick="toast('已保存')">保存</button></div></div>`,
+ user:()=>admStub('平台管理 / 用户管理','用户管理'),role:()=>admStub('平台管理 / 角色管理','角色管理')};
+const admStub=(bc,t)=>`<div class="bc">${bc}</div><div class="card">${pns('ta-res')}<div class="tt">${t}</div>
+ <div style="color:#999;padding:60px;text-align:center">沿用现有「${t}」页面</div></div>`;
+function addSpec(){const c=prompt('显卡数,CPU核,内存G（逗号分隔）','1,10,15');if(!c)return;const a=c.split(',').map(Number);if(a.length==3&&a.every(x=>x>0)){SPEC.push(a);render()}else toast('格式不正确')}
+// 超管页面（字段取自现有系统超管账号）
+const TENANTS=[[1,'超级管理员','0000000000','-','启用'],[11,'20260623新建租户','2026062301','5卡 / 80核 / 125G','启用'],[12,'青岛地铁运营','2026070201','4卡 / 64核 / 100G','启用']];
+const USERS=[[19,'test0001','激活','-','-'],[13,'admin0629','激活','135****5323','06290728'],[11,'admin0623','激活','135****5321','11212'],[10,'leo001','激活','-','-']];
+const AUDIT=[['Administrator','系统管理-界面配置','修改','保存界面配置','修改平台名称','10.233.74.173','2026-10-27 15:47:18'],
+ ['Administrator','系统管理-功能配置','修改','保存功能配置','可见水印：是','10.233.74.173','2026-10-27 15:46:02'],
+ ['Administrator','个人中心','登录','用户登录选择租户',"用户登录选择租户：'超级管理员'",'10.233.74.173','2026-10-27 15:45:13'],
+ ['admin0623','微调数据集','新增','创建数据集','创建数据集：站台越线人工整理','10.233.80.21','2026-10-22 14:52:46']];
+const SUP={
+ setting:()=>`<div class="bc">系统管理 / 界面配置</div><div class="card fm">${pns('su-setting')}<div class="tt">界面配置</div>
+  <div class="sec">LOGO配置</div><div style="display:flex;gap:120px;padding-left:12px">
+  <div><div style="margin-bottom:8px">系统logo</div><div style="width:140px;height:88px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999">LOGO</div><div class="tip" style="width:220px">*注释: 支持上传PNG、JPG、JPEG格式，图片最大限制为2M，最小尺寸128*48，建议尺寸比例8:3</div></div>
+  <div><div style="margin-bottom:8px">登录页面背景</div><div style="width:140px;height:88px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999">背景图</div><div class="tip" style="width:220px">*注释: 支持上传PNG、JPG、JPEG格式，图片最大限制为10M，最小尺寸1920*1080，建议尺寸比例16:9</div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 40px;margin-top:20px;padding-left:12px">
+  <div><div class="tip">平台名称</div><input value="视觉算法平台" maxlength="20" style="width:100%"></div>
+  <div><div class="tip">管理平台名称</div><input value="管理后台" maxlength="20" style="width:100%"></div>
+  <div><div class="tip">版权声明</div><input placeholder="请输入版权声明" maxlength="100" style="width:100%"></div></div>
+  <div class="ghost-row" style="padding-left:12px;margin-top:16px"><span class="ghost"><s>数据处理平台名称 / 推理平台名称 / 算法开发平台名称</s></span></div>
+  <div style="margin-top:24px"><button class="btn p" onclick="toast('已保存')">保存</button></div></div>`,
+ ability:()=>`<div class="bc">系统管理 / 功能配置</div><div class="card fm"><div class="tt">功能配置</div>
+  <div class="sec">数据安全配置 ${pni('su-ability')}</div>
+  <div style="padding-left:12px"><div class="tip">可见水印 <span title="开启后平台页面展示用户名水印">ⓘ</span></div><div style="margin-top:6px">${['是','否'].map(v=>`<label><input type="radio" name="wm" ${WM==v?'checked':''} onchange="WM='${v}'"> ${v}</label>　`).join('')}</div></div>
+  <div class="ghost-row" style="padding-left:12px;margin-top:14px"><span class="ghost"><s>实例资源配置：编码实例自动停用时间 8 小时</s></span>${pni('su-inst')}</div>
+  <div style="margin-top:24px"><button class="btn p" onclick="toast('已保存')">保存</button></div></div>`,
+ empower:()=>`<div class="bc">系统管理 / 系统授权</div><div class="card">${pns('su-auth')}<div class="tt">系统授权</div>
+  <div class="sec">授权信息</div><div style="padding-left:12px;word-break:break-all">
+  <div class="tip">设备摘要</div><div style="background:#f7f8fa;padding:8px;margin:6px 0 14px">OJANWJM17//4ESUryq8H17Gr6Z3kzFguv04zZwum70jS/xzPJqgq7Fw...（示例）</div>
+  <div class="tip">激活码</div><div style="background:#f7f8fa;padding:8px;margin:6px 0 14px">YRzQSHKCPaGPOvIxPwpZiQ7cVe/GRWtvDZMygx7cwZCjYrItiki04k6q...（示例）</div>
+  <div>授权类型：正式　　有效期限：永久</div>
+  <div style="margin-top:16px"><button class="btn p" onclick="toast('原型：重置激活码弹窗同现有')">重置激活码</button></div></div></div>`,
+ tenant:()=>`<div class="bc">平台管理 / 租户管理</div><div class="card">${pns('su-auth')}<div class="tt">租户管理</div>
+  <div class="bar"><button class="btn p" onclick="toast('原型：新建租户弹窗同现有')">新建租户</button></div>
+  ${tb(['ID','租户名称','编码','可分配资源','状态','操作'],TENANTS.map(r=>[...r.slice(0,4),tag(r[4]),'<span class="lk">编辑</span><span class="lk">停用</span>']))}</div>`,
+ user:()=>`<div class="bc">平台管理 / 用户管理</div><div class="card">${pns('su-auth')}<div class="tt">用户管理</div>
+  ${tb(['ID','用户名称','状态','手机号','姓名','操作'],USERS.map(r=>[...r,'<span class="lk">重置密码</span>']))}</div>`,
+ audit:()=>`<div class="bc">平台管理 / 审计日志</div><div class="card">${pns('su-audit')}<div class="tt">审计日志</div>
+  <div class="bar"><span class="sp"><input placeholder="请输入用户名" style="width:230px"></span></div>
+  ${tb(['用户名','操作模块','操作类型','操作功能','操作描述','客户端IP','操作时间'],AUDIT)}<div class="pg">原型仅展示部分记录</div></div>`};
+const APX={su:SUP,ta:AP},ADEF={su:'setting',ta:'dist'};
+P.admin=(k)=>{const m=APX[ROLE];return (m[k]||m[ADEF[ROLE]])()};
+// 改动导航：列出所有改动点，点击跳到对应页面/弹层
+function nav(h,after){document.body.classList.remove('nochg');if(location.hash.slice(1)==h)render();else location.hash=h;if(after)setTimeout(after,150)}
+const CL=[
+{g:'全局',t:'修改',k:'topbar',r:'*',title:'顶部模块切换',desc:'隐藏左上角「大模型微调」模块名与模块切换下拉',o:'左上角显示「大模型微调」模块名，点击进入模块选择页（数据处理/算法开发/管理后台/大模型微调）',n:'隐藏模块名与切换下拉；后台入口移到右上角头像菜单',act:()=>nav('dataset')},
+{g:'全局',t:'修改',k:'brand',r:'*',title:'产品名',desc:'左上角 logo 由「极栈平台」改为「CV微调」',o:'极栈平台',n:'CV微调',act:()=>nav('dataset')},
+{g:'全局',t:'修改',k:'tenant',r:null,pg:false,title:'租户切换',desc:'租户切换已开发：用户仅属于一个租户时隐藏顶部租户切换下拉，属于多个租户时显示，可自行切换（纯行为，无界面差异）',o:'顶部始终显示租户切换下拉',n:'仅 1 个租户时隐藏，多租户时显示并可切换',act:()=>nav('dataset')},
+{g:'全局',t:'隐藏',k:'svc',r:'sidebar',title:'模型服务',desc:'左侧菜单及路由整块隐藏（在线推理、批量推理）',o:'模型服务：在线推理、批量推理',act:()=>nav('dataset')},
+{g:'全局',t:'隐藏',k:'expc',r:'models',title:'体验中心',desc:'模型管理下隐藏「体验中心」，只保留我的模型；模型评估功能整体删除（见「模型」分组）',o:'模型管理 → 我的模型 / 体验中心',act:()=>{mTab=0;nav('models')}},
+{g:'全局',t:'修改',k:'adminentry',r:'*',title:'管理后台入口',desc:'管理后台入口从顶部模块切换移到右上角头像菜单，全局只保留一个入口（红框为新增位置）',o:'模块选择页中的「管理后台」卡片',n:'头像菜单中的「管理后台」',act:()=>nav('dataset',()=>$('#dd').style.display='block')},
+{g:'管理后台',t:'隐藏',k:'sumenu',r:'admin',title:'超管 - 菜单',desc:'只保留 界面配置、功能配置、系统授权、租户管理、用户管理、审计日志；隐藏 总览、开发工具管理、应用管理、文档管理',o:'总览、开发工具管理、应用管理、文档管理',n:'只保留 界面配置、功能配置、系统授权、租户管理、用户管理、审计日志',act:()=>setRole('su','setting')},
+{g:'管理后台',t:'修改',k:'su-setting',r:'admin/setting',title:'超管 - 界面配置',desc:'去掉数据处理/推理/算法开发平台名称，保留 LOGO、平台名称、管理平台名称、版权声明',o:'含 数据处理平台名称 / 推理平台名称 / 算法开发平台名称',n:'仅 LOGO、平台名称、管理平台名称、版权声明',act:()=>setRole('su','setting')},
+{g:'管理后台',t:'修改',k:'su-ability',r:'admin/ability',title:'超管 - 功能配置',desc:'只保留「可见水印」',o:'可见水印 + 实例资源配置（编码实例自动停用时间）',n:'仅「可见水印」',act:()=>setRole('su','ability')},
+{g:'管理后台',t:'保留',k:'su-auth',r:'admin/empower',title:'超管 - 系统授权 / 租户 / 用户',desc:'与现有一致',o:'系统授权 / 租户管理 / 用户管理',act:()=>setRole('su','empower')},
+{g:'管理后台',t:'新增',k:'su-audit',r:'admin/audit',title:'超管 - 审计日志',desc:'现有页面已存在但未配置到超管菜单，交付版开放',o:'无（菜单未配置）',n:'新增「审计日志」菜单',act:()=>setRole('su','audit')},
+{g:'管理后台',t:'隐藏',k:'tamenu',r:'admin',title:'租户管理员 - 菜单',desc:'只保留 资源分配、资源规格、功能配置、用户管理、角色管理；隐藏 总览、项目管理、实例管理、开发工具管理、应用管理',o:'总览、项目管理、开发工具管理、应用管理',n:'只保留 资源分配、资源规格、功能配置、用户管理、角色管理',act:()=>setRole('ta','dist')},
+{g:'管理后台',t:'修改',k:'ta-ability',r:'admin/ability',title:'租户管理员 - 功能配置',desc:'只保留「大模型微调」空间配置和「可见水印」；隐藏算法开发空间配置',x:'隐藏项具体为：算法开发空间配置（数据集存储空间/大文件存储空间/最大创建套件数量）',o:'空间配置含 算法开发 / 大模型微调；另有实例资源配置',n:'仅「大模型微调」空间配置 + 可见水印',act:()=>setRole('ta','ability')},
+{g:'管理后台',t:'保留',k:'ta-res',r:'admin/spec',title:'租户管理员 - 资源/用户/角色',desc:'资源分配、资源规格与现有一致；用户管理、角色管理只留导航',o:'资源分配、资源规格、用户管理、角色管理',act:()=>setRole('ta','spec')},
+{g:'数据集',t:'新增',k:'bd-sync',r:'dataset',title:'平台数据集 - 样本库同步',desc:'平台数据集来源为外部样本库，定时同步 + 手动「立即同步」；1 个样本库 = 1 个数据集；列表展示上次同步结果（成功/失败及原因）；原始数据可在同步完成后或添加数据集版本时下载，建议同步完成后即下载（下载记录为需求说明，原型暂未实现界面）',x:'只同步图像类样本库；平台数据集不可删除、不可上传。',o:'平台数据集已存在，但列表与详情无同步状态、批次、来源信息',n:'新增平台数据集（外部样本库同步）',act:()=>{dsTab='plat';nav('dataset')}},
+{g:'数据集',t:'修改',k:'bd-cols',r:'dataset',title:'平台数据集 - 列表列',desc:'新增「批次数」「同步时间」两列：平台数据集按时同步批次，需要看到批次数与最近同步时间；原列表只有版本数量与创建时间',o:'列表列：ID、数据集名称、数据类型、数据用途、数据格式、版本数量、创建时间、操作',n:'新增「批次数」「同步时间」列',act:()=>{dsTab='plat';nav('dataset')}},
+{g:'数据集',t:'新增',k:'bd-batch',r:'ds',title:'平台数据集详情 - 原始数据',desc:'新增「原始数据」区块，展示同步来的批次；只同步标注完成且审核通过的样本；源端变更只影响之后新建的版本',x:'「原始数据」区块只读，不展示标注状态（接口 qrySampleBatches）。',o:'数据集详情只有「版本信息」',n:'新增「原始数据」区块（只读）',act:()=>nav('ds/05180')},
+{g:'数据集',t:'新增',k:'bd-testds',r:'ftnew',title:'平台数据集 - 用作测试集',desc:'平台数据集的版本可作为微调任务的自定义测试集',o:'测试集在数据集版本内按占比划分，微调任务无独立测试集选择',n:'平台数据集的版本也可选作测试集',act:()=>{ftCopy=null;nav('ftnew')}},
+{g:'数据集',t:'新增',k:'convert',r:'addver',title:'数据转换（视觉理解 → sharegpt）',desc:'创建数据集版本时自动转换：一条问答生成一条样本（user 为「<image> + 问题」，assistant 为答案）；每张有区域框的图片生成一条区域信息样本（user 为「<image> 这张图里包含了哪些信息？」，assistant 为「这张图片里有 N 个区域。」+ 区域1/区域2…逐个单独叙述「（bbox: [xmin, ymin, xmax, ymax]）的标签是{label}，参考值是{reference}，描述是{caption}。」）：规则说明区块',o:'只有版本信息表单，无转换规则说明',n:'新增「视觉理解 → sharegpt」转换说明',act:()=>nav('addver/05180')},
+{g:'数据集',t:'修改',k:'bd-addver',r:'addver',title:'平台数据集 - 添加版本',desc:'「数据上传」替换为「原始数据」批次多选，无需上传文件',x:'提交后通过样本库接口拉取标注（视觉理解），再走现有校验流程。',o:'「数据上传」上传 zip 文件',n:'「原始数据」批次多选，无需上传',act:()=>nav('addver/05180')},
+{g:'数据集',t:'修改',k:'bd-verdetail',r:'ds',title:'平台数据集 - 版本详情',desc:'版本详情抽屉新增「原始数据」一行，其余与现有一致',o:'版本详情无「原始数据」',n:'新增「原始数据」一行',act:()=>nav('ds/05180',()=>verDw('05180','V2'))},
+{g:'数据集',t:'修改',k:'my-list',r:'dataset',title:'我的数据集 - 列表',desc:'沿用现有逻辑（创建 + 上传），只保留图像理解类数据集',x:'数据格式只保留「视觉理解」。',o:'支持文本生成、图像理解两类数据集，列表含数据用途列',n:'只保留图像理解类数据集',act:()=>{dsTab='my';nav('dataset')}},
+{g:'数据集',t:'修改',k:'ds-format',r:'dsnew',title:'创建数据集 - 数据类型与用途',desc:'数据类型只留图像理解；去掉数据用途选择（统一按微调数据）',o:'数据类型 文本生成/图像理解；数据用途 微调/测试/推理；数据格式 文本为 sharegpt/alpaca、图像理解为 sharegpt；上传 .json/.csv/.xlsx 或 zip',n:'只留图像理解；固定「视觉理解」；固定 zip',act:()=>nav('dsnew')},
+{g:'数据集',t:'修改',k:'up-req',r:'dsnew',title:'数据上传 - 导入要求与模板下载',desc:'导入要求与下载项：单个文件上限由 5G 收紧为 1 GB（选文件/拖拽即校验，超出即拦截并阻止提交）；下载项改为「视觉理解说明」「zip模板」，原为「数据集格式说明」「多模态数据集demo示例」',o:'仅支持格式zip，大小不超过5G，一次仅支持上传一个文件；下载：数据集格式说明、多模态数据集demo示例',n:'单个文件不超过 1 GB，即时校验；下载：视觉理解说明、zip模板',act:()=>nav('dsnew')},
+{no:26,g:'数据集',t:'修改',k:'my-addver',r:'addlv',title:'我的数据集 - 添加版本',desc:'平台数据集改为按批次建版本后，我的数据集仍沿用上传 zip 新增版本（不提供原始数据选择）',x:'上传文件新增版本，现有流程不变。',o:'上传 zip 文件新增版本',n:'仍为上传 zip 新增版本，不改为批次',act:()=>nav('addlv/04174')},
+{no:27,g:'微调',t:'修改',k:'ft-list',r:'finetune',title:'快速微调列表',desc:'只显示图像理解任务；「更多」操作按状态可用，与现有一致',o:'列表含文本生成任务',n:'只显示图像理解任务',act:()=>nav('finetune')},
+{no:28,g:'微调',t:'修改',k:'ft-new',r:'ftnew',title:'创建微调任务',desc:'任务类型固定图像理解（文本生成隐藏）',x:'平台数据集版本在创建时已转换为 sharegpt',o:'任务类型可选文本生成/图像理解；基础模型含文本模型',n:'固定图像理解；只列图像理解模型',act:()=>{ftCopy=null;nav('ftnew')}},
+{no:29,g:'微调',t:'保留',k:'ft-detail',r:'ftdetail',title:'任务详情',desc:'任务详情/过程可视化/训练日志/模型文件，复制任务，与现有一致',o:'任务详情/过程可视化/训练日志/模型文件',act:()=>{ftTab=0;nav('ftdetail/'+TASK[0].id)}},
+{no:30,g:'模型',t:'修改',k:'mdl-list',r:'models',title:'我的模型',desc:'页签只显示图像理解模型（平台基础模型页签只有星际大模型）',x:'平台基础模型页签只有星际大模型。',o:'页签含 我的模型 / 平台基础模型 / 共享模型；版本操作含「体验」',n:'两个页签；去掉「体验」',act:()=>{mTab=0;nav('models')}},
+{no:31,g:'模型',t:'删除',k:'mdl-share',r:'models',title:'共享模型 / 版本共享',desc:'删除「共享模型」页签，以及模型版本的「是否分享」开关、共享拦截提示等共享相关操作',o:'「共享模型」页签 + 版本「是否分享」开关 + 共享拦截',act:()=>{mTab=0;nav('models')}},
+{no:32,g:'模型',t:'保留',k:'mdl-new',r:'mnew',title:'创建模型',desc:'模型名称 → 版本来源（已完成的微调任务）→ 模型文件 → 模型合并配置（GPU/CPU）；模型类型固定图像理解',x:'版本来源只列图像理解微调任务。',o:'模型名称 / 模型类型（文本生成、图像理解）/ 版本描述 / 版本来源 / 模型合并配置',act:()=>nav('mnew')},
+{no:34,g:'模型',t:'删除',k:'eval-del',r:'models',title:'模型评估',desc:'删除模型评估功能：左侧菜单入口已去掉（代码暂保留，页面仍可通过地址直接访问）；自动化测评、人工测评不再提供',o:'模型管理 → 模型评估（自动化测评 / 人工评测）',act:()=>{mTab=0;nav('models')}},
+{no:35,g:'说明',t:'说明',k:'log',r:null,pg:false,title:'日志管理 - 日志监控',desc:'仅记录大模型微调相关的操作日志（数据集、微调任务、模型）。数据处理、算法开发等其他模块的日志由各自模块记录，不在本次交付范围内；微调模块本身不新增日志入口',act:()=>{}},
+{no:36,g:'说明',t:'说明',k:'annot',r:null,pg:false,title:'标注模块（第三方集成）',desc:'标注页面由第三方集成开发，我方只保留接口；另保留一个独立地址入口，授权账号可通过该地址使用完整标注功能，该入口不出现在微调菜单中',act:()=>{}},
+{no:37,g:'数据集',t:'修改',k:'ds-fmt2',r:'dsnew',title:'创建数据集 - 数据格式',desc:'数据格式只保留「视觉理解」，不再提供 sharegpt / alpaca；上传要求固定 zip',o:'sharegpt / alpaca',n:'视觉理解（zip）',act:()=>nav('dsnew')},
+{no:39,g:'微调',t:'修改',k:'ft-base',r:'ftnew',title:'创建微调任务 - 基础模型',desc:'基础模型只列图像理解模型（平台基础模型与我的模型）',act:()=>{ftCopy=null;nav('ftnew')}},
+{no:40,g:'微调',t:'修改',k:'ft-fmt',r:'ftnew',title:'创建微调任务 - 数据格式',desc:'数据格式固定「视觉理解」，只支持视觉理解数据集',o:'sharegpt / alpaca',n:'视觉理解',act:()=>{ftCopy=null;nav('ftnew')}},
+{no:42,g:'模型',t:'修改',k:'mdl-exp',r:'models',title:'我的模型 - 版本操作',desc:'模型版本操作去掉「体验」（体验中心已隐藏）',act:()=>{mTab=0;nav('models')}},
+{no:43,g:'管理后台',t:'修改',k:'ta-inst',r:'admin/ability',title:'租户管理员 - 隐藏实例资源配置',desc:'隐藏「实例资源配置」（编码实例自动停用时间）',act:()=>setRole('ta','ability')},
+{no:44,g:'管理后台',t:'修改',k:'su-inst',r:'admin/ability',title:'超管 - 隐藏实例资源配置',desc:'隐藏「实例资源配置」（编码实例自动停用时间）',act:()=>setRole('su','ability')}];
+// 编号 = 数组下标 + 1，页面角标与改动导航共用同一编号
+const CLNO=c=>c.no||(CL.indexOf(c)+1);
+const CLN=k=>{const c=CL.find(x=>x.k==k);return c?CLNO(c):0};
+const CLBY=n=>CL.find(c=>CLNO(c)===n);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function pn(k){const i=CLN(k);if(!i)return'';const c=CLBY(i);
+ return `<i class="pn" data-k="${c.k}" title="改动 ${i}｜${c.t}｜${c.title}" onclick="event.stopPropagation();pnCard(this,${i})">${i}</i>`}
+let pncEl=null;
+function closePn(){if(pncEl){pncEl.remove();pncEl=null}}
+function pnCard(el,i){closePn();const c=CLBY(i);if(!c||!el)return;
+ const d=document.createElement('div');d.className='pnc';
+ d.innerHTML=`<span class="px" onclick="closePn()">✕</span>
+  <div class="ph"><span class="pno">${i}</span><span class="pt">${esc(c.title)}</span><span class="tag ${TC[c.t]}" style="margin-left:auto;flex:none">${c.t}</span></div>
+  <div class="pb">${dsc(c)}</div>
+  <div class="pf"><span class="lk" style="margin:0" onclick="closePn();clJump(${i})">在改动导航中查看 →</span></div>`;
+ d.onclick=ev=>ev.stopPropagation();
+ document.body.appendChild(d);
+ const r=el.getBoundingClientRect(),w=390,h=d.offsetHeight;
+ let left=Math.min(Math.max(8,r.left+r.width/2-w/2),innerWidth-w-8);
+ let top=r.bottom+8;if(top+h>innerHeight-8)top=Math.max(8,r.top-h-8);
+ d.style.left=left+'px';d.style.top=top+'px';pncEl=d}
+// 改动导航「查看」：跳页面并自动打开对应说明卡
+function clOpen(i){const c=CLBY(i);if(!c||c.pg===false)return;c.act();
+ setTimeout(()=>{const el=document.querySelector('.mn .pn[data-k="'+c.k+'"]')||document.querySelector('.pn[data-k="'+c.k+'"]');
+  if(el){el.scrollIntoView({block:'center'});setTimeout(()=>pnCard(el,i),160)}else clJump(i)},700)}
+const pns=(...ks)=>`<span class="pnum">${ks.map(pn).join('')}</span>`;      // 卡片右上角
+const pni=(...ks)=>`<span class="pnum inline">${ks.map(pn).join('')}</span>`; // 行内
+function clJump(n){go('guide');setTimeout(()=>{const r=document.getElementById('cl-'+n);if(r){r.scrollIntoView({block:'center'});r.style.background='#fff3c4';setTimeout(()=>r.style.background='',1800)}},300)}
+const dsc=c=>esc(c.desc)+(c.x?`<span class="dashx">${esc(c.x)}</span>`:'');
+const TC={新增:'g2',修改:'',隐藏:'r',保留:'o',删除:'r',说明:'k'};
+P.guide=()=>{const cnt=t=>CL.filter(c=>c.t==t).length;
+ const row=(c,k)=>{const n=CLNO(c);return `<tr id="cl-${n}"><td>${n}</td><td><span class="tag ${TC[c.t]}">${c.t}</span></td><td>${esc(c.title)}</td><td>${dsc(c)}</td><td style="white-space:nowrap">${c.pg===false?'<span class="tip" style="margin:0">无（非页面）</span>':`<span class="lk" onclick="clOpen(${n})">查看</span>`}</td></tr>`};
+ const table=g=>{const rows=CL.map((c,k)=>({c,k})).filter(x=>x.c.g==g);
+  return rows.length?`<div class="sec" style="margin-top:16px">${g}</div><table><tr><th>#</th><th>类型</th><th>改动点</th><th>说明</th><th>操作</th></tr>${rows.map(({c,k})=>row(c,k)).join('')}</table>`:''};
+ return `<style>.gd table{table-layout:fixed}.gd th:nth-child(1){width:44px}.gd th:nth-child(2){width:70px}.gd th:nth-child(3){width:220px}.gd th:nth-child(5){width:92px}.gd tr{transition:background .4s}</style>
+ <div class="bc">改动导航</div><div class="card gd"><div class="tt">交付版改动导航<span class="x">共 ${CL.length} 处：新增 ${cnt('新增')} / 修改 ${cnt('修改')} / 隐藏 ${cnt('隐藏')} / 保留 ${cnt('保留')} / 删除 ${cnt('删除')}；其中非页面 ${CL.filter(c=>c.pg===false).length} 处</span></div>
+ <div class="tip">页面上的红色数字角标＝本表编号，点角标就地弹出说明卡：修改项左「原」右「改为」（红框），删除/隐藏项的原文用红色虚线框加删除线标出（标「无（非页面）」的条目除外）。点本表「查看」会跳到对应页面并自动打开该卡。</div>
+ <div class="tip" style="margin-bottom:12px">标「无（非页面）」的条目属于流程/接口层面的约定，页面上不做角标。页面上已不再保留黄色改动说明，说明统一收在角标卡片里；表中<span class="dashx" style="margin-left:0">虚线框</span>标出的句子是从原黄色说明并入的内容，供二次核对。右下角可一键隐藏全部角标。</div></div>
+ <div class="card"><div class="sec">图例说明</div>
+ <div style="line-height:1.9">原型标记：<span class="pmark" style="cursor:default">演示：某某操作</span> 这类紫色虚线胶囊（带「原型」角标）只用于演示交互效果，<b>不属于产品功能，开发时不实现</b>，同样随右下角开关隐藏。</div></div>
+ <div class="card gd">${['全局','管理后台','数据集','微调','模型','说明'].map(table).join('')}</div>`};
+const NAV={ds:'dataset',addver:'dataset',dsnew:'dataset',addlv:'dataset',ftnew:'finetune',ftdetail:'finetune',mnew:'models',mver:'models',mdetail:'models',evalnew:'eval',evdetail:'eval'};
+function render(){closePn();const [k,...a]=(location.hash.slice(1)||'guide').split('/');const page=P[k]?k:'guide';
+ const adm=page=='admin';adm?sdAdm(APX[ROLE][a[0]]?a[0]:ADEF[ROLE]):sd(NAV[page]||page);$('#mod').textContent=adm?'管理后台':'大模型微调';$('#back').style.display=adm?'inline-block':'none';
+ $('#hdnum').innerHTML=pni('topbar','brand');$('#hrnum').innerHTML='';$('#ddnum').innerHTML=pn('adminentry');
+ $('#mn').innerHTML=P[page](...a);$('#dd').style.display='none';closeOp();closeMd();
+ // 复制任务：预填名称与描述
+ if(page=='ftnew'&&ftCopy){const t=TASK.find(x=>x.id==ftCopy);if(t){$('#tn').value=(t.name+'_copy').slice(0,30);$('#td').value=t.desc}ftCopy=null}
+}
+// 异步状态变化只刷新列表/详情页，避免清空正在填写的表单
+const rf=()=>{const k=location.hash.slice(1).split('/')[0]||'dataset';if(!['addver','addlv','dsnew','ftnew','evalnew','mnew','mver'].includes(k)&&!$('#mdl'))render()};
+window.addEventListener('hashchange',()=>{closeDw();closePn();vTab='1';window.scrollTo(0,0);render()});
+document.addEventListener('click',e=>{closePn();if(!e.target.closest('.ava'))$('#dd').style.display='none'});
+render();
+</script>
