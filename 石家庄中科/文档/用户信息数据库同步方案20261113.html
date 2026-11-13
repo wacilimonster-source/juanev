@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>用户信息数据库同步方案</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fa;color:#1f2937;font-size:14px;line-height:1.7}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:26px;margin-bottom:6px}
+.sub{color:#6b7280;margin-bottom:24px}
+section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:22px 26px;margin-bottom:20px}
+h2{font-size:18px;margin-bottom:14px;padding-left:10px;border-left:4px solid #1677ff}
+h3{font-size:15px;margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin:6px 0}
+th,td{border:1px solid #e5e7eb;padding:8px 12px;text-align:left;vertical-align:top}
+th{background:#f3f6fb;font-weight:600}
+code{background:#f3f4f6;padding:1px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:13px}
+.tag{display:inline-block;padding:0 8px;border-radius:4px;font-size:12px;line-height:20px}
+.t-add{background:#e8f5e9;color:#2e7d32}.t-upd{background:#e3f2fd;color:#1565c0}
+.t-del{background:#fdecea;color:#c62828}.t-skip{background:#f3f4f6;color:#6b7280}
+.note{background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:10px 14px;margin-top:10px}
+ul.list{padding-left:20px}ul.list li{margin:4px 0}
+/* 流程 */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:8px 0}
+.step{flex:1;min-width:150px;background:#f3f6fb;border:1px solid #d6e4ff;border-radius:8px;padding:12px;text-align:center}
+.step b{display:block;color:#1677ff;margin-bottom:4px}
+.arrow{display:flex;align-items:center;padding:0 8px;color:#9ca3af;font-size:20px}
+/* 原型 */
+.proto{border:1px solid #d1d5db;border-radius:8px;overflow:hidden;margin:10px 0 6px;background:#f0f2f5;position:relative}
+.p-top{height:44px;background:#1b2433;color:#fff;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px;font-weight:600}
+.p-top .logo{width:24px;height:24px;border-radius:5px;background:#2f8cff}
+.p-top .menu{margin-left:auto;font-weight:400;font-size:13px;color:#cbd5e1;display:flex;gap:22px}
+.p-body{display:flex;min-height:360px}
+.p-side{width:64px;background:#fff;border-right:1px solid #e5e7eb;padding-top:12px}
+.p-side div{height:44px;margin:4px 10px;border-radius:6px;background:#f3f4f6}
+.p-main{flex:1;padding:12px 18px;background:#fff;margin:10px;border-radius:6px}
+.crumb{color:#9ca3af;font-size:12px}
+.tabs{display:flex;gap:18px;margin:6px 0 10px;font-size:13px}
+.tabs .on{color:#1677ff;border-bottom:2px solid #1677ff}
+.btns{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.btn{padding:4px 14px;border-radius:4px;font-size:13px;border:1px solid #1677ff;background:#1677ff;color:#fff}
+.btn.ghost{background:#fff;color:#1677ff}
+.btn.plain{background:#fff;color:#374151;border-color:#d1d5db}
+.btn.danger{background:#e53935;border-color:#e53935}
+.hint{font-size:12px;color:#6b7280;margin-left:auto}
+.ptable th{background:#f5f6f8;font-weight:500;color:#4b5563}
+.ptable td,.ptable th{border:none;border-bottom:1px solid #eef0f3;font-size:13px}
+.new{outline:2px dashed #fa8c16;outline-offset:-2px;background:#fff7e6!important}
+.mark{display:inline-block;background:#fa8c16;color:#fff;border-radius:10px;font-size:11px;padding:0 7px;margin-left:4px;vertical-align:1px}
+.mask{position:absolute;inset:44px 0 0 0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.dlg{background:#fff;border-radius:8px;width:440px;padding:20px 22px;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.dlg h4{font-size:15px;margin-bottom:12px}
+.dlg .ft{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.stat{display:flex;gap:10px;margin:8px 0}
+.stat div{flex:1;border-radius:6px;padding:8px;text-align:center;font-size:12px}
+.stat b{display:block;font-size:20px}
+.drawer{position:absolute;top:44px;right:0;bottom:0;width:58%;background:#fff;box-shadow:-4px 0 16px rgba(0,0,0,.15);padding:16px 18px}
+.cap{color:#6b7280;font-size:13px}
+.newbox{border:2px dashed #fa8c16;border-radius:8px;padding:12px 14px;background:#fffdf7}
+li.new{outline:2px dashed #fa8c16;outline-offset:2px;border-radius:4px}
+/* 2026.11.13 本次修改：紫色虚线 */
+.newbox.n2,.n2{border:2px dashed #7b61ff;background:#f7f5ff}
+/* 表格行用四边边框画虚线框（tr 上的 outline 在部分浏览器不渲染） */
+tr.new>td{border-top:2px dashed #fa8c16;border-bottom:2px dashed #fa8c16}
+tr.new>td:first-child{border-left:2px dashed #fa8c16}
+tr.new>td:last-child{border-right:2px dashed #fa8c16}
+tr.n2>td{border-top:2px dashed #7b61ff;border-bottom:2px dashed #7b61ff;background:#f7f5ff}
+tr.n2>td:first-child{border-left:2px dashed #7b61ff}
+tr.n2>td:last-child{border-right:2px dashed #7b61ff}
+td.n2,th.n2{outline:2px dashed #7b61ff;outline-offset:-3px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 2px;font-size:13px;color:#4b5563}
+.legend i{display:inline-block;width:26px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.legend .x1{border:2px dashed #fa8c16;background:#fff7e6}
+.legend .x2{border:2px dashed #7b61ff;background:#f7f5ff}
+.dtag{display:inline-block;background:#7b61ff;color:#fff;border-radius:9px;font-size:11px;line-height:18px;padding:0 8px;margin-left:8px;vertical-align:2px;font-weight:400}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>用户信息数据库同步方案</h1>
+<div class="sub">石家庄中科 · 极星算法推理平台 · 客户 Oracle 视图 vw_ryxx_sjzmj → 平台账号管理</div>
+
+<section>
+<h2>一、方案概览</h2>
+<p>平台每天定时读取客户的人员视图，自动新增、更新、删除平台账号，不再手工逐个添加。</p>
+<div class="flow">
+  <div class="step"><b>① 读取视图</b>连接客户 Oracle<br>拉取全量人员</div><div class="arrow">→</div>
+  <div class="step"><b>② 去重</b>按 USR_ID 去重<br>（一人多岗只留一条）</div><div class="arrow">→</div>
+  <div class="step"><b>③ 比对</b>与平台「同步来源」<br>账号逐个比对</div><div class="arrow">→</div>
+  <div class="step"><b>④ 执行</b>新增 / 更新 / 删除</div><div class="arrow">→</div>
+  <div class="step"><b>⑤ 提示</b>页面显示<br>本次同步结果</div>
+</div>
+</section>
+
+<section>
+<h2>二、字段对照</h2>
+<table>
+<tr><th style="width:22%">客户视图字段</th><th style="width:22%">平台字段</th><th>规则</th></tr>
+<tr><td><code>USR_ID</code> 用户ID</td><td>用户名</td><td>直接作为登录用户名，也是每次同步识别同一人的唯一依据；比对时去除首尾空格、忽略大小写</td></tr>
+<tr><td><code>USR_NAM</code> 用户名称</td><td>姓名 <span class="mark">新增字段</span></td><td>账号列表展示，方便识别「WANGCS 是谁」；同步账号的姓名由视图维护，不可手动修改；同一 USR_ID 多行时取第一行的姓名</td></tr>
+<tr><td>（无）</td><td>密码</td><td>初始密码 = 账号转小写 + <code>@2026</code>，例如 WANGCS → <code>wangcs@2026</code>；规则统一，无需分发清单。需要改密码时由管理员在账号管理中操作</td></tr>
+<tr><td>（无）</td><td>角色</td><td>统一配置「普通用户」角色（平台内置，见第四节）</td></tr>
+<tr><td><code>CST_NAM</code>、<code>POS_NAM</code> 等</td><td>（不同步）</td><td>部门、岗位本期不入库</td></tr>
+</table>
+</section>
+
+<section>
+<h2>三、同步规则</h2>
+<table>
+<tr><th style="width:30%">情况</th><th style="width:12%">动作</th><th>说明</th></tr>
+<tr><td>视图有，平台没有</td><td><span class="tag t-add">新增</span></td><td>用户名=USR_ID，姓名=USR_NAM，密码=账号小写 + @2026，角色=普通用户</td></tr>
+<tr><td>视图有，平台已有同名「本地」账号</td><td><span class="tag t-skip">跳过</span></td><td>不覆盖本地账号，计入本次「跳过」人数</td></tr>
+<tr><td>视图有，平台也有</td><td><span class="tag t-upd">更新</span></td><td>只更新姓名；密码、角色不覆盖。角色由管理员或超级管理员在平台上调整，同步不会改回去</td></tr>
+<tr><td>平台有（同步来源），视图没有</td><td><span class="tag t-del">删除</span></td><td>视为离职或调出，删除账号；若该账号正在登录，不强制下线，登录状态到期自然失效</td></tr>
+<tr><td>平台本地账号（Administrator / Admin / test 等）</td><td><span class="tag t-skip">不处理</span></td><td>不参与同步，永远不会被修改或删除</td></tr>
+</table>
+<div class="note">账号增加「来源」属性：<b>同步</b> / <b>本地</b>。只有「同步」来源的账号才会被同步程序删除，手工创建的账号不受影响。上线前平台已有的账号统一标记为「本地」。</div>
+</section>
+
+<section>
+<h2>四、内置「普通用户」角色</h2>
+<ul class="list">
+<li>平台初始化时自动创建「普通用户」角色，作为同步账号的默认角色。</li>
+<li>该角色<b>可编辑</b>（管理员可调整菜单权限），<b>不可删除</b>（角色列表中不显示删除按钮），防止同步时找不到默认角色。</li>
+<li>同步新增的账号一律配置为「普通用户」；如需更高权限，由管理员在账号管理中单独修改，后续同步不会覆盖。</li>
+</ul>
+</section>
+
+<section>
+<h2>五、安全保护</h2>
+<ul class="list">
+<li><b>空数据不删除：</b>数据库连接失败或视图返回 0 条数据时，本次同步终止，不改动任何账号。</li>
+<li><b>单条异常跳过：</b>USR_ID 为空或不符合平台用户名校验规则的数据跳过，计入「跳过」人数并记入后台日志。</li>
+<li><b>数据库只读：</b>只读取客户视图，不回写；账号密码加密存放在后端配置中。</li>
+</ul>
+</section>
+
+<section>
+<h2>六、账号与角色保护 <span class="dtag">2026.11.13 新增</span></h2>
+<div class="newbox n2">
+<table>
+<tr><th style="width:34%">对象</th><th>规则</th></tr>
+<tr><td>超级管理员角色</td><td>系统内置，<b>不可编辑、不可删除</b>，角色列表中不显示这两个操作</td></tr>
+<tr><td>管理员角色</td><td>系统内置，<b>不可删除</b>；编辑权限维持现有页面逻辑不变</td></tr>
+<tr><td>普通用户角色</td><td><b>可编辑、不可删除</b>（同步账号默认角色，见第四节）</td></tr>
+<tr class="n2"><td>同步账号</td><td>不提供自助改密和角色编辑；<b>需要改密码或调整角色时，由管理员在账号管理中操作</b>，同步账号自身无法修改</td></tr>
+</table>
+</div>
+<div class="note">「普通用户」角色<b>不分配「用户管理」菜单权限</b>，同步账号登录后看不到角色管理和账号管理页，自然不会出现自行提权或误删管理员的情况。<b>账号角色统一由管理员或超级管理员调整</b>，无需额外开发前端校验。</div>
+</section>
+
+<section>
+<h2>七、触发方式</h2>
+<ul class="list">
+<li><b>定时同步：</b>每天 02:00 自动执行。</li>
+<li><b>手动同步：</b>账号管理页点击「立即同步」。</li>
+<li><b>防重复：</b>同步进行中「立即同步」按钮置灰并显示「同步中…」，手动与定时同步不会同时执行。</li>
+</ul>
+</section>
+<section>
+<h2>八、原型设计</h2>
+<div class="legend">
+  <span><i class="x1"></i>前期已确认调整（账号/姓名/来源/同步按钮等）</span>
+  <span><i class="x2"></i>2026.11.13 本次修改</span>
+ </div>
+ <p class="cap">虚线框内为改动内容，其余保持现有页面不变。原型中的人数、时间均为示例数据。</p>
+
+<h3>8.1 角色管理列表</h3>
+<div class="proto">
+ <div class="p-top"><span class="logo"></span>极星算法推理平台<span class="menu"><span>数据看板</span><span>算法中心</span><span>预警中心</span></span></div>
+ <div class="p-body" style="min-height:220px"><div class="p-side"><div></div><div></div><div></div></div>
+ <div class="p-main">
+  <div class="crumb">管理中心 › 用户管理</div>
+  <div class="tabs"><span class="on">角色管理</span><span>账户管理</span></div>
+  <div class="btns"><span class="btn">添加角色</span></div>
+  <table class="ptable">
+   <tr><th>角色名称</th><th>说明</th><th>操作</th></tr>
+   <tr class="n2"><td>超级管理员 <span class="dtag">11.13</span></td><td>系统内置，权限固定</td><td style="color:#9ca3af">—</td></tr>
+   <tr class="n2"><td>管理员 <span class="mark">内置</span><span class="dtag">11.13</span></td><td>系统内置</td><td style="color:#1677ff">编辑</td></tr>
+   <tr class="new"><td>普通用户 <span class="mark">内置</span></td><td>系统内置，同步账号默认角色</td><td style="color:#1677ff">编辑</td></tr>
+  </table>
+ </div></div>
+</div>
+<ul class="list cap">
+<li>超级管理员、管理员、普通用户三个角色均为内置，均无「删除」按钮；超级管理员角色连「编辑」也不提供。</li>
+</ul>
+
+<h3>8.2 账号管理列表</h3>
+<div class="proto">
+ <div class="p-top"><span class="logo"></span>极星算法推理平台<span class="menu"><span>数据看板</span><span>算法中心</span><span>预警中心</span></span></div>
+ <div class="p-body"><div class="p-side"><div></div><div></div><div></div><div></div><div></div></div>
+ <div class="p-main">
+  <div class="crumb">管理中心 › 用户管理</div>
+  <div class="tabs"><span>角色管理</span><span class="on">账户管理</span></div>
+  <div class="btns"><span class="btn">添加账号</span><span class="btn ghost new">⟳ 立即同步</span>
+   <span class="hint new">上次同步：2026-10-26 02:00　成功 · 新增 2 / 更新 1 / 删除 1 / 跳过 1</span></div>
+  <table class="ptable">
+   <tr><th>用户名</th><th class="new">姓名</th><th>角色</th><th class="new">来源</th><th>最后登录时间</th><th>操作</th></tr>
+   <tr><td>Administrator</td><td>—</td><td>超级管理员</td><td><span class="tag t-skip">本地</span></td><td>2026-10-26 14:33:00</td><td style="color:#1677ff">编辑　删除</td></tr>
+   <tr><td>Admin</td><td>—</td><td>管理员</td><td><span class="tag t-skip">本地</span></td><td>2026-10-26 10:39:03</td><td style="color:#1677ff">编辑　删除</td></tr>
+   <tr><td>WANGCS</td><td>王传胜</td><td>普通用户</td><td><span class="tag t-upd">同步</span></td><td>2026-10-26 09:12:41</td><td style="color:#1677ff">编辑</td></tr>
+   <tr><td>NANXINGWU</td><td>南兴武</td><td>普通用户</td><td><span class="tag t-upd">同步</span></td><td>—</td><td style="color:#1677ff">编辑</td></tr>
+   <tr><td>FENGXINGENG</td><td>冯新更</td><td>普通用户</td><td><span class="tag t-upd">同步</span></td><td>—</td><td style="color:#1677ff">编辑</td></tr>
+  </table>
+  <p class="cap" style="margin-top:8px">共 5 条</p>
+ </div></div>
+</div>
+<ul class="list cap">
+<li>新增「姓名」「来源」两列；「同步」来源账号不提供手动删除（由同步统一管理），操作列只有「修改密码」，用户名、姓名、角色均不可改；「本地」账号可正常编辑姓名、角色、密码。</li>
+<li class="n2"><span class="dtag">11.13</span> 「普通用户」角色不分配「用户管理」菜单，同步账号登录后看不到本页面；账号角色由管理员或超级管理员在此列表中统一调整。</li>
+<li>按钮区右侧显示上次同步的时间和结果，失败时显示为红色「同步失败」及失败原因。</li>
+</ul>
+
+<h3>8.3 添加账号（本地账号）</h3>
+<div class="proto" style="height:380px">
+ <div class="p-top"><span class="logo"></span>极星算法推理平台</div>
+ <div class="mask"><div class="dlg">
+  <h4>添加账号</h4>
+  <table style="border:none"><tr><td style="border:none;width:90px">* 用户名</td><td style="border:none"><div style="border:1px solid #d1d5db;border-radius:4px;height:30px;line-height:28px;padding:0 8px;color:#9ca3af;font-size:13px">请输入用户名</div></td></tr><tr class="new"><td style="border:none;width:90px">姓名 <span class="mark">新增</span></td><td style="border:none"><div style="border:1px solid #d1d5db;border-radius:4px;height:30px;line-height:28px;padding:0 8px;color:#9ca3af;font-size:13px">请输入姓名（选填）</div></td></tr><tr><td style="border:none;width:90px">* 密码</td><td style="border:none"><div style="border:1px solid #d1d5db;border-radius:4px;height:30px;line-height:28px;padding:0 8px;color:#9ca3af;font-size:13px">请输入密码</div></td></tr><tr><td style="border:none;width:90px">* 确认密码</td><td style="border:none"><div style="border:1px solid #d1d5db;border-radius:4px;height:30px;line-height:28px;padding:0 8px;color:#9ca3af;font-size:13px">请再次输入密码</div></td></tr><tr><td style="border:none;width:90px">* 角色</td><td style="border:none"><div style="border:1px solid #d1d5db;border-radius:4px;height:30px;line-height:28px;padding:0 8px;color:#9ca3af;font-size:13px">请选择角色</div></td></tr></table>
+  <div class="ft"><span class="btn plain">取消</span><span class="btn">确定</span></div>
+ </div></div>
+</div>
+<ul class="list cap"><li>手动添加、编辑本地账号时可填写姓名（选填）。</li>
+<li class="n2"><span class="dtag">11.13</span> 同步账号行只提供「修改密码」操作，弹窗仅新密码、确认密码两项；角色不可改，需调整时由管理员操作。</li></ul>
+
+<h3>8.4 点击「立即同步」→ 结果提示</h3>
+<div class="proto" style="height:150px">
+ <div class="p-top"><span class="logo"></span>极星算法推理平台</div>
+ <div style="display:flex;justify-content:center;padding-top:22px">
+  <div style="background:#fff;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:10px 18px;font-size:14px">
+   <span style="color:#2e7d32;font-weight:600">✔ 同步完成</span>　新增 2 人，更新 1 人，删除 1 人，跳过 1 人
+  </div>
+ </div>
+</div>
+<ul class="list cap">
+<li>页面顶部轻提示，3 秒后自动消失，列表同时刷新。</li>
+<li>同步失败时显示红色提示，例如「✖ 同步失败：数据库连接超时，账号未改动」。</li>
+</ul>
+</section>
+
+<section>
+<h2>九、配置项（后端配置文件，不做界面）</h2>
+<table>
+<tr><th style="width:30%">配置项</th><th>值</th></tr>
+<tr><td>数据库地址 / 端口 / 服务名</td><td>115.175.2.30 / 1521 / orcl</td></tr>
+<tr><td>数据库账号、密码</td><td>客户提供，加密存储</td></tr>
+<tr><td>视图名</td><td>vw_ryxx_sjzmj</td></tr>
+<tr><td>定时规则</td><td>每天 02:00</td></tr>
+<tr><td>默认角色</td><td>普通用户（平台内置）</td></tr>
+<tr class="n2"><td>初始密码后缀</td><td><code>@2026</code>（拼在小写账号之后，示例 wangcs@2026）</td></tr>
+</table>
+</section>
+
+<section>
+<h2>十、待确认事项</h2>
+<ul class="list">
+<li><b>客户：</b>平台服务器能否访问 115.175.2.30:1521（防火墙是否放通）</li>
+<li><b>客户：</b>「普通用户」默认开放哪些菜单权限（建议数据看板、预警中心仅查看）</li>
+<li><b>客户：</b>每天同步一次是否满足</li>
+<li><b>研发：</b>确认平台密码复杂度规则是否接受 <code>wangcs@2026</code> 这类「字母 + @ + 数字」组合</li>
+<li><b>研发：</b>删除账号后，其名下的报警处理记录等历史数据是否受影响</li>
+</ul>
+<div class="note">本期不涉及：部门/岗位组织架构同步、按部门自动分配角色、向客户数据库回写数据。</div>
+</section>
+</div>
+</body>
+</html>
