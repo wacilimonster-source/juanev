@@ -79,7 +79,7 @@
   </section>
   <section class="page-panel" id="multiRoiInterfaceRequirements" data-page-panel="multi-roi-interface" role="tabpanel" aria-label="多ROI接口需求" hidden>
     <h2>1. 需求概述</h2>
-    <p class="lead">当某阶段启用 ROI 且任务配置的 ROI 数量 ≥ 2 时，平台不再逐 ROI 裁剪、逐 ROI 调用模型，改为经推理网关通过现有 OpenAI 兼容接口一次性下发：原始整图 + 该阶段提示词 + 推理参数 + ROI 坐标列表（<code>roi_wkt_list</code>）。算法服务按 ROI 裁剪、分别推理并融合后，仍以一个 <code>choices[0].message.content</code> 返回；平台按 ROI 分隔符拆分结果，继续执行现有成立条件、报警判定、目标框渲染与第三方上报。</p>
+    <p class="lead">当某阶段启用 ROI 且任务配置的 ROI 数量 ≥ 2 时，平台不再逐 ROI 裁剪、逐 ROI 调用模型，改为经推理网关通过现有 OpenAI 兼容接口一次性下发：整图（按“分析分辨率”配置压缩或不压缩）+ 该阶段提示词 + 推理参数 + ROI 坐标列表（<code>roi_wkt_list</code>）。算法服务按 ROI 裁剪、分别推理并融合后，仍以一个 <code>choices[0].message.content</code> 返回；平台按 ROI 分隔符拆分结果，继续执行现有成立条件、报警判定、目标框渲染与第三方上报。</p>
     <div class="note ok"><b>与单 ROI 的边界：</b>未启用 ROI 或仅 1 个 ROI 时保持现状不变——整图直接调用，或由平台裁剪一次再调用，均不下发 <code>roi_wkt_list</code>。本节仅适用于 ROI ≥ 2 的多 ROI 场景。</div>
 
     <h2>2. 触发条件与调用方式</h2>
@@ -87,17 +87,18 @@
       <tr><td>关闭</td><td>任意</td><td>整图调用一次（现状）</td><td>否</td></tr>
       <tr><td>开启</td><td>0（未绘制）</td><td>整图调用一次（等同关闭）</td><td>否</td></tr>
       <tr><td>开启</td><td>1</td><td>平台裁剪一张后调用（现状不变）</td><td>否</td></tr>
-      <tr><td>开启</td><td>≥2</td><td>原图 + ROI 列表一次下发（本节）</td><td>是，长度 = ROI 数</td></tr>
+      <tr><td>开启</td><td>≥2</td><td>整图（按分析分辨率）+ ROI 列表一次下发（本节）</td><td>是，长度 = ROI 数</td></tr>
     </tbody></table>
 
     <h2>3. 请求下发</h2>
     <ul>
-      <li>图片：使用该帧原始整图（平台实际下发尺寸），不再上传各 ROI 的裁剪图。</li>
+      <li>图片：按该场景“分析分辨率”配置下发整图——选择压缩 1080p / 720p 时下发缩放后的整图，选择不压缩时下发原始分辨率整图；同时不再上传各 ROI 的裁剪图。</li>
       <li>提示词与推理参数：沿用该阶段场景配置原样下发，不因 ROI 数量增加而修改。</li>
       <li>新增顶层可选字段 <code>roi_wkt_list</code>，按任务 ROI 顺序排列，每项表示一个轴对齐矩形。</li>
       <li>WKT 格式：<code>POLYGON ((x1 y1, x2 y1, x2 y2, x1 y2, x1 y1))</code>，闭合 5 点；<code>x1 &lt; x2</code>、<code>y1 &lt; y2</code>，坐标基于下发整图左上角像素，<code>x2</code> 可等于图宽、<code>y2</code> 可等于图高。</li>
       <li><code>stream</code> 固定 <code>false</code>；单次请求的 ROI 数量不得超过该模型登记的最大 ROI 数。</li>
     </ul>
+    <div class="note"><b>坐标基准：</b>本节所称“原图”均指本次实际下发的那张整图——压缩开启时为缩放后图像，不压缩时为原始分辨率图像。ROI 坐标与返回 bbox 均以该图左上角像素为基准；开启压缩时，ROI 需随缩放比例一并换算，避免与摄像头原始分辨率绑定。</div>
 <pre>{
   "model": "EV-VLM",
   "messages": [
