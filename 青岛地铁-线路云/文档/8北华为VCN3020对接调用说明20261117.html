@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8 北华为 VCN3020 对接调用说明</title>
+  <style>
+    :root { color-scheme: light; --ink:#172638; --muted:#455970; --accent:#006c64; --line:#d6e1ea; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f3f6fa; color:var(--ink); font:16px/1.7 system-ui,"Microsoft YaHei",sans-serif; }
+    header { background:#12283e; color:#fff; border-bottom:5px solid #29b0a2; }
+    .hero, .layout { max-width:1230px; margin:auto; padding:36px 28px; }
+    .hero p { margin:.35em 0 0; color:#d0dfeb; }
+    .kicker { font-size:.85rem; letter-spacing:.08em; }
+    h1 { font-size:clamp(1.85rem,4vw,2.8rem); line-height:1.25; margin:.28em 0; }
+    .layout { display:grid; grid-template-columns:205px minmax(0,1fr); gap:30px; align-items:start; }
+    nav { position:sticky; top:22px; padding:15px; background:var(--paper); border:1px solid var(--line); border-radius:10px; }
+    nav strong { display:block; padding:0 6px 5px; }
+    nav a { display:block; padding:4px 6px; }
+    a { color:#00675f; text-underline-offset:3px; }
+    a:focus-visible { outline:2px solid #00675f; outline-offset:3px; }
+    section { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:23px 27px; margin-bottom:18px; scroll-margin-top:18px; }
+    h2 { font-size:1.35rem; line-height:1.35; margin:0 0 .7em; }
+    h3 { font-size:1.07rem; margin:1.4em 0 .55em; }
+    p, ul, ol { margin:.65em 0; }
+    li + li { margin-top:.25em; }
+    .flow { padding-left:1.5em; }
+    .flow li::marker { color:var(--accent); font-weight:700; }
+    .note { padding:10px 13px; border-left:4px solid #b56c13; background:#fff6e8; }
+    .source, .muted { color:var(--muted); font-size:.88rem; }
+    .table { overflow-x:auto; margin:.8em 0; }
+    table { width:100%; border-collapse:collapse; text-align:left; font-size:.94rem; }
+    th, td { border-bottom:1px solid var(--line); padding:8px 10px; vertical-align:top; }
+    th { background:#eaf2f7; }
+    code { font: .9em/1.5 Consolas,"Microsoft YaHei",monospace; overflow-wrap:anywhere; }
+    p code, li code, td code { background:#edf3f7; border-radius:4px; padding:.08em .25em; }
+    pre { background:#14283a; color:#edf6fb; padding:13px 15px; border-radius:8px; overflow:auto; margin:.7em 0; }
+    pre code { font-size:.87rem; }
+    @media (max-width:780px) { .layout { display:block; } nav { position:static; margin-bottom:16px; } nav a { display:inline-block; } }
+    @media (max-width:480px) { .hero,.layout { padding:22px 12px; } section { padding:17px 14px; } }
+    @media print { body { background:#fff; font-size:10pt; } header { background:#fff; color:var(--ink); } .hero p { color:var(--muted); } .layout { display:block; } nav { display:none; } .hero,.layout,section { padding:8px 0; } section { border:0; } h2,h3 { break-after:avoid; } tr,pre { break-inside:avoid; } pre { white-space:pre-wrap; color:#172638; background:#eef3f7; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <p class="kicker">青岛地铁 · 线路云 · 8 北</p>
+      <h1>华为 VCN3020 对接调用说明</h1>
+      <p>组织树同步、摄像机同步与实时 RTSP 取停流</p>
+      <p class="kicker">接口依据 eSDK IVS V200R019C50 客户端 API · 2026-11-04</p>
+    </div>
+  </header>
+  <div class="layout">
+    <nav aria-label="文档目录">
+      <strong>目录</strong>
+      <a href="#flow">01 总体流程</a>
+      <a href="#session">02 SDK 登录</a>
+      <a href="#groups">03 域与组织树</a>
+      <a href="#cameras">04 摄像机列表</a>
+      <a href="#rtsp">05 实时取流</a>
+      <a href="#stop">06 停流与注销</a>
+      <a href="#mapping">07 极星字段映射</a>
+      <a href="#checks">08 联调验收</a>
+      <a href="#sources">09 参考材料</a>
+    </nav>
+    <main>
+      <section id="flow">
+        <h2>01 总体流程</h2>
+        <ol class="flow">
+          <li><strong>建立会话。</strong> 调用 <code>IVS_SDK_Init</code> 和 <code>IVS_SDK_Login</code>，获得 <code>iSessionID</code>。</li>
+          <li><strong>同步组织。</strong> 调用 <code>IVS_SDK_GetDomainRoute</code> 获取授权域，以各域的 <code>cDomainCode</code> 查询设备组。按父组关系先建父组，再建子组。</li>
+          <li><strong>同步摄像机。</strong> 调用 <code>IVS_SDK_GetDeviceList</code> 分页读取摄像机，按 <code>cDomainCode</code> 和 <code>cDevGroupCode</code> 查极星分组。</li>
+          <li><strong>按需播放。</strong> 用摄像机 <code>cCode</code> 调用 <code>IVS_SDK_GetRtspURL</code>，将返回的 URL 交给 RTSP 客户端，在 30 秒有效期内发起连接。</li>
+          <li><strong>结束播放。</strong> 关闭拉流客户端。本次 SDK 会话使用完毕后注销，进程退出时释放 SDK 资源。</li>
+        </ol>
+        <p class="note">CHM 概述列出的 VCN3020 配套版本为 <code>V100R002C50SPC206</code>。联调前核对现场固件、配套 SDK、账号可见范围以及 RTSP 实际访问地址。</p>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262892046.html">适配产品概述</a></p>
+      </section>
+
+      <section id="session">
+        <h2>02 SDK 初始化与登录</h2>
+        <pre><code>IVS_INT32 IVS_SDK_Init();
+IVS_INT32 IVS_SDK_Login(IVS_LOGIN_INFO *pLoginReqInfo,
+                        IVS_INT32 *pSessionID);</code></pre>
+        <p>进程启动时调用一次 <code>IVS_SDK_Init()</code>。成功后将 <code>IVS_LOGIN_INFO</code> 清零，再填入以下字段，使用账号密码发起登录。</p>
+        <div class="table"><table>
+          <thead><tr><th scope="col">入参字段</th><th scope="col">填法</th></tr></thead>
+          <tbody>
+            <tr><td><code>stIP.uiIPType</code> / <code>stIP.cIP</code></td><td>IPv4 示例使用 <code>IP_V4</code> 与平台 IP。</td></tr>
+            <tr><td><code>uiPort</code></td><td>平台 SDK 登录端口，CHM 默认 <code>9900</code>，以现场配置为准。</td></tr>
+            <tr><td><code>cUserName</code> / <code>pPWD</code></td><td>对接账号和密码。基本身份验证要求密码非空。</td></tr>
+            <tr><td><code>uiLoginType</code> / <code>uiClientType</code></td><td>基本身份验证用 <code>0</code>。登录示例使用 <code>uiClientType=0</code>（PC 客户端）。</td></tr>
+          </tbody>
+        </table></div>
+        <p>登录超时为 20 秒。返回码 <code>0</code> 表示成功，从输出参数读取 <code>iSessionID</code>。<code>0</code> 是合法会话 ID，SDK 的会话 ID 范围为 <code>0–127</code>，最多支持 128 个同时登录。后续业务调用复用有效会话。</p>
+        <p>收到 SDK 无效会话错误 <code>IVS_SDK_RET_INVALID_SESSION_ID</code>（<code>999115312</code>）时，重新登录并以新会话重试当前查询或重新申请取流。记录接口名和返回码，避免记录账号密码或完整取流 URL。同步若因会话或接口错误中断，保留既有数据，待完整同步成功后再核对缺失资源。</p>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262892175.html">初始化</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892181.html">登录</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892302.html">登录结构</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892860.html">错误码</a></p>
+      </section>
+
+      <section id="groups">
+        <h2>03 获取域与组织树</h2>
+        <h3>3.1 获取当前账号可见的域</h3>
+        <pre><code>IVS_INT32 IVS_SDK_GetDomainRoute(IVS_INT32 iSessionID,
+                                 IVS_DOMAIN_ROUTE_LIST *pDomainRouteList,
+                                 IVS_UINT32 uiBufferSize);</code></pre>
+        <p>预分配并清零输出缓冲区，传入实际字节数。返回成功后检查 <code>uiTotal</code> 是否在容量内，再遍历 <code>stDomainRoute[]</code>。取 <code>cDomainCode</code> 作为设备组查询入参，取 <code>cDomainName</code> 作为域展示名。<code>bIsLocalDomain</code> 用于区分本域与外域，<code>cSuperDomain</code> 表示上级域。</p>
+        <p class="note">域路由接口描述写明系统最多 <code>128×8</code> 个域，示例按 128 条分配。缓冲区大小按配套 SDK 头文件及确认的容量 <code>N</code> 计算，即 <code>sizeof(IVS_DOMAIN_ROUTE_LIST) + (N - 1) * sizeof(IVS_DOMAIN_ROUTE)</code>。联调核对实际域数和容量，超容量时中止本次同步并核查。</p>
+
+        <h3>3.2 按父组关系还原设备组树</h3>
+        <pre><code>IVS_INT32 IVS_SDK_GetDeviceGroup(IVS_INT32 iSessionID,
+                                 const IVS_CHAR *pDomainCode,
+                                 const IVS_CHAR *pDevGroupCode,
+                                 IVS_DEVICE_GROUP_LIST *pDeviceGroupList,
+                                 IVS_UINT32 uiBufferSize);</code></pre>
+        <ol>
+          <li>每个目标域首次调用传入 <code>pDomainCode = cDomainCode</code> 和 <code>pDevGroupCode = "0"</code>。按接口要求预留 5000 条，缓冲区大小为 <code>sizeof(IVS_DEVICE_GROUP_LIST) + 4999 * sizeof(IVS_DEVICE_GROUP)</code>。</li>
+          <li>返回成功后，在缓冲区容量内按 <code>uiTotal</code> 读取 <code>stDeviceGroup[]</code>，保存 <code>cGroupCode</code>、<code>cGroupName</code>、<code>cParentGroupCode</code>、<code>cDomainCode</code> 和 <code>bIsExDomin</code>。</li>
+          <li>按 <code>cParentGroupCode</code> 挂接。父组为 <code>"0"</code> 时挂到该域的极星分组。联调用有多层组织的域确认根查询覆盖深度。若根查询只回直接子组，传每个子组 <code>cGroupCode</code> 逐层查询，以域和组编码去重。</li>
+        </ol>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262892021.html">域路由接口</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892126.html">域结构</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892491.html">设备组接口</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892641.html">设备组列表</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892136.html">设备组字段</a></p>
+      </section>
+
+      <section id="cameras">
+        <h2>04 分页获取摄像机</h2>
+        <pre><code>IVS_INT32 IVS_SDK_GetDeviceList(IVS_INT32 iSessionID,
+                                IVS_UINT32 uiDeviceType,
+                                const IVS_INDEX_RANGE *pIndexRange,
+                                IVS_VOID *pDeviceList,
+                                IVS_UINT32 uiBufferSize);</code></pre>
+        <div class="table"><table>
+          <thead><tr><th scope="col">设备类型</th><th scope="col">输出结构</th><th scope="col">用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>2</code></td><td><code>IVS_CAMERA_BRIEF_INFO_LIST</code></td><td>基础同步默认使用，包含摄像机编码、名称、域、所属组和状态。</td></tr>
+            <tr><td><code>33</code></td><td><code>IVS_CAMERA_BRIEF_INFO_LIST_EX</code></td><td>需要经纬度时使用。</td></tr>
+            <tr><td><code>35</code></td><td><code>IVS_CAMERA_BRIEF_INFO_LIST_V2</code></td><td>需要互联编码 <code>cConnectCode</code> 时使用。以配套 SDK 头文件确认类型定义。</td></tr>
+          </tbody>
+        </table></div>
+        <ol>
+          <li>首查 <code>IVS_INDEX_RANGE{1, 1000}</code>。区间两端均包含，每页最多 1000 台。按实际类型分配缓冲区，类型 <code>2</code> 的计算方式为 <code>sizeof(IVS_CAMERA_BRIEF_INFO_LIST) + (N - 1) * sizeof(IVS_CAMERA_BRIEF_INFO)</code>，其中 <code>N</code> 为本页申请条数。</li>
+          <li>成功后读取 <code>uiTotal</code> 和返回的 <code>stIndexRange</code>。总数为 <code>0</code> 时结束。非空时先校验返回区间和本页容量，再读取 <code>stCameraBriefInfo[]</code>；最后一页最多读取总数覆盖的记录。</li>
+          <li>若返回区间尚未到达总数，从已确认的最后一个索引加一继续查询。总数 2003 时，正常请求依次为 <code>1–1000</code>、<code>1001–2000</code>、<code>2001–2003</code>。区间异常、缺页或无推进时，将本轮标记为未完成并复查。</li>
+        </ol>
+        <p>归属匹配使用 <code>cDomainCode</code> 和 <code>cDevGroupCode</code>。<code>cParentCode</code> 表示父设备编码。<code>uiStatus</code> 的 <code>0/1/2</code> 分别为离线、在线、休眠；<code>uiCameraStatus=2</code> 表示视频丢失。资源同步保留离线摄像机。</p>
+        <p>如只需查询某个域，可用 <code>IVS_SDK_GetDomainDeviceList</code> 传入域编码和类型 <code>2</code>。该接口在 CHM 中列出的摄像机类型包含 <code>2</code> 和 <code>33</code>，使用 <code>35</code> 时走上面的 <code>IVS_SDK_GetDeviceList</code>。</p>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262892023.html">设备列表接口</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892847.html">基础列表结构</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892454.html">基础设备字段</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892780.html">V2 列表结构</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892373.html">指定域查询</a></p>
+      </section>
+
+      <section id="rtsp">
+        <h2>05 申请 RTSP URL 并拉流</h2>
+        <pre><code>IVS_SDK_API IVS_SDK_GetRtspURL(IVS_INT32 iSessionID,
+                               const IVS_CHAR *pCameraCode,
+                               const IVS_URL_MEDIA_PARAM *pURLMediaParam,
+                               IVS_CHAR *pRtspURL,
+                               IVS_UINT32 uiBufferSize);</code></pre>
+        <p>摄像机编码取设备列表的 <code>cCode</code> 原值。将 <code>IVS_URL_MEDIA_PARAM</code> 清零后填写实时播放参数，URL 输出缓冲区可按 CHM 示例先用 1024 字节，传入实际缓冲区字节数。</p>
+        <div class="table"><table>
+          <thead><tr><th scope="col">参数</th><th scope="col">首轮联调取值</th><th scope="col">含义</th></tr></thead>
+          <tbody>
+            <tr><td><code>ServiceType</code></td><td><code>SERVICE_TYPE_REALVIDEO</code>（1）</td><td>实时浏览。</td></tr>
+            <tr><td><code>StreamType</code></td><td><code>STREAM_TYPE_MAIN</code>（1）</td><td>主码流，辅码流 1 为 2。</td></tr>
+            <tr><td><code>ProtocolType</code></td><td><code>PROTOCOL_RTP_OVER_TCP</code>（2）</td><td>按 TCP 拉流联调时，拉流端也选 TCP。使用 UDP 时对应 <code>PROTOCOL_RTP_OVER_UDP</code>（1）。</td></tr>
+            <tr><td><code>PackProtocolType</code></td><td><code>PACK_PROTOCOL_ES</code></td><td>一般先用 ES，国标摄像机按现场协商验证 PS。CHM 明确不支持 TS。</td></tr>
+            <tr><td><code>TransMode</code> / <code>BroadCastType</code></td><td><code>MEDIA_TRANS</code>（0） / <code>BROADCAST_UNICAST</code>（0）</td><td>中转、单播。</td></tr>
+            <tr><td><code>iClientType</code></td><td><code>1</code></td><td>标准 RTSP 客户端。若联调涉及外域短 URL，CHM 指定使用 <code>5</code>，需验证现场支持。</td></tr>
+            <tr><td><code>VideoDecType</code> / <code>AudioDecType</code></td><td>示例 <code>VIDEO_DEC_H264</code> / <code>AUDIO_DEC_G711U</code></td><td>按设备码流和客户端解码能力填写。H.265 使用 <code>VIDEO_DEC_H265</code>。</td></tr>
+            <tr><td><code>dstIP</code></td><td>默认留空</td><td>NAT 场景按现场确认的目的 IPv4 填写。</td></tr>
+          </tbody>
+        </table></div>
+        <pre><code>// 示例使用支持 H.264 / G.711U 的摄像机和拉流客户端
+IVS_URL_MEDIA_PARAM media = {};
+media.ServiceType = SERVICE_TYPE_REALVIDEO;
+media.StreamType = STREAM_TYPE_MAIN;
+media.ProtocolType = PROTOCOL_RTP_OVER_TCP;
+media.PackProtocolType = PACK_PROTOCOL_ES;
+media.TransMode = MEDIA_TRANS;
+media.BroadCastType = BROADCAST_UNICAST;
+media.iClientType = 1;
+media.VideoDecType = VIDEO_DEC_H264;
+media.AudioDecType = AUDIO_DEC_G711U;
+
+IVS_CHAR url[1024] = {};
+IVS_INT32 ret = IVS_SDK_GetRtspURL(iSessionID, cameraCode, &amp;media,
+                                  url, sizeof(url));
+// ret == 0 且 URL 非空时，立即交给 RTSP 客户端发起播放。</code></pre>
+        <p>按需申请 URL，在 <strong>30 秒内</strong>发起连接。过期或重拉时重新申请并使用完整返回值。若 SDK 返回成功但客户端无法播放，依次核查 URL 中的媒体地址与端口、传输协议、编码和平台视频加密配置。CHM 明确提示，开启视频加密时，第三方无法解析该接口返回的 RTSP URL。</p>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262892217.html">取流接口</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892566.html">媒体参数</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892133.html">传输枚举</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262891871.html">视频编码枚举</a></p>
+      </section>
+
+      <section id="stop">
+        <h2>06 停流、注销与资源释放</h2>
+        <ol>
+          <li>业务结束时，由发起拉流的一侧执行客户端停止或关闭操作，释放本路 RTSP 连接和解码资源。联调观察客户端退出后 VCN3020 平台侧的播放会话何时释放。</li>
+          <li>该 SDK 会话的业务全部结束后调用 <code>IVS_SDK_Logout(iSessionID)</code>。成功后废弃旧会话 ID。其他调用仍在共用该会话时，保留会话。</li>
+          <li>进程退出前，在业务和会话结束后调用 <code>IVS_SDK_Cleanup()</code>，与初始化配对。</li>
+        </ol>
+        <p class="note">华为将 <code>IVS_SDK_StopURLPlayByToken</code> 标为仅适配 IVS3800 V100R019C50 及以上版本。VCN3020 的验收以拉流客户端关闭后的实际释放结果为准。若现场要求平台侧强制停流，由平台方确认该版本支持的接口及权限。</p>
+        <p class="source">原文 <a href="ivs_chm_extracted/zh-cn_topic_0262891990.html">Token 断流适配说明</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892588.html">注销</a> · <a href="ivs_chm_extracted/zh-cn_topic_0262892613.html">释放资源</a></p>
+      </section>
+
+      <section id="mapping">
+        <h2>07 极星字段映射</h2>
+        <div class="table"><table>
+          <thead><tr><th scope="col">8 北来源</th><th scope="col">极星字段或映射</th><th scope="col">处理方式</th></tr></thead>
+          <tbody>
+            <tr><td>域 <code>cDomainName</code> / 组 <code>cGroupName</code></td><td><code>name</code></td><td>用作分组名称。</td></tr>
+            <tr><td><code>cDomainCode</code> / <code>(cDomainCode, cGroupCode)</code></td><td>本地映射键</td><td>分别保存域和设备组对应的极星分组 ID。</td></tr>
+            <tr><td>组 <code>cParentGroupCode</code></td><td><code>pid</code></td><td>查到上级极星分组 ID 后填入；根组编码 <code>"0"</code> 关联对应域分组。</td></tr>
+            <tr><td>摄像机 <code>cDomainCode</code> + <code>cDevGroupCode</code></td><td><code>groupId</code></td><td>用组合键查极星分组 ID。组编码为 <code>"0"</code> 时对应域分组。归属缺失的设备先记录并核对源数据或权限。</td></tr>
+            <tr><td>摄像机 <code>cCode</code> / <code>cName</code></td><td><code>cid</code> / <code>name</code></td><td><code>cid</code> 暂用 <code>cCode</code> 原值，联调验证跨域唯一性。若出现冲突，先确认极星唯一键规则，取流仍使用原始 <code>cCode</code>。</td></tr>
+            <tr><td><code>IVS_SDK_GetRtspURL</code> 输出</td><td><code>stream</code></td><td>沿用视频地址字段的业务含义，播放时填入新申请的临时 URL。资源同步持久化摄像机标识和归属。</td></tr>
+          </tbody>
+        </table></div>
+        <h3>字段串联示例</h3>
+        <pre><code>域路由  cDomainCode = "DOMAIN_A"
+设备组  cGroupCode = "GROUP_01", cParentGroupCode = "0"
+摄像机  cCode = "CAM_01", cDomainCode = "DOMAIN_A",
+        cDevGroupCode = "GROUP_01"
+
+极星    groupId = 映射("DOMAIN_A", "GROUP_01"), cid = "CAM_01"
+取流    GetRtspURL 的 pCameraCode = "CAM_01"，返回 URL 用于本次播放</code></pre>
+      </section>
+
+      <section id="checks">
+        <h2>08 联调验收</h2>
+        <div class="table"><table>
+          <thead><tr><th scope="col">检查项</th><th scope="col">验收观察</th></tr></thead>
+          <tbody>
+            <tr><td>版本、权限、登录</td><td>确认固件和配套 SDK，核对登录地址及端口。返回有效会话，账号可见域和设备符合授权范围。验证会话失效后的重新登录。</td></tr>
+            <tr><td>组织树</td><td>选择有多层设备组的域，与平台管理界面核对节点数及父子关系。涉及多域时，检查同名组或同编码组的归属。</td></tr>
+            <tr><td>摄像机</td><td>用较小页长或超过 1000 台的目录验证翻页和末页，核对总数、组归属、离线设备和 <code>cid</code> 唯一性。</td></tr>
+            <tr><td>实时播放</td><td>抽测在线摄像机，验证在有效期内能收到画面，过期后重新申请可播放。记录实测协议、媒体地址端口和编码。</td></tr>
+            <tr><td>释放与重拉</td><td>停止客户端后检查本地资源和平台侧会话，反复取流与停止，记录实际释放时长。若有外域设备，单列外域取停流结果。</td></tr>
+          </tbody>
+        </table></div>
+        <p class="muted">以上为联调验收项，结果由 8 北现场填写。</p>
+      </section>
+
+      <section id="sources">
+        <h2>09 参考材料</h2>
+        <ul>
+          <li>8 北接口定义与产品适配以《eSDK IVS V200R019C50 接口参考（客户端.API）》为准。各节原文链接指向随工作区保存的 CHM 解包页。<a href="8北_CHM目录地图.md">CHM 目录地图</a> · <a href="8北对接_材料结构化提取总览.md">材料提取总览</a></li>
+          <li>8 南用于参考组织归属和极星字段口径。<a href="../华为8南对接/ivs3800_northbound_integration_plan.md">IVS3800 北向对接方案</a></li>
+          <li>宇视用于参考业务调用顺序和取停流生命周期。<a href="../宇视对接/宇视感知联网平台API对接调用流程说明_完整版.md">宇视感知联网平台 API 对接调用流程说明</a></li>
+        </ul>
+        <p class="muted">HTML 正文和样式可独立离线打开。参考链接按工作区目录结构定位。</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
