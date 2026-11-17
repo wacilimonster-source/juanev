@@ -14,20 +14,38 @@
     --accent:#1677ff;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   body{
     font:14px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",Arial,sans-serif;
     color:var(--text);background:var(--bg);
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 80px}
-  header{margin-bottom:40px}
+  .wrap{max-width:1160px;margin:0 auto;padding:56px 24px 80px}
+  .layout{display:flex;align-items:stretch;gap:36px}
+  .toc{flex:0 0 196px;width:196px}
+  .toc-inner{position:sticky;top:28px;max-height:calc(100vh - 56px);overflow:auto}
+  .toc[hidden]{display:none}
+  main{flex:1;min-width:0}
+  .toc-label{font-size:12px;color:var(--sub);letter-spacing:.3px;padding:1px 0 10px 13px}
+  .toc ul{list-style:none;border-left:1px solid var(--line)}
+  .toc li+li{border-top:0}
+  .toc li a{
+    display:block;margin-left:-1px;padding:7px 0 7px 12px;
+    border-left:2px solid transparent;
+    font-size:13px;line-height:1.45;color:var(--sub);text-decoration:none;
+    transition:color .15s,border-color .15s;
+  }
+  .toc li a:hover{color:var(--text)}
+  .toc li a.on{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+  header{margin-bottom:36px}
   h1{font-size:26px;font-weight:600;letter-spacing:-.3px}
   .desc{margin-top:8px;color:var(--sub);font-size:14px}
   .meta{margin-top:14px;font-size:12px;color:#9aa1ab}
   .meta span+span::before{content:"·";margin:0 8px;color:#cfd4da}
   .project{
     background:var(--card);border:1px solid var(--line);border-radius:10px;
-    overflow:hidden;margin-bottom:16px;
+    overflow:hidden;margin-bottom:16px;scroll-margin-top:24px;
   }
   .project-head{
     display:flex;align-items:baseline;gap:10px;
@@ -92,6 +110,25 @@
   .empty{font-size:13px;color:#9aa1ab;padding:10px 0}
   footer{margin-top:48px;font-size:12px;color:#9aa1ab;border-top:1px solid var(--line);padding-top:16px}
   code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--sub)}
+  @media (max-width:900px){
+    .layout{display:block}
+    .toc{width:auto;flex:none}
+    .toc-inner{
+      position:static;max-height:none;overflow:visible;
+      margin:0 0 20px;padding-bottom:12px;border-bottom:1px solid var(--line);
+    }
+    .toc-label{padding:0 0 8px 2px}
+    .toc ul{
+      display:flex;gap:8px;overflow-x:auto;
+      border-left:0;padding-bottom:2px;scrollbar-width:none;
+    }
+    .toc ul::-webkit-scrollbar{display:none}
+    .toc li a{
+      margin-left:0;padding:6px 11px;border:1px solid var(--line);
+      border-radius:999px;font-size:12px;white-space:nowrap;
+    }
+    .toc li a.on{border:1px solid #b5d4f4;background:#e8f1ff}
+  }
   @media (max-width:560px){
     .wrap{padding:36px 16px 60px}
     a.item{flex-wrap:wrap;gap:4px}
@@ -106,276 +143,298 @@
     <h1>设计原型目录</h1>
     <p class="desc">按客户 / 项目归档的原型与文档，点击标题即可打开最新版本。</p>
     <p class="meta">
-      <span>更新于 2026-11-16</span>
-      <span>6 个项目 · 5 个原型 · 10 个版本</span>
+      <span>更新于 2026-11-17</span>
+      <span>6 个项目 · 5 个原型 · 11 个版本</span>
     </p>
   </header>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-工地项目</h2>
-      <span class="count">青岛地铁-工地项目/</span>
-    </div>
-
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li class="row">
-          <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112-v2.html">
-            <span class="name">人脸抓拍机布控库自维护设计稿</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-          <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112-v2.html" data-name="人脸抓拍机布控库自维护设计稿20261112-v2.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-          <details class="versions">
-            <summary>历史版本 (2)</summary>
-            <ul>
-              <li class="row">
-                <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112.html">
-                  <span class="name">2026-11-12 版（v1）</span>
-                  <span class="tag">2026-11-12</span>
-                </a>
-                <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112.html" data-name="人脸抓拍机布控库自维护设计稿20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-              </li>
-              <li class="row">
-                <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html">
-                  <span class="name">2026-11-11 版</span>
-                  <span class="tag">2026-11-11</span>
-                </a>
-                <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html" data-name="人脸抓拍机布控库自维护设计稿20261111.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-              </li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </div>
-
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-工地项目/文档/版本记录.html">全部记录 →</a>
+  <div class="layout">
+    <aside class="toc" id="toc" aria-label="项目导航" hidden>
+      <div class="toc-inner">
+        <div class="toc-label">项目目录</div>
+        <ul class="toc-list"></ul>
       </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">新增需求 15：人脸抓拍机添加（含 Excel 导入）后默认绑定 9808-人脸识别；新增需求 16：有启用布控库才开始分析（无库只记录上报与在线）</span>
-        </li>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">新增「设备在线状态每日定时抓图」「人脸抓拍机按最近上报 72 小时判断在线」（需求 13、14）</span>
-        </li>
-        <li>
-          <span class="u-date">2026-11-11</span>
-          <span class="u-text">首版归档：人脸抓拍机与布控库自维护设计稿</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+    </aside>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-青铁院</h2>
-      <span class="count">青岛地铁-青铁院/</span>
-    </div>
+    <main>
+      <section class="project" id="qd-gongdi">
+        <div class="project-head">
+          <h2>青岛地铁-工地项目</h2>
+          <span class="count">青岛地铁-工地项目/</span>
+        </div>
 
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li class="row">
-          <a class="item" href="青岛地铁-青铁院/原型/图像标注统计原型20261112.html">
-            <span class="name">图像标注统计原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-          <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-青铁院/原型/图像标注统计原型20261112.html" data-name="图像标注统计原型20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-        </li>
-      </ul>
-    </div>
+        <div class="sub">
+          <div class="sub-label">原型</div>
+          <ul>
+            <li class="row">
+              <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112-v2.html">
+                <span class="name">人脸抓拍机布控库自维护设计稿</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-11-12</span>
+              </a>
+              <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112-v2.html" data-name="人脸抓拍机布控库自维护设计稿20261112-v2.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+              <details class="versions">
+                <summary>历史版本 (2)</summary>
+                <ul>
+                  <li class="row">
+                    <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112.html">
+                      <span class="name">2026-11-12 版（v1）</span>
+                      <span class="tag">2026-11-12</span>
+                    </a>
+                    <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261112.html" data-name="人脸抓拍机布控库自维护设计稿20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+                  </li>
+                  <li class="row">
+                    <a class="item" href="青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html">
+                      <span class="name">2026-11-11 版</span>
+                      <span class="tag">2026-11-11</span>
+                    </a>
+                    <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-工地项目/原型/人脸抓拍机布控库自维护设计稿20261111.html" data-name="人脸抓拍机布控库自维护设计稿20261111.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+                  </li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </div>
 
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-青铁院/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">首版归档：图像标注统计原型（标注统计入口、多维筛选、标签/人员汇总、形状明细、分页）</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="青岛地铁-工地项目/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-11-12</span>
+              <span class="u-text">新增需求 15：人脸抓拍机添加（含 Excel 导入）后默认绑定 9808-人脸识别；新增需求 16：有启用布控库才开始分析（无库只记录上报与在线）</span>
+            </li>
+            <li>
+              <span class="u-date">2026-11-12</span>
+              <span class="u-text">新增「设备在线状态每日定时抓图」「人脸抓拍机按最近上报 72 小时判断在线」（需求 13、14）</span>
+            </li>
+            <li>
+              <span class="u-date">2026-11-11</span>
+              <span class="u-text">首版归档：人脸抓拍机与布控库自维护设计稿</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-门户管理</h2>
-      <span class="count">青岛地铁-门户管理/</span>
-    </div>
+      <section class="project" id="qd-qingtieyuan">
+        <div class="project-head">
+          <h2>青岛地铁-青铁院</h2>
+          <span class="count">青岛地铁-青铁院/</span>
+        </div>
 
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li class="row">
-          <a class="item" href="青岛地铁-门户管理/原型/门户页面原型20261112.html">
-            <span class="name">门户页面原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-12</span>
-          </a>
-          <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-门户管理/原型/门户页面原型20261112.html" data-name="门户页面原型20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-        </li>
-      </ul>
-    </div>
+        <div class="sub">
+          <div class="sub-label">原型</div>
+          <ul>
+            <li class="row">
+              <a class="item" href="青岛地铁-青铁院/原型/图像标注统计原型20261112.html">
+                <span class="name">图像标注统计原型</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-11-12</span>
+              </a>
+              <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-青铁院/原型/图像标注统计原型20261112.html" data-name="图像标注统计原型20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+            </li>
+          </ul>
+        </div>
 
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-门户管理/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-12</span>
-          <span class="u-text">首版归档：门户首页与平台管理后台「用户管理」「角色管理」原型；模型市场、我的工单等模块仅保留菜单展示。</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="青岛地铁-青铁院/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-11-12</span>
+              <span class="u-text">首版归档：图像标注统计原型（标注统计入口、多维筛选、标签/人员汇总、形状明细、分页）</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>石家庄中科</h2>
-      <span class="count">石家庄中科/</span>
-    </div>
+      <section class="project" id="qd-menhu">
+        <div class="project-head">
+          <h2>青岛地铁-门户管理</h2>
+          <span class="count">青岛地铁-门户管理/</span>
+        </div>
 
-    <div class="sub">
-      <div class="sub-label">文档</div>
-      <ul>
-        <li>
-          <a class="item" href="石家庄中科/文档/用户信息数据库同步方案20261113.html">
-            <span class="name">用户信息数据库同步方案</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-13</span>
-          </a>
-          <details class="versions">
-            <summary>历史版本 (1)</summary>
-            <ul>
-              <li>
-                <a class="item" href="石家庄中科/文档/用户信息数据库同步方案20261026.html">
-                  <span class="name">2026-10-26 版</span>
-                  <span class="tag">2026-10-26</span>
-                </a>
-              </li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </div>
+        <div class="sub">
+          <div class="sub-label">原型</div>
+          <ul>
+            <li class="row">
+              <a class="item" href="青岛地铁-门户管理/原型/门户页面原型20261112.html">
+                <span class="name">门户页面原型</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-11-12</span>
+              </a>
+              <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-门户管理/原型/门户页面原型20261112.html" data-name="门户页面原型20261112.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+            </li>
+          </ul>
+        </div>
 
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="石家庄中科/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-13</span>
-          <span class="u-text">新增「账号与角色保护」：超管/管理员角色不可删除，同步账号改密与角色调整统一由管理员操作；补充密码规则（账号小写 + @2026）</span>
-        </li>
-        <li>
-          <span class="u-date">2026-10-26</span>
-          <span class="u-text">首版归档：用户信息数据库同步方案（字段对照、同步规则、内置「普通用户」角色、安全保护、界面原型与配置项）</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="青岛地铁-门户管理/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-11-12</span>
+              <span class="u-text">首版归档：门户首页与平台管理后台「用户管理」「角色管理」原型；模型市场、我的工单等模块仅保留菜单展示。</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-微调</h2>
-      <span class="count">青岛地铁-微调/</span>
-    </div>
+      <section class="project" id="sjz-zhongke">
+        <div class="project-head">
+          <h2>石家庄中科</h2>
+          <span class="count">石家庄中科/</span>
+        </div>
 
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li class="row">
-          <a class="item" href="青岛地铁-微调/原型/大模型微调交付版原型20261113-v2.html">
-            <span class="name">大模型微调交付版原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-11-13</span>
-          </a>
-          <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-微调/原型/大模型微调交付版原型20261113-v2.html" data-name="大模型微调交付版原型20261113-v2.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-          <details class="versions">
-            <summary>历史版本 (1)</summary>
-            <ul>
-              <li class="row">
-                <a class="item" href="青岛地铁-微调/原型/大模型微调交付版原型20261113.html">
-                  <span class="name">2026-11-13 版（v1）</span>
-                  <span class="tag">2026-11-13</span>
-                </a>
-                <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-微调/原型/大模型微调交付版原型20261113.html" data-name="大模型微调交付版原型20261113.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-              </li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </div>
+        <div class="sub">
+          <div class="sub-label">文档</div>
+          <ul>
+            <li>
+              <a class="item" href="石家庄中科/文档/用户信息数据库同步方案20261113.html">
+                <span class="name">用户信息数据库同步方案</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-11-13</span>
+              </a>
+              <details class="versions">
+                <summary>历史版本 (1)</summary>
+                <ul>
+                  <li>
+                    <a class="item" href="石家庄中科/文档/用户信息数据库同步方案20261026.html">
+                      <span class="name">2026-10-26 版</span>
+                      <span class="tag">2026-10-26</span>
+                    </a>
+                  </li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </div>
 
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-微调/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-11-13</span>
-          <span class="u-text">平台数据集版本状态改为下载/转换流程；上传单文件上限 1 GB 调整为 5 GB；资源分配新增自动分配与批量分配；移除实例资源配置</span>
-        </li>
-        <li>
-          <span class="u-date">2026-11-13</span>
-          <span class="u-text">首版归档：大模型微调交付版原型（数据集取自外部样本库，仅保留图像理解微调；快速微调、我的模型、微调数据集与管理后台）</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="石家庄中科/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-11-13</span>
+              <span class="u-text">新增「账号与角色保护」：超管/管理员角色不可删除，同步账号改密与角色调整统一由管理员操作；补充密码规则（账号小写 + @2026）</span>
+            </li>
+            <li>
+              <span class="u-date">2026-10-26</span>
+              <span class="u-text">首版归档：用户信息数据库同步方案（字段对照、同步规则、内置「普通用户」角色、安全保护、界面原型与配置项）</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-  <section class="project">
-    <div class="project-head">
-      <h2>青岛地铁-线路云</h2>
-      <span class="count">青岛地铁-线路云/</span>
-    </div>
+      <section class="project" id="qd-weidiao">
+        <div class="project-head">
+          <h2>青岛地铁-微调</h2>
+          <span class="count">青岛地铁-微调/</span>
+        </div>
 
-    <div class="sub">
-      <div class="sub-label">原型</div>
-      <ul>
-        <li class="row">
-          <a class="item" href="青岛地铁-线路云/原型/极星算法推理平台需求与原型20261023.html">
-            <span class="name">极星算法推理平台需求与原型</span>
-            <span class="badge">最新</span>
-            <span class="tag">2026-10-23</span>
-          </a>
-          <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-线路云/原型/极星算法推理平台需求与原型20261023.html" data-name="极星算法推理平台需求与原型20261023.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
-        </li>
-      </ul>
-    </div>
+        <div class="sub">
+          <div class="sub-label">原型</div>
+          <ul>
+            <li class="row">
+              <a class="item" href="青岛地铁-微调/原型/大模型微调交付版原型20261117.html">
+                <span class="name">大模型微调交付版原型</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-11-17</span>
+              </a>
+              <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-微调/原型/大模型微调交付版原型20261117.html" data-name="大模型微调交付版原型20261117.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+              <details class="versions">
+                <summary>历史版本 (2)</summary>
+                <ul>
+                  <li class="row">
+                    <a class="item" href="青岛地铁-微调/原型/大模型微调交付版原型20261113-v2.html">
+                      <span class="name">2026-11-13 版（v2）</span>
+                      <span class="tag">2026-11-13</span>
+                    </a>
+                    <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-微调/原型/大模型微调交付版原型20261113-v2.html" data-name="大模型微调交付版原型20261113-v2.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+                  </li>
+                  <li class="row">
+                    <a class="item" href="青岛地铁-微调/原型/大模型微调交付版原型20261113.html">
+                      <span class="name">2026-11-13 版（v1）</span>
+                      <span class="tag">2026-11-13</span>
+                    </a>
+                    <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-微调/原型/大模型微调交付版原型20261113.html" data-name="大模型微调交付版原型20261113.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+                  </li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </div>
 
-    <div class="updates">
-      <div class="updates-head">
-        <span>最近更新</span>
-        <a href="青岛地铁-线路云/文档/版本记录.html">全部记录 →</a>
-      </div>
-      <ul>
-        <li>
-          <span class="u-date">2026-10-23</span>
-          <span class="u-text">首版归档：极星算法推理平台需求与原型（V1.7，含 ROI 过滤、多 ROI 接口、成立条件、持续统计、多帧行为识别等需求与页面原型）</span>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="青岛地铁-微调/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-11-17</span>
+              <span class="u-text">「是否开启 TensorBoard」由勾选框改为标准开关控件</span>
+            </li>
+            <li>
+              <span class="u-date">2026-11-13</span>
+              <span class="u-text">平台数据集版本状态改为下载/转换流程；上传单文件上限 1 GB 调整为 5 GB；资源分配新增自动分配与批量分配；移除实例资源配置</span>
+            </li>
+            <li>
+              <span class="u-date">2026-11-13</span>
+              <span class="u-text">首版归档：大模型微调交付版原型（数据集取自外部样本库，仅保留图像理解微调；快速微调、我的模型、微调数据集与管理后台）</span>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-  <footer>
-    目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code><br>
-    版本规则：同名文件按日期沉淀，最新版作为入口，旧版保留可回溯。
-  </footer>
+      <section class="project" id="qd-xianluyun">
+        <div class="project-head">
+          <h2>青岛地铁-线路云</h2>
+          <span class="count">青岛地铁-线路云/</span>
+        </div>
+
+        <div class="sub">
+          <div class="sub-label">原型</div>
+          <ul>
+            <li class="row">
+              <a class="item" href="青岛地铁-线路云/原型/极星算法推理平台需求与原型20261023.html">
+                <span class="name">极星算法推理平台需求与原型</span>
+                <span class="badge">最新</span>
+                <span class="tag">2026-10-23</span>
+              </a>
+              <a class="dl" href="https://raw.githubusercontent.com/wacilimonster-source/juanev/main/青岛地铁-线路云/原型/极星算法推理平台需求与原型20261023.html" data-name="极星算法推理平台需求与原型20261023.html" target="_blank" rel="noopener" title="下载 HTML 源文件">下载</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="updates">
+          <div class="updates-head">
+            <span>最近更新</span>
+            <a href="青岛地铁-线路云/文档/版本记录.html">全部记录 →</a>
+          </div>
+          <ul>
+            <li>
+              <span class="u-date">2026-10-23</span>
+              <span class="u-text">首版归档：极星算法推理平台需求与原型（V1.7，含 ROI 过滤、多 ROI 接口、成立条件、持续统计、多帧行为识别等需求与页面原型）</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        目录结构：<code>&lt;客户&gt;-&lt;项目&gt;/原型/</code> · <code>&lt;客户&gt;-&lt;项目&gt;/文档/</code><br>
+        版本规则：同名文件按日期沉淀，最新版作为入口，旧版保留可回溯。
+      </footer>
+    </main>
+  </div>
 
 </div>
 <script>
@@ -411,6 +470,74 @@
       });
     });
   });
+})();
+</script>
+<script>
+(function () {
+  var toc = document.getElementById('toc');
+  var list = toc && toc.querySelector('.toc-list');
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section.project[id]'));
+  if (!toc || !list || !secs.length) return;
+
+  var active = -1;
+  var links = secs.map(function (sec, i) {
+    var h2 = sec.querySelector('h2');
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + sec.id;
+    a.textContent = h2 ? h2.textContent.trim() : sec.id;
+    a.addEventListener('click', function () { setActive(i); });
+    li.appendChild(a);
+    list.appendChild(li);
+    return a;
+  });
+  toc.hidden = false;
+
+  function setActive(i) {
+    if (i === active || !links[i]) return;
+    active = i;
+    links.forEach(function (a, n) {
+      if (n === i) {
+        a.classList.add('on');
+        a.setAttribute('aria-current', 'true');
+      } else {
+        a.classList.remove('on');
+        a.removeAttribute('aria-current');
+      }
+    });
+    if (list.scrollWidth > list.clientWidth + 1) {
+      var r = links[i].getBoundingClientRect();
+      var b = list.getBoundingClientRect();
+      if (r.left < b.left || r.right > b.right) {
+        list.scrollLeft += (r.left - b.left) - (b.width - r.width) / 2;
+      }
+    }
+  }
+
+  var timer = null;
+  function sync() {
+    var idx = 0;
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i].getBoundingClientRect().top <= 140) idx = i;
+    }
+    if (window.pageYOffset + window.innerHeight >= document.documentElement.scrollHeight - 4) {
+      idx = secs.length - 1;
+    }
+    setActive(idx);
+  }
+  function onScroll() {
+    if (timer) return;
+    timer = window.setTimeout(function () {
+      timer = null;
+      sync();
+    }, 60);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('hashchange', onScroll);
+  window.addEventListener('load', sync);
+  sync();
 })();
 </script>
 </body>
