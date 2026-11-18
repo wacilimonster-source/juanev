@@ -85,7 +85,7 @@
 
   <header>
     <h1>青岛地铁-智能巡视</h1>
-    <p class="desc">原型与文档版本记录 · 共 2 个版本，新记录在最上方</p>
+    <p class="desc">原型与文档版本记录 · 共 4 个版本，新记录在最上方</p>
   </header>
 
   <article class="entry">
@@ -95,9 +95,52 @@
     </div>
     <div class="body">
       <div class="head">
-        <a class="file" href="../原型/无人机巡检识别高保真原型20261118.html">无人机巡检识别高保真原型</a>
+        <a class="file" href="../原型/无人机巡检识别高保真原型20261118-v2.html">无人机巡检识别高保真原型（v2）</a>
         <span class="badge">最新</span>
-        <span class="ver">2026-11-18 版</span>
+        <span class="ver">2026-11-18 版（v2）</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req">应用中心 · 新增</span>新增「工地隐患监测」应用卡片及导航条双应用切换器，支持绿化与隐患两套控制台独立预览</li>
+        <li><span class="req mod">点位管理 · 改动</span>隐患应用取消「点位配置」页及状态筛选，改为只读接入列表并增加说明提示条</li>
+        <li><span class="req mod">巡视记录 · 改动</span>场景筛选按当前应用动态切换，隐患应用新增 1808~1816 九类场景及对应示例数据与现场示意图</li>
+        <li><span class="req mod">结果详情 · 改动</span>识别画面与接口请求/响应页签适配隐患检测接口（不传 jsonFile，回传隐患目标框与标签）</li>
+        <li><span class="req mod">大模型配置 · 改动</span>隐患应用下模型推理地址改为完整 URL 输入与校验，与绿化应用独立配置</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-18</div>
+      <div class="type">文档</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="无人机巡检识别需求文档20261118-v2.html">无人机巡检识别需求文档（v2）</a>
+        <span class="badge">最新</span>
+        <span class="ver">2026-11-18 版（v2）</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req mod">文档 · 改版</span>更新为 v0.8（待评审），标题调整为《无人机巡检识别 · 工地隐患监测 · 产品需求文档》</li>
+        <li><span class="req">应用拆分 · 新增</span>明确应用中心保留「无人机巡检识别」（绿化）并新增「工地隐患监测」（隐患），两套平台独立对接</li>
+        <li><span class="req">接口依赖 · 新增</span>新增《工地隐患检测接口（v1.0）》调用说明，区分绿化与隐患两套上下行接口路径</li>
+        <li><span class="req">场景 · 新增</span>新增 1808~1816 九类工地隐患场景、标签枚举及文档口径备注</li>
+        <li><span class="req mod">点位与配置 · 改动</span>明确隐患应用无「点位配置」页且模型调用不传 jsonFile，大模型地址改为完整 URL 校验</li>
+        <li><span class="req mod">流程与详情 · 改动</span>补充隐患应用跳过标注校验步骤、结果详情展示隐患目标框与双平台接口报文规则</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-18</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/无人机巡检识别高保真原型20261118.html">无人机巡检识别高保真原型</a>
+        <span class="badge old">历史</span>
+        <span class="ver">2026-11-18 版（v1）</span>
       </div>
       <ul class="changes">
         <li><span class="req">原型 · 新增</span>首版归档《无人机巡检识别 · 高保真原型》（极星算法推理平台应用中心模块）</li>
@@ -115,7 +158,8 @@
     <div class="body">
       <div class="head">
         <a class="file" href="无人机巡检识别需求文档20261118.html">无人机巡检识别需求文档</a>
-        <span class="ver">2026-11-18 版</span>
+        <span class="badge old">历史</span>
+        <span class="ver">2026-11-18 版（v1）</span>
       </div>
       <ul class="changes">
         <li><span class="req doc">文档 · 新增</span>首版归档《无人机巡检识别 · 产品需求文档》（v0.7 待评审）</li>

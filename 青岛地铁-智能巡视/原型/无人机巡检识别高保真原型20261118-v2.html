@@ -1,0 +1,2008 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>无人机巡检识别 · 工地隐患监测 · 高保真原型</title>
+<style>
+  :root{--blue:#1890ff;--blue-d:#0f7bd8;--ink:#333;--line:#dfe4e8}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body.proto{margin:0;background:#f0f2f5;color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",Arial,sans-serif;font-size:13px;line-height:1.5;overflow:hidden}
+  button{font-family:inherit}
+
+  /* ---------- 原型导航条（交付用，非产品界面） ---------- */
+  .pnav{height:48px;background:#0b1420;color:#fff;display:flex;align-items:center;gap:16px;padding:0 16px;position:relative;z-index:30}
+  .pnav .t{font-size:14px;font-weight:600;letter-spacing:.5px;white-space:nowrap}
+  .pnav .t small{color:#7d8f9f;font-weight:400;margin-left:10px;letter-spacing:0}
+  .pnav .scr{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;align-items:center}
+  .pnav .scr .nav-label{color:#6f8496;font-size:12px;letter-spacing:.5px;margin-right:6px;white-space:nowrap}
+  .pnav .scr button{height:30px;padding:0 14px;border:1px solid #2b3d4f;background:#132234;color:#b9c8d6;border-radius:3px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .pnav .scr button:hover{border-color:#3d556b;color:#fff}
+  .pnav .scr button.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+  .pnav .app-sw{display:inline-flex;border:1px solid #2b3d4f;border-radius:3px;overflow:hidden;margin-left:8px}
+  .pnav .app-sw button{height:28px;padding:0 11px;border:0;border-right:1px solid #2b3d4f;background:#132234;color:#9fb0c0;font-size:12px;cursor:pointer;white-space:nowrap}
+  .pnav .app-sw button:last-child{border-right:0}
+  .pnav .app-sw button.on{background:#1b4f82;color:#fff;font-weight:600}
+  .jx-seg.wrap{flex-wrap:wrap;border:0;gap:4px;overflow:visible}
+  .jx-seg.wrap button{border:1px solid #d9dfe3;border-radius:3px}
+  .jx-seg.wrap button.on{border-color:var(--blue)}
+  .jx-info-bar{border-left:3px solid var(--blue);background:#e6f7ff;color:#0b5f9e;padding:9px 12px;font-size:12px;border-radius:2px;margin-bottom:12px;line-height:1.6}
+
+  .stage{height:calc(100vh - 48px);position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column}
+  .screen.on{display:flex;animation:pageIn .2s ease}
+  @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- 极星平台外壳 ---------- */
+  .jx{flex:1;display:flex;flex-direction:column;min-height:0;background:#f0f2f5}
+  .jx-topbar{flex:0 0 56px;background:#0f1b2b;display:flex;align-items:center;padding:0 18px;gap:16px;color:#fff}
+  .jx-logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+  .jx-logo i{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#39a8e8,#1b6fc4);position:relative;display:inline-block}
+  .jx-logo i:after{content:"";position:absolute;inset:7px;border:1.5px solid #cfe9fb;border-radius:2px;transform:rotate(45deg)}
+  .jx-nav{display:flex;gap:2px;margin-left:10px}
+  .jx-nav span{color:#c3d0dc;padding:8px 13px;border-radius:3px;font-size:14px;white-space:nowrap}
+  .jx-nav span.on{background:#1b3a5c;color:#fff;font-weight:600}
+  .jx-user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#c3d0dc;font-size:13px;white-space:nowrap}
+  .jx-bell{width:16px;height:16px;border:1.5px solid #8fa3b5;border-radius:3px 3px 6px 6px;position:relative}
+  .jx-bell:after{content:"";position:absolute;left:5px;bottom:-4px;width:5px;height:3px;background:#8fa3b5;border-radius:0 0 4px 4px}
+  .jx-body{flex:1;display:flex;min-height:0}
+  .jx-rail{flex:0 0 46px;background:#16222f;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .jx-rail div{width:34px;height:34px;border-radius:4px;background:#20303f}
+  .jx-rail div.on{background:#0f4d80}
+  .jx-side{flex:0 0 158px;background:#16222f;color:#9fb0c0;padding:10px 0}
+  .jx-side .mt{padding:9px 18px;font-size:12px;color:#63798d;letter-spacing:1px}
+  .jx-side .m{padding:11px 18px;font-size:13px;border-left:3px solid transparent;cursor:pointer}
+  .jx-side .m:hover{color:#fff}
+  .jx-side .m.on{background:#0f2a45;color:#fff;border-left-color:var(--blue);font-weight:600}
+  .jx-main{flex:1;min-width:0;overflow:auto;padding:14px 18px 22px;background:#f0f2f5}
+  .jx-crumb{font-size:12px;color:#8c9aa6;margin-bottom:12px}
+  .jx-crumb b{color:#5b6b78;font-weight:400}
+  .jx-card{background:#fff;border-radius:2px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .jx-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .jx-row:last-child{margin-bottom:0}
+  .jx-sep{color:#d5dbe0;margin:0 2px}
+  .jx-btn{height:30px;padding:0 14px;border:1px solid #d9dfe3;background:#fff;border-radius:3px;color:#4f5b64;font-size:13px;cursor:pointer}
+  .jx-btn:hover{border-color:var(--blue);color:var(--blue)}
+  .jx-btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+  .jx-btn.pri:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff}
+  .jx-btn.ghost{border-color:transparent;color:var(--blue);padding:0 6px;background:transparent;white-space:nowrap}
+  .jx-btn.ghost:hover{color:var(--blue-d)}
+  .jx-btn.ghost.del{color:#cf1322}
+  .jx-btn.ghost.del:hover{color:#a8071a}
+  .jx-btn[disabled]{color:#b8c0c6;border-color:#e6eaed;cursor:not-allowed;background:#fafafa}
+  .jx-seg{display:inline-flex;border:1px solid #d9dfe3;border-radius:3px;overflow:hidden}
+  .jx-seg button{height:28px;padding:0 13px;border:0;border-right:1px solid #e6eaed;background:#fff;color:#5b6b78;font-size:13px;cursor:pointer}
+  .jx-seg button:last-child{border-right:0}
+  .jx-seg button.on{background:#e6f4ff;color:var(--blue);font-weight:600}
+  .jx-input{height:30px;border:1px solid #d9dfe3;border-radius:3px;padding:0 10px;font-size:13px;color:#3d4b58;font-family:inherit;width:220px}
+  .jx-input:focus{outline:0;border-color:var(--blue)}
+  .jx-input.w160{width:160px}
+  .jx-textarea{width:100%;border:1px solid #d9dfe3;border-radius:3px;padding:9px 10px;font-size:13px;color:#3d4b58;font-family:inherit;line-height:1.75;resize:vertical;min-height:150px}
+  .jx-textarea:focus{outline:0;border-color:var(--blue)}
+  .jx-input.bad{border-color:#f5222d}
+  .jx-search{position:relative;display:inline-block}
+  .jx-search .jx-input{padding-right:32px}
+  .jx-search:after{content:"\1F50D";position:absolute;right:9px;top:4px;font-size:13px;color:#9aa7b1}
+  .jx-tabs{display:flex;border-bottom:1px solid #eef0f2;margin:-2px 0 14px}
+  .jx-tabs span{padding:9px 16px;font-size:13px;color:#7b8891;border-bottom:2px solid transparent;cursor:pointer}
+  .jx-tabs span.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+  .jx-table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
+  .jx-table th{background:#fafafa;color:#4a5a68;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid #eef0f2;white-space:nowrap}
+  .jx-table td{padding:10px 12px;border-bottom:1px solid #f2f4f6;color:#3d4b58;vertical-align:middle}
+  .jx-table tr:hover td{background:#fafcfe}
+  .jx-table .thumb{width:76px;height:44px;border-radius:2px;overflow:hidden;border:1px solid #e6eaed;display:block}
+  .jx-table .thumb svg,.jx-table .thumb img{width:100%;height:100%;display:block;object-fit:cover}
+  .jx-tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border:1px solid #d9d9d9;color:#8c8c8c;background:#fafafa;white-space:nowrap}
+  .jx-tag.b{color:#1890ff;border-color:#91d5ff;background:#e6f7ff}
+  .jx-tag.g{color:#389e0d;border-color:#b7eb8f;background:#f6ffed}
+  .jx-tag.o{color:#d46b08;border-color:#ffd591;background:#fff7e6}
+  .jx-tag.r{color:#cf1322;border-color:#ffa39e;background:#fff1f0}
+  /* 本次需求变更标记：红字 + 角标（新=新增，改=修改） */
+  .chg{color:#d4380d;font-weight:600}
+  .chg-tag{display:inline-block;margin-left:3px;padding:0 4px;font-size:10px;line-height:15px;font-weight:600;color:#fff;background:#d4380d;border-radius:2px;vertical-align:super}
+  .jx-pager{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:12px 14px;color:#6b7885;font-size:13px}
+  .jx-pager button{min-width:28px;height:28px;border:1px solid #d9dfe3;background:#fff;border-radius:3px;color:#5b6b78;cursor:pointer;padding:0 8px}
+  .jx-pager button.on{border-color:var(--blue);color:var(--blue);font-weight:600}
+  .jx-pager button[disabled]{color:#c3cbd2;cursor:not-allowed}
+  .jx-empty{padding:56px 0;text-align:center;color:#9aa7b1}
+  .jx-empty .ei{display:block;width:40px;height:40px;margin:0 auto 10px;border:3px solid #e2e8ec;border-radius:6px;position:relative}
+  .jx-empty .ei:after{content:"";position:absolute;inset:7px;border:2px dashed #cfd8de;border-radius:3px}
+  /* 骨架屏 */
+  .sk{display:block;height:13px;border-radius:3px;background:linear-gradient(90deg,#eef1f4 25%,#f7f9fa 37%,#eef1f4 63%);background-size:400% 100%;animation:skMove 1.2s ease infinite}
+  @keyframes skMove{from{background-position:100% 50%}to{background-position:0 50%}}
+  /* 表头排序 */
+  .jx-table th.sortable{cursor:pointer;user-select:none;position:relative;padding-right:20px}
+  .jx-table th.sortable:hover{color:var(--blue)}
+  .jx-table th.sortable:after{content:"\2195";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#c3cbd2}
+  .jx-table th.sortable.asc:after{content:"\2191";color:var(--blue)}
+  .jx-table th.sortable.desc:after{content:"\2193";color:var(--blue)}
+  .jx-table th.sortable.asc,.jx-table th.sortable.desc{color:var(--blue)}
+  .jx-appgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1080px}
+  .jx-appcard{background:#0e1c33;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(11,26,48,.18);position:relative}
+  .jx-appcard .cap{padding:14px 16px 4px;color:#fff;font-size:15px;font-weight:600;letter-spacing:.5px}
+  .jx-appcard .art{flex:1;min-height:168px;display:flex;align-items:center;justify-content:center}
+  .jx-appcard .art svg{width:150px;height:110px}
+  .jx-appcard .act{padding:12px 14px 14px}
+  .jx-appcard .act button{width:100%;height:34px;border:0;border-radius:3px;background:linear-gradient(90deg,#2f8fe0,#1f6fd0);color:#fff;font-size:14px;cursor:pointer}
+  .jx-appcard .act button:hover{background:linear-gradient(90deg,#3aa0f0,#2478dd)}
+  .jx-appcard.empty{background:#f2f4f6;box-shadow:none;align-items:center;justify-content:center;color:#9aa7b1;min-height:300px;border:1px solid #e6eaed}
+  .jx-badge-new{position:absolute;right:12px;top:12px;background:#f5222d;color:#fff;font-size:11px;padding:1px 7px;border-radius:9px;font-weight:600;z-index:2}
+  .small{font-size:12px;color:#8c9aa6}
+
+  /* ---------- 参考图 / 标注 / 识别框 ---------- */
+  .roi-wrap{display:grid;grid-template-columns:1fr 340px;gap:16px}
+  .roi-stage{position:relative;width:100%;aspect-ratio:16/9;background:#0d1622;border:1px solid #d9dfe3;overflow:hidden;user-select:none}
+  .roi-bg{position:absolute;inset:0}
+  .roi-bg svg{width:100%;height:100%;display:block}
+  .roi-bg img{width:100%;height:100%;display:block;object-fit:cover}
+  .roi-box{position:absolute;border:2px solid #52c41a;background:rgba(82,196,26,.14)}
+  .roi-box .lb{position:absolute;left:-2px;top:-19px;background:#52c41a;color:#fff;font-size:11px;padding:0 6px;line-height:17px;border-radius:2px 2px 0 0;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+  .roi-box.on{border-color:var(--blue);background:rgba(24,144,255,.18);z-index:3}
+  .roi-box.on .lb{background:var(--blue)}
+  .roi-box.det{border-color:#f5222d;background:rgba(245,34,45,.12);pointer-events:none}
+  .roi-box.det .lb{background:#f5222d}
+  .roi-box .rz{position:absolute;right:-6px;bottom:-6px;width:12px;height:12px;background:#fff;border:2px solid var(--blue);border-radius:2px;display:none}
+  .roi-box.on .rz{display:block}
+  .roi-panel{display:flex;flex-direction:column;gap:12px}
+  .roi-panel .blk{background:#fff;border:1px solid #eef0f2;border-radius:3px;padding:12px 14px}
+  .roi-panel .blk h4{margin:0 0 9px;font-size:13px;color:#3d4b58;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .roi-list{list-style:none;margin:0;padding:0;max-height:210px;overflow:auto}
+  .roi-list li{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid #eef0f2;border-radius:3px;margin-bottom:6px;font-size:12px;background:#fafcfe;cursor:pointer}
+  .roi-list li.on{border-color:#91d5ff;background:#e6f7ff}
+  .roi-list li b{color:#0b5f9e;white-space:nowrap}
+  .roi-list li input{flex:1;min-width:0;height:22px;border:1px solid transparent;background:transparent;font-size:12px;color:#3d4b58;padding:0 3px;font-family:inherit}
+  .roi-list li input:hover,.roi-list li input:focus{border-color:#d9dfe3;background:#fff;outline:0}
+  .roi-list li .co{color:#8c9aa6;font-family:Consolas,monospace;font-size:11px;white-space:nowrap}
+  .roi-list li button{border:0;background:transparent;color:#cf1322;cursor:pointer;font-size:12px;flex:0 0 auto}
+  .fld{margin-bottom:12px}
+  .fld label{display:block;font-size:13px;color:#4a5a68;margin-bottom:5px}
+  .fld label .req{color:#f5222d;margin-right:3px}
+  .fld .tip{font-size:12px;color:#9aa7b1;margin-top:4px;line-height:1.5}
+  .sw{position:relative;display:inline-block;width:40px;height:20px;vertical-align:-4px;cursor:pointer;margin:0}
+  .sw input{position:absolute;opacity:0;width:0;height:0}
+  .sw i{position:absolute;inset:0;background:#c8d0d6;border-radius:10px;transition:.2s}
+  .sw i:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .sw input:checked + i{background:var(--blue)}
+  .sw input:checked + i:after{left:22px}
+  .note-warn{border-left:3px solid #faad14;background:#fffbe6;color:#ad6800;padding:9px 12px;font-size:12px;border-radius:2px;margin-top:12px;line-height:1.6}
+  .loading{display:inline-block;width:12px;height:12px;border:2px solid #cfe3f5;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .jx-btn.pri[disabled]{background:#7ab8f0;border-color:#7ab8f0;cursor:not-allowed}
+  .chk{display:flex;flex-wrap:wrap;gap:8px 16px}
+  .chk label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#3d4b58;margin:0;cursor:pointer}
+  .result-wrap{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
+  .card-h{display:flex;align-items:baseline;gap:8px;margin:0 0 12px;font-size:13px;font-weight:600;color:#3d4b58}
+  .card-h small{font-weight:400;color:#9aa7b1;font-size:12px}
+  .overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 22px}
+  .overview span{display:block;font-size:12px;color:#8c9aa6;margin-bottom:3px}
+  .overview b{font-size:13px;color:#26333f;font-weight:600;word-break:break-all}
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 12px}
+  .kpi div{background:#f7f9fb;border:1px solid #eef0f2;border-radius:3px;padding:10px 12px}
+  .kpi span{display:block;font-size:12px;color:#8c9aa6}
+  .kpi b{font-size:18px;color:#0b5f9e;font-weight:700}
+  .code{font-family:Consolas,monospace;background:#f7f9fb;border:1px solid #eef0f2;border-radius:3px;padding:10px;white-space:pre-wrap;font-size:12px;color:#3d4b58;word-break:break-all;line-height:1.6;max-height:460px;overflow:auto}
+  .io-tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid #eef0f2;margin:0 0 12px}
+  .io-tabs button{appearance:none;border:0;border-bottom:2px solid transparent;background:transparent;color:#7b8891;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:-1px}
+  .io-tabs button:hover{color:var(--blue)}
+  .io-tabs button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+  .kv{display:grid;grid-template-columns:92px 1fr;gap:7px 10px;font-size:12px;margin-bottom:12px}
+  .kv span:nth-child(odd){color:#8c9aa6}
+  .kv span:nth-child(even){color:#3d4b58;font-family:Consolas,monospace;word-break:break-all}
+  .io-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .io-label{font-size:12px;color:#8c9aa6;margin-bottom:6px}
+
+  /* ---------- 标注 JSON 预览 ---------- */
+  .annot-layer{position:absolute;inset:0;pointer-events:none}
+  .annot-layer svg{width:100%;height:100%;display:block}
+  .annot-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;color:#6b7885}
+  .annot-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .ro{display:inline-block;padding:0 10px;height:26px;line-height:24px;border:1px solid #eef0f2;background:#f7f9fb;border-radius:3px;font-size:12px;color:#3d4b58;font-family:Consolas,monospace;white-space:nowrap}
+  .ro.warn{color:#d46b08;border-color:#ffe7ba;background:#fff7e6}
+
+  /* ---------- 弹窗 / 抽屉 ---------- */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:80}
+  .mask.on{display:flex;animation:maskIn .18s ease}
+  @keyframes maskIn{from{opacity:0}to{opacity:1}}
+  .dlg{background:#fff;border-radius:4px;width:480px;max-width:92vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 28px rgba(0,0,0,.22);animation:dlgIn .2s cubic-bezier(.2,.8,.3,1)}
+  @keyframes dlgIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+  .dlg-h{flex:0 0 48px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #eef0f2;font-size:15px;font-weight:600;color:#26333f}
+  .dlg-h .x{margin-left:auto;border:0;background:transparent;font-size:20px;color:#98a5b0;cursor:pointer;line-height:1}
+  .dlg-h .x:hover{color:#5b6b78}
+  .dlg-b{padding:18px 16px;overflow:auto}
+  .dlg-f{padding:12px 16px;border-top:1px solid #eef0f2;display:flex;justify-content:flex-end;gap:8px}
+  .err{color:#f5222d;font-size:12px;margin-top:5px;display:none}
+  .err.on{display:block}
+  .up{border:1px dashed #cfd8de;background:#f8fafb;padding:12px;text-align:center;color:#6b7885;font-size:12px;margin-top:10px;border-radius:3px;cursor:pointer;display:block}
+  .up:hover{border-color:var(--blue);color:var(--blue)}
+  .up input{display:none}
+
+  .toast{position:fixed;left:50%;top:66px;transform:translate(-50%,-16px);background:#1f2c38;color:#fff;padding:9px 18px;border-radius:3px;font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:99;max-width:70vw}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media(max-width:1100px){.roi-wrap,.result-wrap,.io-split{grid-template-columns:1fr}.jx-appgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body class="proto">
+
+<div class="pnav">
+  <div class="t">无人机巡检识别 <small>高保真原型 · 极星算法推理平台</small></div>
+  <div class="app-sw" id="appSwitcher" title="切换当前预览的控制台应用">
+    <button type="button" data-switch-app="green" class="on">无人机巡检识别（绿化）</button>
+    <button type="button" data-switch-app="hazard">工地隐患监测（隐患）<sup class="chg-tag">新</sup></button>
+  </div>
+  <div class="scr">
+    <span class="nav-label">原型页面快捷导航</span>
+    <button type="button" data-screen="appcenter" class="on">应用中心</button>
+    <button type="button" data-screen="points">点位管理</button>
+    <button type="button" data-screen="config" id="navConfigBtn">点位配置</button>
+    <button type="button" data-screen="records">巡视记录</button>
+    <button type="button" data-screen="result">识别结果</button>
+    <button type="button" data-screen="retention">记录保留设置</button>
+    <button type="button" data-screen="modelcfg">大模型配置</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ ① 应用中心 ============ -->
+  <section class="screen on" data-screen="appcenter">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-main">
+          <div class="jx-tabs" id="appTabs">
+            <span class="on" data-cat="all">全部应用 (4)</span>
+            <span data-cat="ai">AI应用 (3)</span>
+            <span data-cat="tool">AI工具 (1)</span>
+            <span data-cat="svc">AI服务 (0)</span>
+          </div>
+          <div class="jx-appgrid" id="appGrid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ② 点位管理 ============ -->
+  <section class="screen" data-screen="points">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt app-mt">无人机巡检识别</div>
+          <div class="m on" data-go="points">点位管理</div>
+          <div class="m" data-go="records">巡视记录</div>
+          <div class="m" data-go="modelcfg">大模型配置</div>
+          <div class="m" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb"><span class="app-crumb">无人机巡检识别</span> / <b>点位管理</b></div>
+          <div class="jx-info-bar" id="pointHazardTip" style="display:none">工地隐患监测无需上传标注 JSON 与配置参考图，无「点位配置」页；点位由工地隐患平台下发后自动创建，下发巡视记录即可直接分析。</div>
+          <div class="jx-card" style="margin-bottom:12px">
+            <div class="jx-row">
+              <span id="pointStatusWrap" style="display:inline-flex;align-items:center;gap:8px">
+                <div class="jx-seg" id="pointStatusSeg">
+                  <button class="on" type="button" data-status="all">全部点位</button>
+                  <button type="button" data-status="done">已配置</button>
+                  <button type="button" data-status="todo">未配置</button>
+                </div>
+                <span class="jx-sep">|</span>
+              </span>
+              <span class="jx-search"><input class="jx-input" id="pointKw" placeholder="搜索点位编码 / 点位名称"></span>
+              <span class="jx-sep">|</span>
+              <button class="jx-btn pri" type="button" id="pointQuery">查询</button>
+              <button class="jx-btn" type="button" id="pointReset">重置</button>
+            </div>
+          </div>
+          <div class="jx-card" style="padding:0">
+            <table class="jx-table">
+              <thead id="pointThead">
+                <tr>
+                  <th style="width:150px" class="sortable" data-key="code">点位编码</th><th style="width:150px" class="sortable" data-key="name">点位名称</th>
+                  <th style="width:96px">参考图</th><th style="width:74px" class="sortable" data-key="annots">标注数</th>
+                  <th style="width:100px" class="sortable" data-key="status">配置状态</th>
+                  <th style="width:150px" class="sortable" data-key="createTime">创建时间</th><th style="width:100px">操作</th>
+                </tr>
+              </thead>
+              <tbody id="pointBody"></tbody>
+            </table>
+            <div class="jx-pager" id="pointPager"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ③ 点位配置 ============ -->
+  <section class="screen" data-screen="config">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt">无人机巡检识别</div>
+          <div class="m on" data-go="points">点位管理</div>
+          <div class="m" data-go="records">巡视记录</div>
+          <div class="m" data-go="modelcfg">大模型配置</div>
+          <div class="m" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb">无人机巡检识别 / <b>点位管理</b> / 点位配置 · <span id="cfgPoint">--</span></div>
+          <div class="jx-card">
+            <input type="file" id="annotFile" accept=".json,application/json" style="display:none">
+            <div class="jx-row">
+              <button class="jx-btn pri" type="button" id="btnUploadJson">上传标注 JSON</button>
+              <button class="jx-btn" type="button" id="btnRemoveJson">移除 JSON</button>
+              <span class="jx-sep">|</span>
+              <span class="small" id="cfgImgTip">参考图：--</span>
+              <span style="margin-left:auto"></span>
+              <button class="jx-btn" type="button" id="btnReplaceImg">替换参考图</button>
+            </div>
+            <div class="roi-wrap">
+              <div>
+                <div class="roi-stage" id="roiStage"><div class="roi-bg" id="roiBg"></div></div>
+                <div class="small" style="margin-top:8px" id="roiHint">参考图上叠加显示标注 JSON 中的区域，仅供核对，不参与编辑。</div>
+                <div class="annot-legend" id="annotLegend"></div>
+              </div>
+              <div class="roi-panel">
+                <div class="blk">
+                  <h4>标注清单 <span class="small" id="annotCount">0 条</span></h4>
+                  <ul class="roi-list" id="annotList"></ul>
+                </div>
+                <div class="blk">
+                  <h4>JSON 摘要</h4>
+                  <div class="kv" id="jsonMeta"></div>
+                </div>
+              </div>
+            </div>
+            <div class="jx-row" style="margin-top:16px;justify-content:flex-end">
+              <button class="jx-btn" type="button" data-go="points">返回</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ④ 巡视记录 ============ -->
+  <section class="screen" data-screen="records">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt app-mt">无人机巡检识别</div>
+          <div class="m" data-go="points">点位管理</div>
+          <div class="m on" data-go="records">巡视记录</div>
+          <div class="m" data-go="modelcfg">大模型配置</div>
+          <div class="m" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb"><span class="app-crumb">无人机巡检识别</span> / <b>巡视记录</b></div>
+          <div class="jx-card" style="margin-bottom:12px">
+            <div class="jx-row">
+              <div class="jx-seg" id="recRangeSeg">
+                <button class="on" type="button" data-range="today">今天</button>
+                <button type="button" data-range="7d">近7天</button>
+                <button type="button" data-range="30d">近30天</button>
+              </div>
+              <input class="jx-input w160" id="recFrom" value="2026-10-12 00:00:00">
+              <span style="color:#c3cbd2">~</span>
+              <input class="jx-input w160" id="recTo" value="2026-10-12 23:59:59">
+              <span class="jx-sep">|</span>
+              <span class="jx-search"><input class="jx-input" id="recKw" placeholder="巡视记录ID / 任务ID / 点位编码"></span>
+              <button class="jx-btn pri" type="button" id="recQuery">查询</button>
+              <button class="jx-btn" type="button" id="recReset">重置</button>
+            </div>
+            <div class="jx-row">
+              <div class="jx-seg" id="recTypeSeg">
+                <button class="on" type="button" data-type="all">全部场景</button>
+                <button type="button" data-type="1803">1803 树木识别</button>
+                <button type="button" data-type="1804">1804 绿化占比</button>
+                <button type="button" data-type="1805">1805 硬化路面</button>
+                <button type="button" data-type="1806">1806 苗木绿化状态<sup class="chg-tag">新</sup></button>
+                <button type="button" data-type="1807">1807 地面铺装状态<sup class="chg-tag">新</sup></button>
+              </div>
+              <span class="jx-sep">|</span>
+              <div class="jx-seg" id="recStatusSeg">
+                <button class="on" type="button" data-st="all">全部状态</button>
+                <button type="button" data-st="done">已完成</button>
+                <button type="button" data-st="fail">失败</button>
+              </div>
+              <span class="jx-sep">|</span>
+              <div class="jx-seg" id="recCbSeg">
+                <button class="on" type="button" data-cb="all">全部回传</button>
+                <button type="button" data-cb="ok">回传成功</button>
+                <button type="button" data-cb="fail">回传失败</button>
+              </div>
+            </div>
+          </div>
+          <div class="jx-card" style="padding:0">
+            <table class="jx-table">
+              <thead>
+                <tr>
+                  <th style="width:92px" class="sortable" data-key="id">巡视记录ID</th><th style="width:72px">图片</th>
+                  <th style="width:104px" class="sortable" data-key="pointCode">点位编码</th><th style="width:116px" class="sortable" data-key="scene">场景</th>
+                  <th style="width:240px">任务ID</th><th style="width:86px" class="sortable" data-key="analyze">分析状态</th>
+                  <th style="width:86px" class="sortable" data-key="callback">回传状态</th><th style="width:116px" class="sortable" data-key="receiveTime">接收时间</th><th style="width:78px">操作</th>
+                </tr>
+              </thead>
+              <tbody id="recBody"></tbody>
+            </table>
+            <div class="jx-pager" id="recPager"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ⑤ 识别结果详情 ============ -->
+  <section class="screen" data-screen="result">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt app-mt">无人机巡检识别</div>
+          <div class="m" data-go="points">点位管理</div>
+          <div class="m on" data-go="records">巡视记录</div>
+          <div class="m" data-go="modelcfg">大模型配置</div>
+          <div class="m" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb"><span class="app-crumb">无人机巡检识别</span> / <b>巡视记录</b> / 识别结果详情 · 巡视记录 <span id="rsRecordId">--</span></div>
+          <div class="jx-card" style="margin-bottom:12px">
+            <div class="overview">
+              <div><span>巡视记录ID</span><b id="rsId">--</b></div>
+              <div><span>点位编码</span><b id="rsPoint">--</b></div>
+              <div><span>任务ID</span><b id="rsTask">--</b></div>
+              <div><span>场景</span><b id="rsScene">--</b></div>
+              <div><span>分析状态</span><b id="rsStatus">--</b></div>
+              <div><span>接收时间</span><b id="rsRecv">--</b></div>
+              <div><span>分析耗时</span><b id="rsCost">--</b></div>
+              <div><span>模型调用次数</span><b id="rsCallCount">--</b></div>
+            </div>
+          </div>
+
+          <div class="result-wrap">
+            <div class="jx-card">
+              <div class="card-h">识别画面</div>
+              <div class="roi-stage" id="resultStage" style="cursor:default"><div class="roi-bg" id="resultBg"></div></div>
+              <div class="small" style="margin-top:8px" id="resultLegend"></div>
+            </div>
+            <div class="jx-card">
+              <div class="card-h">识别结果 <small>modelResult</small></div>
+              <div class="kpi" id="resultKpi"></div>
+              <div class="code" id="resultJson"></div>
+            </div>
+          </div>
+
+          <div class="jx-card" style="margin-top:16px">
+            <div class="card-h">接口请求与响应</div>
+            <div class="io-tabs" id="apiTabs">
+              <button class="on" type="button" data-api="record" id="apiTabRec">下发巡视记录　工地平台 → 极星</button>
+              <button type="button" data-api="model" id="apiTabModel">模型调用　极星 → 大模型</button>
+              <button type="button" data-api="callback" id="apiTabCb">接收点位识别结果　极星 → 工地平台</button>
+            </div>
+            <div class="kv" id="apiKv"></div>
+            <div class="io-split">
+              <div>
+                <div class="io-label">请求</div>
+                <div class="code" id="apiReq"></div>
+              </div>
+              <div>
+                <div class="io-label">响应</div>
+                <div class="code" id="apiResp"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ⑥ 记录保留设置 ============ -->
+  <section class="screen" data-screen="retention">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt app-mt">无人机巡检识别</div>
+          <div class="m" data-go="points">点位管理</div>
+          <div class="m" data-go="records">巡视记录</div>
+          <div class="m" data-go="modelcfg">大模型配置</div>
+          <div class="m on" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb"><span class="app-crumb">无人机巡检识别</span> / <b>记录保留设置</b></div>
+
+          <div class="jx-card" style="margin-bottom:12px">
+            <div class="card-h">保留策略</div>
+            <div class="fld">
+              <label><span class="req">*</span>巡视记录保存时长</label>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <input class="jx-input w160" id="retCustom" type="number" min="1" max="3650" step="1" placeholder="请输入天数">
+                <span class="small">天（1～3650）</span>
+              </div>
+              <div class="err" id="retErr">请输入 1～3650 之间的整数</div>
+              <div class="tip">超出保存时长的巡视记录（含原图、识别结果与回传报文）将被自动清理，清理后不可恢复。</div>
+            </div>
+            <div class="fld">
+              <label>自动清理</label>
+              <label class="sw"><input type="checkbox" id="retAuto" checked><i></i></label>
+              <span class="small" style="margin-left:8px">开启后系统按下方时间每日自动清理一次</span>
+            </div>
+            <div class="fld" style="margin-bottom:0">
+              <label>每日清理时间</label>
+              <input class="jx-input w160" id="retTime" value="03:00">
+              <div class="tip">建议设置在业务低峰时段。</div>
+            </div>
+            <div class="note-warn" id="retAutoOffNote" style="display:none">自动清理已关闭，超出保存时长的记录将不会被清理，存储将持续增长。</div>
+            <div class="jx-row" style="justify-content:flex-end;margin-top:16px">
+              <button class="jx-btn" type="button" id="retReset">恢复默认</button>
+              <button class="jx-btn pri" type="button" id="retSave">保存设置</button>
+            </div>
+          </div>
+
+          <div class="jx-card" style="margin-bottom:12px">
+            <div class="card-h">存储概览</div>
+            <div class="overview" id="retOverview"></div>
+          </div>
+
+          <div class="jx-card" style="padding:0">
+            <div style="padding:14px 16px 0"><div class="card-h">清理记录 <small>最近 5 次</small></div></div>
+            <table class="jx-table">
+              <thead>
+                <tr>
+                  <th style="width:200px">清理时间</th><th style="width:140px">清理条数</th><th>释放空间</th>
+                </tr>
+              </thead>
+              <tbody id="retLogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ⑦ 大模型配置 ============ -->
+  <section class="screen" data-screen="modelcfg">
+    <div class="jx">
+      <div class="jx-topbar">
+        <div class="jx-logo"><i></i>极星算法推理平台</div>
+        <div class="jx-nav"><span>数据看板</span><span>算法中心</span><span>预警中心</span><span>接入中心</span><span>管理中心</span><span class="on">应用中心</span></div>
+        <div class="jx-user"><span>Administrator</span><span class="jx-bell"></span></div>
+      </div>
+      <div class="jx-body">
+        <div class="jx-rail"><div></div><div></div><div></div><div></div><div></div><div class="on"></div></div>
+        <div class="jx-side">
+          <div class="mt app-mt">无人机巡检识别</div>
+          <div class="m" data-go="points">点位管理</div>
+          <div class="m" data-go="records">巡视记录</div>
+          <div class="m on" data-go="modelcfg">大模型配置</div>
+          <div class="m" data-go="retention">记录保留设置</div>
+        </div>
+        <div class="jx-main">
+          <div class="jx-crumb"><span class="app-crumb">无人机巡检识别</span> / <b>大模型配置</b></div>
+
+          <div class="jx-card">
+            <div class="card-h">调用接口</div>
+            <div class="fld" style="margin-bottom:0">
+              <label id="mcAddrLabel">模型地址（IP:端口，选填）<sup class="chg-tag">改</sup></label>
+              <input class="jx-input" id="mcAddr" style="width:100%;max-width:520px" placeholder="例如 172.16.210.88:9000，留空使用服务端默认">
+              <div class="tip" id="mcAddrTip">绿化恢复检测接口由模型侧封装提供。此处填写实际调用的模型地址，<b>仅需 IP 与端口</b>，无需协议、路径、请求方式、超时时间与鉴权信息；作为 <b>modelUrl</b> 字段随请求一并透传，配置后对本模块全部场景生效；<b>留空时模型侧使用服务端默认配置</b>。</div>
+            </div>
+            <div class="fld" style="margin-top:14px">
+              <label id="mcNameLabel">模型名称（选填）<sup class="chg-tag">新</sup></label>
+              <input class="jx-input" id="mcName" style="width:100%;max-width:520px" placeholder="例如 ev-vlm-32b，留空使用服务端默认模型">
+              <div class="tip" id="mcNameTip">作为 <b>modelName</b> 字段随请求一并透传；留空时模型侧使用服务端配置的默认模型。</div>
+            </div>
+            <div class="jx-row" style="justify-content:flex-end;margin-top:14px">
+              <button class="jx-btn pri" type="button" id="mcSave">保存配置</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ 通用确认弹窗 ============ -->
+<div class="mask" id="mConfirm">
+  <div class="dlg" style="width:400px">
+    <div class="dlg-h"><span id="cfTitle">确认</span><button class="x" type="button" data-close>×</button></div>
+    <div class="dlg-b" style="padding:22px 18px;color:#3d4b58" id="cfText"></div>
+    <div class="dlg-f"><button class="jx-btn" type="button" data-close>取消</button><button class="jx-btn pri" type="button" id="cfOk">确定</button></div>
+  </div>
+</div>
+
+<!-- ============ 上传参考图 ============ -->
+<div class="mask" id="mRefImg">
+  <div class="dlg" style="width:520px">
+    <div class="dlg-h"><span>上传参考图</span><button class="x" type="button" data-close>×</button></div>
+    <div class="dlg-b">
+      <div class="small" style="margin-bottom:8px">当前参考图（<span id="refState">系统默认图</span>）</div>
+      <div id="refPreview" style="border:1px solid #eef0f2;border-radius:3px;overflow:hidden;aspect-ratio:16/9;background:#0d1622"></div>
+      <label class="up" style="margin-top:12px">点击上传本地图片<input type="file" id="refFile" accept="image/*"></label>
+      <div class="tip small" style="margin-top:8px">未上传时使用系统默认参考图；上传后替换为本地图片。</div>
+      <div class="tip small" style="margin-top:6px">参考图仅作底图与标注预览，与标注 JSON 相互独立，替换不会影响已上传的标注。</div>
+    </div>
+    <div class="dlg-f">
+      <button class="jx-btn" type="button" id="refReset">恢复默认图</button>
+      <button class="jx-btn" type="button" data-close>取消</button>
+      <button class="jx-btn pri" type="button" id="refOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var toastEl = $("#toast"), toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+  function openMask(id){
+    var m = $("#" + id);
+    if(!m) return;
+    m.classList.add("on");
+    var cand = $$("input,textarea", m).filter(function(el){ return el.type !== "hidden" && el.offsetParent !== null; })[0] || $(".jx-btn.pri", m);
+    setTimeout(function(){ if(cand) cand.focus(); }, 80);
+  }
+  function closeMask(id){ $("#" + id).classList.remove("on"); }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function p2(n){ return (n < 10 ? "0" : "") + n; }
+  function stamp(){
+    var d = new Date();
+    return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
+  }
+  function btnLoading(btn, text, done, delay){
+    var old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span>' + (text || "处理中");
+    setTimeout(function(){
+      btn.disabled = false;
+      btn.innerHTML = old;
+      if(done) done();
+    }, delay || 600);
+  }
+  function showSkeleton(tbody, cols, rows, done){
+    var html = "";
+    for(var i = 0; i < (rows || 4); i++){
+      html += "<tr>" + new Array(cols).fill(0).map(function(){
+        return '<td><span class="sk" style="width:' + (38 + Math.round(Math.random() * 48)) + '%"></span></td>';
+      }).join("") + "</tr>";
+    }
+    tbody.innerHTML = html;
+    setTimeout(function(){ if(done) done(); }, 320);
+  }
+  function syncSortUI(table, s){
+    $$("th.sortable", table).forEach(function(th){
+      var k = th.getAttribute("data-key");
+      th.classList.toggle("asc", s.key === k && !s.desc);
+      th.classList.toggle("desc", s.key === k && s.desc);
+    });
+  }
+  function sortPoints(list){
+    var s = state.pointSort, k = s.key;
+    return list.slice().sort(function(a, b){
+      var va, vb;
+      if(k === "code"){ va = a.code; vb = b.code; }
+      else if(k === "name"){ va = a.name; vb = b.name; }
+      else if(k === "annots"){ va = annotCount(a); vb = annotCount(b); }
+      else if(k === "status"){ va = pointConfigured(a) ? 1 : 0; vb = pointConfigured(b) ? 1 : 0; }
+      else { va = a.createTime; vb = b.createTime; }
+      if(typeof va === "string") return s.desc ? vb.localeCompare(va) : va.localeCompare(vb);
+      return s.desc ? vb - va : va - vb;
+    });
+  }
+  function sortRecords(list){
+    var s = state.recSort, k = s.key;
+    var sceneOrder = { "1803": 1, "1804": 2, "1805": 3, "1806": 4, "1807": 5, "1808": 8, "1809": 9, "1810": 10, "1811": 11, "1812": 12, "1813": 13, "1814": 14, "1815": 15, "1816": 16 };
+    var stOrder = { fail: 0, running: 1, none: 2, done: 3 };
+    var cbOrder = { fail: 0, none: 1, ok: 2 };
+    return list.slice().sort(function(a, b){
+      var va, vb;
+      if(k === "id"){ va = a.id; vb = b.id; }
+      else if(k === "pointCode"){ va = a.pointCode; vb = b.pointCode; }
+      else if(k === "scene"){ va = sceneOrder[a.taskType]; vb = sceneOrder[b.taskType]; }
+      else if(k === "analyze"){ va = stOrder[a.analyze]; vb = stOrder[b.analyze]; }
+      else if(k === "callback"){ va = cbOrder[a.callback]; vb = cbOrder[b.callback]; }
+      else { va = a.receiveTime; vb = b.receiveTime; }
+      if(typeof va === "string") return s.desc ? vb.localeCompare(va) : va.localeCompare(vb);
+      return s.desc ? vb - va : va - vb;
+    });
+  }
+
+  /* ================= 默认参考图（内联 SVG，无外部依赖） ================= */
+  function defaultSceneSVG(){
+    var tree = function(x, y, r){
+      return '<rect x="' + (x - 7) + '" y="' + (y - 6) + '" width="14" height="' + (r + 34) + '" fill="#6b5238"/>' +
+             '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#3f8b45"/>' +
+             '<circle cx="' + (x - r * 0.5) + '" cy="' + (y + r * 0.35) + '" r="' + (r * 0.62) + '" fill="#4c9c52"/>' +
+             '<circle cx="' + (x + r * 0.5) + '" cy="' + (y + r * 0.3) + '" r="' + (r * 0.55) + '" fill="#356f3a"/>';
+    };
+    var person = function(x, y, c){
+      return '<circle cx="' + x + '" cy="' + (y - 46) + '" r="11" fill="#e3c4a8"/>' +
+             '<rect x="' + (x - 9) + '" y="' + (y - 34) + '" width="18" height="34" rx="6" fill="' + c + '"/>' +
+             '<rect x="' + (x - 8) + '" y="' + y + '" width="6" height="20" fill="#3b4550"/>' +
+             '<rect x="' + (x + 2) + '" y="' + y + '" width="6" height="20" fill="#3b4550"/>';
+    };
+    return '<svg viewBox="0 0 1920 1080" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><linearGradient id="skDefault" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6f7"/><stop offset="1" stop-color="#eef7fd"/></linearGradient></defs>' +
+      '<rect width="1920" height="1080" fill="url(#skDefault)"/>' +
+      '<rect x="70" y="235" width="300" height="330" fill="#d5dfe7"/><rect x="400" y="290" width="230" height="275" fill="#cbd7e0"/><rect x="1480" y="255" width="330" height="310" fill="#d5dfe7"/><rect x="1060" y="320" width="200" height="245" fill="#cbd7e0"/>' +
+      '<rect x="0" y="565" width="1920" height="120" fill="#6fa85e"/>' +
+      '<rect x="0" y="685" width="1920" height="395" fill="#6f7780"/>' +
+      '<rect x="0" y="677" width="1920" height="10" fill="#cfe0c4"/>' +
+      '<rect x="0" y="880" width="1920" height="12" fill="#e9edf0" opacity="0.75"/>' +
+      '<rect x="140" y="960" width="170" height="10" fill="#e9edf0" opacity="0.6"/>' +
+      '<rect x="470" y="960" width="170" height="10" fill="#e9edf0" opacity="0.6"/>' +
+      '<rect x="800" y="960" width="170" height="10" fill="#e9edf0" opacity="0.6"/>' +
+      tree(300, 500, 66) + tree(640, 480, 58) + tree(1260, 495, 70) + tree(1600, 470, 56) +
+      person(960, 870, "#2f6fa5") + person(1010, 890, "#b8542f") +
+      '<rect x="1150" y="770" width="260" height="110" rx="10" fill="#8b95a0"/></svg>';
+  }
+  function hazardSceneSVG(taskType){
+    var t = String(taskType || "1808");
+    var body = "";
+    if(t === "1808" || t === "1809"){
+      body = '<rect x="0" y="420" width="1920" height="660" fill="#8b7d6b"/>' +
+             '<polygon points="180,680 960,520 1420,860 120,960" fill="#a8845c"/>' +
+             (t === "1809" ? '<rect x="160" y="470" width="1460" height="440" fill="#3a7d44" opacity="0.62"/><polygon points="260,520 680,500 620,760 220,740" fill="#9c7a54"/><polygon points="820,490 1240,510 1180,750 860,720" fill="#9c7a54"/>' : '<polygon points="220,540 880,500 940,860 160,890" fill="#b88c5e"/><rect x="1080" y="540" width="680" height="360" fill="#3b7a46" opacity="0.72"/>');
+    } else if(t === "1810" || t === "1811"){
+      body = '<rect x="0" y="520" width="1920" height="560" fill="#636b73"/><rect x="0" y="820" width="1920" height="14" fill="#d9dfe4" opacity="0.6"/>' +
+             (t === "1810" ? '<rect x="340" y="420" width="1020" height="380" rx="14" fill="#4f6d8a"/><rect x="1360" y="500" width="240" height="300" rx="12" fill="#d48806"/><ellipse cx="520" cy="830" rx="70" ry="70" fill="#262c33"/><ellipse cx="1180" cy="830" rx="70" ry="70" fill="#262c33"/><ellipse cx="1480" cy="830" rx="64" ry="64" fill="#262c33"/><polygon points="360,420 1320,420 1240,330 440,340" fill="#8b6b47"/>' : '<ellipse cx="640" cy="790" rx="310" ry="110" fill="#8d6e4e"/><ellipse cx="1140" cy="860" rx="190" ry="70" fill="#7c5e3f"/>');
+    } else if(t === "1812" || t === "1813"){
+      body = '<rect x="0" y="560" width="1920" height="520" fill="#7c848c"/>' +
+             '<rect x="80" y="300" width="380" height="400" fill="#2b5f8e" stroke="#e6eef5" stroke-width="6"/>' +
+             (t === "1812" ? '<rect x="460" y="300" width="520" height="400" fill="#2b5f8e" stroke="#e6eef5" stroke-width="6"/><polygon points="560,360 820,380 780,620 520,580" fill="#3a4550"/><rect x="980" y="300" width="840" height="400" fill="#2b5f8e" stroke="#e6eef5" stroke-width="6"/>' : '<rect x="1120" y="300" width="700" height="400" fill="#2b5f8e" stroke="#e6eef5" stroke-width="6"/><rect x="460" y="420" width="660" height="280" fill="#9ea8b2" opacity="0.5"/>');
+    } else if(t === "1814"){
+      body = '<rect x="0" y="520" width="1920" height="560" fill="#787f87"/>' +
+             '<rect x="180" y="460" width="640" height="320" fill="#9e7a52"/><rect x="300" y="380" width="460" height="140" fill="#7f8c99"/><rect x="980" y="500" width="680" height="300" fill="#b08b63"/>';
+    } else {
+      body = '<rect x="0" y="180" width="1920" height="900" fill="#aeb6bd"/><rect x="0" y="180" width="1920" height="36" fill="#959ea6"/>' +
+             (t === "1815" ? '<path d="M560 320 C640 460 520 640 760 840 L940 840 C980 620 880 440 820 320 Z" fill="#5e6b78" opacity="0.65"/>' : '<circle cx="420" cy="520" r="18" fill="#6f7780"/><circle cx="470" cy="560" r="14" fill="#6f7780"/><circle cx="520" cy="510" r="22" fill="#6f7780"/><circle cx="1120" cy="610" r="24" fill="#6f7780"/><circle cx="1175" cy="645" r="16" fill="#6f7780"/>');
+    }
+    return '<svg viewBox="0 0 1920 1080" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><linearGradient id="skHazard" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9dfef"/><stop offset="1" stop-color="#e8f2fa"/></linearGradient></defs>' +
+      '<rect width="1920" height="1080" fill="url(#skHazard)"/>' +
+      '<rect x="120" y="160" width="260" height="340" fill="#cfd8e0"/><rect x="1480" y="190" width="320" height="310" fill="#cfd8e0"/>' +
+      body + '</svg>';
+  }
+  function imgHTML(p, taskType){
+    if(activeApp === "hazard") return hazardSceneSVG(taskType);
+    if(p && p.customImg) return '<img src="' + p.customImg + '" alt="参考图">';
+    return defaultSceneSVG();
+  }
+  function imgLabel(p){ return p && p.customImg ? ("自定义上传" + (p.imgName ? "（" + p.imgName + "）" : "")) : "系统默认图"; }
+
+  /* ================= 双应用配置与状态 ================= */
+  var activeApp = "green";
+  var APP_CFG = {
+    green: {
+      name: "无人机巡检识别",
+      platformName: "智慧工地一体化平台（绿化）",
+      recordUrl: "/api/model/xingji/open/patrol/inspection/record",
+      cbUrl: "/constructionServer/constructionServer/public/patrol/point/analysis/receive",
+      modelApiName: "绿化恢复检测（模型侧封装接口）",
+      modelApiUrl: "<模型侧封装接口地址>",
+      hasConfig: true,
+      types: ["1803", "1804", "1805", "1806", "1807"],
+      defaultRangeFrom: "2026-10-12 00:00:00",
+      defaultRangeTo: "2026-10-12 23:59:59"
+    },
+    hazard: {
+      name: "工地隐患监测",
+      platformName: "智慧工地隐患监测平台",
+      recordUrl: "/api/model/xingji/open/hazard/patrol/inspection/record",
+      cbUrl: "https://yhjc.qd-metro.com/analyse/public/smartPatrol/analysis/receive",
+      modelApiName: "工地隐患检测接口（v1.0）",
+      modelApiUrl: "/api/v1/image/analysis",
+      hasConfig: false,
+      types: ["1808", "1809", "1810", "1811", "1812", "1813", "1814", "1815", "1816"],
+      defaultRangeFrom: "2026-11-18 00:00:00",
+      defaultRangeTo: "2026-11-18 23:59:59"
+    }
+  };
+  var MC_DEFAULT = { modelAddr: "172.16.210.88:9000", modelName: "ev-vlm-32b" };
+  var MC_HAZARD_DEFAULT = { modelAddr: "http://172.35.1.1:8080/apis/ais-v2/chat/completions", modelName: "ev-vlm-35b" };
+  function cloneMC(o){ return JSON.parse(JSON.stringify(o)); }
+  /* ================= 演示用标注 JSON（COCO 单图格式，内联） ================= */
+  var IMG_W = 1920, IMG_H = 1080;
+  var CAT_NAME = { 1: "硬化路面", 2: "绿化", 3: "建筑" };
+  var CAT_COLOR = { 1: "#8c8c8c", 2: "#52c41a", 3: "#fa8c16" };
+  var CAT_RGB = { 1: "140,140,140", 2: "82,196,26", 3: "250,140,22" };
+  var DEMO_CATS = [
+    { id: 1, name: "硬化路面", supercategory: "" },
+    { id: 2, name: "绿化", supercategory: "" },
+    { id: 3, name: "建筑", supercategory: "" }
+  ];
+  function demoAnnotJSON(fileName, anns){
+    return {
+      info: { contributor: "", date_created: "", description: "", url: "", version: "", year: "" },
+      licenses: [ { name: "", id: 0, url: "" } ],
+      categories: DEMO_CATS,
+      images: [ { id: 1, width: IMG_W, height: IMG_H, file_name: fileName, license: 0, flickr_url: "", coco_url: "", date_captured: 0 } ],
+      annotations: anns.map(function(a, i){
+        var seg = a.seg, xs = [], ys = [];
+        for(var j = 0; j < seg.length - 1; j += 2){ xs.push(seg[j]); ys.push(seg[j + 1]); }
+        var x0 = Math.min.apply(null, xs), y0 = Math.min.apply(null, ys);
+        return {
+          id: i + 1, image_id: 1, category_id: a.cat, segmentation: [ seg ],
+          area: a.area, bbox: [ x0, y0, Math.max.apply(null, xs) - x0, Math.max.apply(null, ys) - y0 ],
+          iscrowd: 0, attributes: { occluded: false }
+        };
+      })
+    };
+  }
+  function mkAnnot(o){ return parseAnnotJSON(JSON.stringify(o)); }
+
+  var DEMO_JSON = {
+    "QD-GD-0001": demoAnnotJSON("世博园/右上1.jpeg", [
+      { cat: 3, area: 84000,  seg: [70, 200, 370, 200, 370, 480, 70, 480] },
+      { cat: 3, area: 85800,  seg: [1480, 220, 1810, 220, 1810, 480, 1480, 480] },
+      { cat: 2, area: 460800, seg: [0, 480, 1920, 480, 1920, 720, 0, 720] },
+      { cat: 2, area: 17424,  seg: [234, 434, 366, 434, 366, 566, 234, 566] },
+      { cat: 2, area: 19600,  seg: [1190, 425, 1330, 425, 1330, 565, 1190, 565] },
+      { cat: 1, area: 691200, seg: [0, 720, 1920, 720, 1920, 1080, 0, 1080] }
+    ]),
+    "QD-GD-0002": demoAnnotJSON("世博园/左下2.jpeg", [
+      { cat: 3, area: 120000, seg: [200, 180, 640, 180, 640, 420, 200, 420] },
+      { cat: 2, area: 352000, seg: [0, 420, 1920, 420, 1920, 760, 0, 760] },
+      { cat: 1, area: 512000, seg: [0, 760, 1920, 760, 1920, 1080, 0, 1080] }
+    ]),
+    "QD-GD-0003": demoAnnotJSON("车辆段/右上3.jpeg", [
+      { cat: 3, area: 68000,  seg: [1500, 250, 1820, 250, 1820, 400, 1500, 400] },
+      { cat: 2, area: 92000,  seg: [120, 240, 520, 240, 520, 400, 120, 400] },
+      { cat: 2, area: 720000, seg: [0, 380, 1920, 380, 1920, 780, 0, 780] },
+      { cat: 1, area: 420000, seg: [0, 780, 1920, 780, 1920, 1080, 0, 1080] }
+    ]),
+    "QD-GD-0004": demoAnnotJSON("车辆段/东侧绿地4.jpeg", [
+      { cat: 2, area: 1990000, seg: [0, 80, 1920, 80, 1920, 1060, 0, 1060] },
+      { cat: 2, area: 23000,   seg: [180, 50, 330, 50, 330, 190, 180, 190] },
+      { cat: 1, area: 60000,   seg: [760, 80, 1160, 80, 1160, 560, 760, 560] }
+    ])
+  };
+
+  var appStates = {
+    green: {
+      points: [
+        { code: "QD-GD-0001", name: "东川路站东北角", annot: mkAnnot(DEMO_JSON["QD-GD-0001"]), createTime: "2026-10-08 09:12" },
+        { code: "QD-GD-0002", name: "东川路站西南角", annot: mkAnnot(DEMO_JSON["QD-GD-0002"]), createTime: "2026-10-08 09:12" },
+        { code: "P-2026-102", name: "东川路站东北角", annot: null, createTime: "2026-10-11 16:40" },
+        { code: "P-2026-103", name: "东川路站西南角", annot: null, createTime: "2026-10-11 16:40" },
+        { code: "QD-GD-0003", name: "车辆段围墙外侧", annot: mkAnnot(DEMO_JSON["QD-GD-0003"]), createTime: "2026-10-09 11:05" },
+        { code: "QD-GD-0004", name: "车辆段东侧绿地", annot: mkAnnot(DEMO_JSON["QD-GD-0004"]), createTime: "2026-10-09 14:22", chgMark: "新" }
+      ],
+      records: [
+        { id: "1001", taskId: "e9ac5bdfdcfe4e7d8f72b39251011276", taskType: 1803, pointCode: "QD-GD-0001", analyze: "done", callback: "ok", receiveTime: "2026-10-12 10:20:31", failReason: "", cbRetry: 0, inspId: "R-20261012-089", batch: [1803, 1804], chgMark: "改" },
+        { id: "1002", taskId: "e9ac5bdfdcfe4e7d8f72b39251011276", taskType: 1804, pointCode: "QD-GD-0001", analyze: "done", callback: "ok", receiveTime: "2026-10-12 10:21:04", failReason: "", cbRetry: 0, inspId: "R-20261012-089", batch: [1803, 1804], chgMark: "改" },
+        { id: "1003", taskId: "b7c8d9e0f1a2b3c4d5e6f708192a3b4c", taskType: 1805, pointCode: "QD-GD-0002", analyze: "done", callback: "fail", receiveTime: "2026-10-12 10:22:47", failReason: "回调工地平台超时（连接 10s 未响应）", cbRetry: 1 },
+        { id: "1004", taskId: "c3d4e5f60718293a4b5c6d7e8f901a2b", taskType: 1803, pointCode: "P-2026-102", analyze: "fail", callback: "none", receiveTime: "2026-10-12 10:25:12", failReason: "点位未上传标注 JSON", cbRetry: 0 },
+        { id: "1005", taskId: "d4e5f60718293a4b5c6d7e8f901a2b3c", taskType: 1805, pointCode: "QD-GD-0003", analyze: "running", callback: "none", receiveTime: "2026-10-12 10:26:55", failReason: "", cbRetry: 0 },
+        { id: "1006", taskId: "e5f60718293a4b5c6d7e8f901a2b3c4d", taskType: 1806, pointCode: "QD-GD-0004", analyze: "done", callback: "ok", receiveTime: "2026-10-12 10:28:12", failReason: "", cbRetry: 0, chgMark: "新" },
+        { id: "1007", taskId: "f60718293a4b5c6d7e8f901a2b3c4d5e", taskType: 1806, pointCode: "QD-GD-0002", analyze: "done", callback: "ok", receiveTime: "2026-10-12 10:29:40", failReason: "", cbRetry: 0, chgMark: "新" },
+        { id: "1008", taskId: "0718293a4b5c6d7e8f901a2b3c4d5e6f", taskType: 1807, pointCode: "QD-GD-0002", analyze: "done", callback: "ok", receiveTime: "2026-10-12 10:31:05", failReason: "", cbRetry: 0, chgMark: "新" }
+      ],
+      pointFilter: { status: "all", kw: "" },
+      pointPage: 1,
+      recFilter: { range: "today", type: "all", st: "all", cb: "all", kw: "" },
+      recPage: 1,
+      pointSort: { key: "createTime", desc: true },
+      recSort: { key: "receiveTime", desc: true },
+      pageSize: 5,
+      editing: null,
+      model: cloneMC(MC_DEFAULT),
+      retention: { days: 30, auto: true, time: "03:00" },
+      retTotal: 1286,
+      retSize: "4.72 GB",
+      retLog: [
+        { time: "2026-10-12 03:00:12", count: 12, size: "86.4 MB" },
+        { time: "2026-10-11 03:00:09", count: 8, size: "54.2 MB" },
+        { time: "2026-10-10 03:00:11", count: 15, size: "103.7 MB" },
+        { time: "2026-10-09 03:00:08", count: 6, size: "41.8 MB" },
+        { time: "2026-10-08 03:00:14", count: 11, size: "74.5 MB" }
+      ],
+      result: { recordId: "1001", api: "record" },
+      pendingImg: null,
+      pendingName: ""
+    },
+    hazard: {
+      points: [
+        { code: "YH-GD-0001", name: "东川路站基坑西侧", createTime: "2026-11-15 09:10", chgMark: "新" },
+        { code: "YH-GD-0002", name: "东川路站北大门出入口", createTime: "2026-11-15 09:10", chgMark: "新" },
+        { code: "YH-GD-0003", name: "车辆段物料堆放区", createTime: "2026-11-16 14:25", chgMark: "新" },
+        { code: "YH-GD-0004", name: "盾构井南侧围挡", createTime: "2026-11-16 16:40", chgMark: "新" },
+        { code: "YH-GD-0005", name: "车站主体二层混凝土墙面", createTime: "2026-11-17 10:15", chgMark: "新" }
+      ],
+      records: [
+        { id: "2001", taskId: "a1b2c3d4e5f60718293a4b5c6d7e8f01", taskType: 1808, pointCode: "YH-GD-0001", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:12:18", failReason: "", cbRetry: 0, inspId: "YH-20261118-001", batch: [1808, 1809], modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [160, 500, 940, 890], label: "有裸土未覆盖" } ], chgMark: "新" },
+        { id: "2002", taskId: "a1b2c3d4e5f60718293a4b5c6d7e8f01", taskType: 1809, pointCode: "YH-GD-0001", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:12:20", failReason: "", cbRetry: 0, inspId: "YH-20261118-001", batch: [1808, 1809], modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [220, 500, 680, 760], label: "有防尘网破损" }, { bbox_2d: [820, 490, 1240, 750], label: "有防尘网破损" } ], chgMark: "新" },
+        { id: "2003", taskId: "b2c3d4e5f60718293a4b5c6d7e8f02", taskType: 1810, pointCode: "YH-GD-0002", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:20:05", failReason: "", cbRetry: 0, inspId: "YH-20261118-002", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [340, 330, 1360, 800], label: "车厢未封闭" } ], chgMark: "新" },
+        { id: "2004", taskId: "c3d4e5f60718293a4b5c6d7e8f03", taskType: 1811, pointCode: "YH-GD-0002", analyze: "done", callback: "fail", receiveTime: "2026-11-18 09:25:44", failReason: "回调工地隐患平台超时（连接 10s 未响应）", cbRetry: 1, inspId: "YH-20261118-003", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [330, 680, 950, 900], label: "有出渣车道路遗撒" } ], chgMark: "新" },
+        { id: "2005", taskId: "d4e5f60718293a4b5c6d7e8f04", taskType: 1812, pointCode: "YH-GD-0004", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:31:10", failReason: "", cbRetry: 0, inspId: "YH-20261118-004", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [520, 360, 820, 620], label: "有围挡破损" } ], chgMark: "新" },
+        { id: "2006", taskId: "e5f60718293a4b5c6d7e8f05", taskType: 1813, pointCode: "YH-GD-0004", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:35:29", failReason: "", cbRetry: 0, inspId: "YH-20261118-005", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [460, 420, 1120, 700], label: "围挡缺失/大门敞开" } ], chgMark: "新" },
+        { id: "2007", taskId: "f60718293a4b5c6d7e8f06", taskType: 1814, pointCode: "YH-GD-0003", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:42:02", failReason: "", cbRetry: 0, inspId: "YH-20261118-006", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [180, 380, 820, 780], label: "物料堆放杂乱" } ], chgMark: "新" },
+        { id: "2008", taskId: "0718293a4b5c6d7e8f07", taskType: 1815, pointCode: "YH-GD-0005", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:48:15", failReason: "", cbRetry: 0, inspId: "YH-20261118-007", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [540, 320, 960, 840], label: "有渗漏水" } ], chgMark: "新" },
+        { id: "2009", taskId: "18293a4b5c6d7e8f08", taskType: 1816, pointCode: "YH-GD-0005", analyze: "done", callback: "ok", receiveTime: "2026-11-18 09:53:40", failReason: "", cbRetry: 0, inspId: "YH-20261118-008", modelUsed: "qwen3.5-vl-35b", demoResult: [ { bbox_2d: [380, 480, 560, 600], label: "有蜂窝麻面" }, { bbox_2d: [1080, 570, 1220, 680], label: "有蜂窝麻面" } ], chgMark: "新" },
+        { id: "2010", taskId: "293a4b5c6d7e8f09", taskType: 1808, pointCode: "YH-GD-0001", analyze: "done", callback: "ok", receiveTime: "2026-11-18 10:02:11", failReason: "", cbRetry: 0, inspId: "YH-20261118-009", modelUsed: "qwen3.5-vl-35b", demoResult: [], chgMark: "新" },
+        { id: "2011", taskId: "3a4b5c6d7e8f10", taskType: 1812, pointCode: "YH-GD-0004", analyze: "fail", callback: "none", receiveTime: "2026-11-18 10:10:05", failReason: "图片下载超时（10s），未发起模型调用", cbRetry: 0, inspId: "YH-20261118-010", chgMark: "新" }
+      ],
+      pointFilter: { status: "all", kw: "" },
+      pointPage: 1,
+      recFilter: { range: "today", type: "all", st: "all", cb: "all", kw: "" },
+      recPage: 1,
+      pointSort: { key: "createTime", desc: true },
+      recSort: { key: "receiveTime", desc: true },
+      pageSize: 5,
+      editing: null,
+      model: cloneMC(MC_HAZARD_DEFAULT),
+      retention: { days: 30, auto: true, time: "03:00" },
+      retTotal: 428,
+      retSize: "1.64 GB",
+      retLog: [
+        { time: "2026-11-18 03:00:08", count: 7, size: "48.2 MB" },
+        { time: "2026-11-17 03:00:11", count: 5, size: "34.6 MB" },
+        { time: "2026-11-16 03:00:06", count: 9, size: "61.0 MB" }
+      ],
+      result: { recordId: "2001", api: "record" },
+      pendingImg: null,
+      pendingName: ""
+    }
+  };
+  var state = appStates[activeApp];
+
+  var TASK_LABEL = {
+    1803: "1803 树木识别", 1804: "1804 绿化占比", 1805: "1805 硬化路面", 1806: "1806 苗木绿化状态", 1807: "1807 地面铺装状态",
+    1808: "1808 裸土未覆盖", 1809: "1809 防尘网破损", 1810: "1810 出渣车封闭", 1811: "1811 出渣车道路遗撒",
+    1812: "1812 围挡破损", 1813: "1813 围挡缺失/大门敞开", 1814: "1814 物料堆放杂乱", 1815: "1815 渗漏水", 1816: "1816 蜂窝麻面"
+  };
+  var TASK_FULL = {
+    1803: "1803 树木识别", 1804: "1804 绿化面积分析", 1805: "1805 硬化路面百分比分析", 1806: "1806 苗木绿化状态识别", 1807: "1807 地面铺装状态识别",
+    1808: "1808 裸土未覆盖", 1809: "1809 防尘网破损", 1810: "1810 出渣车封闭", 1811: "1811 出渣车道路遗撒",
+    1812: "1812 围挡破损", 1813: "1813 围挡缺失/不连续（含大门敞开）", 1814: "1814 物料堆放杂乱", 1815: "1815 渗漏水", 1816: "1816 蜂窝麻面"
+  };
+  function findPoint(code){ for(var i = 0; i < state.points.length; i++) if(state.points[i].code === code) return state.points[i]; return null; }
+  function findRecord(id){ for(var i = 0; i < state.records.length; i++) if(state.records[i].id === id) return state.records[i]; return null; }
+  function pointConfigured(p){ return !!(p && p.annot && p.annot.items.length); }
+  function annotCount(p){ return (p && p.annot) ? p.annot.items.length : 0; }
+  function scenePct(p, catId){
+    if(!p || !p.annot) return 0;
+    var total = p.annot.width * p.annot.height;
+    if(!total) return 0;
+    var sum = 0;
+    p.annot.items.forEach(function(it){ if(it.catId === catId) sum += it.area; });
+    return Math.round(sum / total * 10000) / 100;
+  }
+
+  /* ================= ① 应用中心 ================= */
+  var APPS = [
+    { name: "人脸识别", cat: "ai", art: '<svg viewBox="0 0 150 110"><ellipse cx="75" cy="78" rx="52" ry="16" fill="#123b63"/><circle cx="75" cy="46" r="26" fill="#e8f2fa"/><circle cx="66" cy="44" r="3.5" fill="#1b4a7a"/><circle cx="84" cy="44" r="3.5" fill="#1b4a7a"/><path d="M66 57q9 7 18 0" stroke="#1b4a7a" stroke-width="2" fill="none"/><path d="M75 20v-8M49 30l-6-6M101 30l6-6" stroke="#7fb6e0" stroke-width="2"/></svg>' },
+    { name: "离线识别", cat: "tool", art: '<svg viewBox="0 0 150 110"><path d="M30 74h90v10H30z" fill="#123b63"/><path d="M50 68l14-30 22 30z" fill="#2b6ea8"/><rect x="46" y="60" width="58" height="8" fill="#1b4a7a"/><path d="M40 84h70v8H40z" fill="#2f6fa5"/></svg>' },
+    { name: "无人机巡检识别", appKey: "green", cat: "ai", art: '<svg viewBox="0 0 150 110"><path d="M28 92h94v6H28z" fill="#123b63"/><path d="M46 74l10-26h38l10 26z" fill="#2b6ea8"/><path d="M52 74h46v6H52z" fill="#1b4a7a"/><circle cx="75" cy="34" r="10" fill="#7fb6e0"/><path d="M40 30h20M90 30h20" stroke="#7fb6e0" stroke-width="2"/><circle cx="40" cy="30" r="5" fill="#e8f2fa"/><circle cx="110" cy="30" r="5" fill="#e8f2fa"/><path d="M69 62h12v8H69z" fill="#eaf6ff"/></svg>' },
+    { name: "工地隐患监测", appKey: "hazard", cat: "ai", isNew: true, art: '<svg viewBox="0 0 150 110"><path d="M26 92h98v6H26z" fill="#123b63"/><path d="M42 86h66v-8H42z" fill="#1b4a7a"/><path d="M46 58c0-17 13-30 29-30s29 13 29 30v12H46z" fill="#2b6ea8"/><path d="M39 70h72v6H39z" fill="#7fb6e0"/><path d="M72 24h6v18h-6z" fill="#e8f2fa"/><polygon points="75,38 89,62 61,62" fill="#faad14"/><rect x="73.5" y="45" width="3" height="9" fill="#0e1c33"/><rect x="73.5" y="56" width="3" height="3" fill="#0e1c33"/></svg>' }
+  ];
+  var appCat = "all";
+  function renderApps(){
+    var list = APPS.filter(function(a){ return appCat === "all" || a.cat === appCat; });
+    var html = list.map(function(a){
+      return '<div class="jx-appcard">' + (a.isNew ? '<span class="jx-badge-new">新增</span>' : '') +
+        '<div class="cap">' + a.name + '</div><div class="art">' + a.art + '</div>' +
+        '<div class="act"><button type="button" data-app="' + a.name + '"' + (a.appKey ? ' data-appkey="' + a.appKey + '"' : '') + '>应用控制台</button></div></div>';
+    }).join("");
+    if(!list.length) html = '<div class="jx-empty" style="grid-column:1/-1;background:#fff">该分类下暂无应用</div>';
+    else if(appCat === "all") html += '<div class="jx-appcard empty">持续更新中...</div>';
+    $("#appGrid").innerHTML = html;
+    $$("#appTabs span").forEach(function(s){ s.classList.toggle("on", s.getAttribute("data-cat") === appCat); });
+  }
+  $("#appTabs").addEventListener("click", function(e){
+    var s = e.target.closest("span[data-cat]");
+    if(!s) return;
+    appCat = s.getAttribute("data-cat");
+    renderApps();
+  });
+
+  /* ================= ② 点位管理 ================= */
+  function filteredPoints(){
+    var f = state.pointFilter;
+    return state.points.filter(function(p){
+      if(activeApp === "green"){
+        if(f.status === "done" && !pointConfigured(p)) return false;
+        if(f.status === "todo" && pointConfigured(p)) return false;
+      }
+      if(f.kw){
+        var k = f.kw.toLowerCase();
+        if(p.code.toLowerCase().indexOf(k) < 0 && p.name.toLowerCase().indexOf(k) < 0) return false;
+      }
+      return true;
+    });
+  }
+  function renderPager(el, total, page, pages, onGo){
+    var h = '<span>共 ' + total + ' 条</span>';
+    h += '<button type="button" data-pg="' + (page - 1) + '"' + (page <= 1 ? ' disabled' : '') + '>‹</button>';
+    for(var i = 1; i <= pages; i++) h += '<button type="button" class="' + (i === page ? 'on' : '') + '" data-pg="' + i + '">' + i + '</button>';
+    h += '<button type="button" data-pg="' + (page + 1) + '"' + (page >= pages ? ' disabled' : '') + '>›</button>';
+    el.innerHTML = h;
+    $$("button[data-pg]", el).forEach(function(b){
+      b.addEventListener("click", function(){
+        if(b.disabled) return;
+        var n = Number(b.getAttribute("data-pg"));
+        if(n >= 1 && n <= pages) onGo(n);
+      });
+    });
+  }
+  function renderPoints(){
+    var isGreen = activeApp === "green";
+    $("#pointStatusWrap").style.display = isGreen ? "inline-flex" : "none";
+    $("#pointHazardTip").style.display = isGreen ? "none" : "";
+    $("#pointThead").innerHTML = isGreen
+      ? '<tr><th style="width:150px" class="sortable" data-key="code">点位编码</th><th style="width:150px" class="sortable" data-key="name">点位名称</th><th style="width:96px">参考图</th><th style="width:74px" class="sortable" data-key="annots">标注数</th><th style="width:100px" class="sortable" data-key="status">配置状态</th><th style="width:150px" class="sortable" data-key="createTime">创建时间</th><th style="width:100px">操作</th></tr>'
+      : '<tr><th style="width:180px" class="sortable" data-key="code">点位编码</th><th style="width:240px" class="sortable" data-key="name">点位名称</th><th style="width:140px">接入状态</th><th style="width:180px" class="sortable" data-key="createTime">创建时间</th></tr>';
+
+    var list = sortPoints(filteredPoints());
+    var total = list.length;
+    var pages = Math.max(1, Math.ceil(total / state.pageSize));
+    if(state.pointPage > pages) state.pointPage = pages;
+    var start = (state.pointPage - 1) * state.pageSize;
+    var rows = list.slice(start, start + state.pageSize);
+    var body = $("#pointBody");
+    var cols = isGreen ? 7 : 4;
+    syncSortUI(body.closest("table"), state.pointSort);
+    if(!rows.length){
+      body.innerHTML = '<tr><td colspan="' + cols + '"><div class="jx-empty"><span class="ei"></span>没有匹配的点位</div></td></tr>';
+    } else if(isGreen){
+      body.innerHTML = rows.map(function(p){
+        var ok = pointConfigured(p);
+        return '<tr>' +
+          '<td>' + esc(p.code) + (p.chgMark ? '<sup class="chg-tag">' + p.chgMark + '</sup>' : '') + '</td><td>' + esc(p.name) + '</td>' +
+          '<td><span class="thumb">' + imgHTML(p) + '</span></td>' +
+          '<td>' + annotCount(p) + '</td>' +
+          '<td><span class="jx-tag ' + (ok ? 'g' : 'r') + '">' + (ok ? '已配置' : '未配置') + '</span></td>' +
+          '<td>' + esc(p.createTime) + '</td>' +
+          '<td><button class="jx-btn ghost" type="button" data-cfg="' + esc(p.code) + '">配置</button></td></tr>';
+      }).join("");
+    } else {
+      body.innerHTML = rows.map(function(p){
+        return '<tr>' +
+          '<td>' + esc(p.code) + (p.chgMark ? '<sup class="chg-tag">' + p.chgMark + '</sup>' : '') + '</td><td>' + esc(p.name) + '</td>' +
+          '<td><span class="jx-tag g">已下发（可直接分析）</span></td>' +
+          '<td>' + esc(p.createTime) + '</td></tr>';
+      }).join("");
+    }
+    renderPager($("#pointPager"), total, state.pointPage, pages, function(n){ state.pointPage = n; showSkeleton($("#pointBody"), cols, 3, renderPoints); });
+  }
+  $("#pointStatusSeg").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-status]");
+    if(!b) return;
+    $$("button", this).forEach(function(x){ x.classList.toggle("on", x === b); });
+    state.pointFilter.status = b.getAttribute("data-status");
+    state.pointPage = 1;
+    showSkeleton($("#pointBody"), activeApp === "green" ? 7 : 4, 4, renderPoints);
+  });
+  $("#pointQuery").addEventListener("click", function(){
+    state.pointFilter.kw = $("#pointKw").value.trim();
+    state.pointPage = 1;
+    showSkeleton($("#pointBody"), activeApp === "green" ? 7 : 4, 4, function(){
+      renderPoints();
+      toast("查询完成，共 " + filteredPoints().length + " 条");
+    });
+  });
+  $("#pointReset").addEventListener("click", function(){
+    $("#pointKw").value = "";
+    state.pointFilter = { status: "all", kw: "" };
+    $$("button", $("#pointStatusSeg")).forEach(function(x, i){ x.classList.toggle("on", i === 0); });
+    state.pointPage = 1;
+    showSkeleton($("#pointBody"), activeApp === "green" ? 7 : 4, 4, function(){ renderPoints(); toast("已重置筛选条件"); });
+  });
+  $("#pointKw").addEventListener("keydown", function(e){ if(e.key === "Enter") $("#pointQuery").click(); });
+  $("#pointKw").addEventListener("input", function(){
+    state.pointFilter.kw = this.value.trim();
+    state.pointPage = 1;
+    renderPoints();
+  });
+  $("#pointThead").addEventListener("click", function(e){
+    var th = e.target.closest("th[data-key]");
+    if(!th) return;
+    var k = th.getAttribute("data-key"), s = state.pointSort;
+    if(s.key === k) s.desc = !s.desc;
+    else { s.key = k; s.desc = false; }
+    state.pointPage = 1;
+    showSkeleton($("#pointBody"), activeApp === "green" ? 7 : 4, 4, renderPoints);
+  });
+
+  /* ----- 详情 ----- */
+  var confirmCb = null;
+  function askConfirm(title, text, cb){
+    $("#cfTitle").textContent = title;
+    $("#cfText").textContent = text;
+    confirmCb = cb;
+    openMask("mConfirm");
+  }
+  $("#cfOk").addEventListener("click", function(){
+    closeMask("mConfirm");
+    if(confirmCb){ var f = confirmCb; confirmCb = null; f(); }
+  });
+
+  /* ================= ③ 点位配置（标注 JSON） ================= */
+  function parseAnnotJSON(text){
+    var raw;
+    try { raw = JSON.parse(text); } catch(e){ return { err: "JSON 解析失败，请确认文件为合法 JSON" }; }
+    if(!raw || typeof raw !== "object" || Array.isArray(raw)) return { err: "JSON 顶层结构必须为对象" };
+    if(!Array.isArray(raw.images) || !raw.images.length) return { err: "缺少 images 字段或 images 为空" };
+    if(!Array.isArray(raw.annotations)) return { err: "缺少 annotations 字段" };
+    if(!Array.isArray(raw.categories)) return { err: "缺少 categories 字段" };
+    var img = raw.images[0];
+    var w = Number(img.width), h = Number(img.height);
+    if(!(w > 0) || !(h > 0)) return { err: "images[0] 缺少有效的 width / height" };
+    var items = raw.annotations
+      .filter(function(a){ return Number(a.iscrowd) !== 1; })
+      .map(function(a){
+        var cid = Number(a.category_id);
+        return {
+          catId: cid,
+          catName: CAT_NAME[cid] || ("类别 " + cid),
+          area: Number(a.area) || 0,
+          seg: (a.segmentation && a.segmentation[0]) ? a.segmentation[0] : [],
+          bbox: a.bbox || null
+        };
+      });
+    return {
+      width: w, height: h,
+      fileName: img.file_name || "",
+      items: items,
+      raw: raw
+    };
+  }
+
+  function openConfig(code){
+    var p = findPoint(code);
+    if(!p) return;
+    state.editing = p;
+    renderConfig();
+    goScreen("config");
+  }
+  function renderConfig(){
+    var p = state.editing;
+    if(!p) return;
+    $("#cfgPoint").textContent = p.code + " " + p.name;
+    $("#roiBg").innerHTML = imgHTML(p);
+    $("#cfgImgTip").textContent = "参考图：" + imgLabel(p) + " " + IMG_W + "×" + IMG_H;
+    renderAnnots();
+  }
+  function renderAnnots(){
+    var p = state.editing;
+    var stage = $("#roiStage");
+    $$(".annot-layer", stage).forEach(function(n){ n.remove(); });
+    if(!p) return;
+    var a = p.annot;
+
+    if(a && a.items.length){
+      var svg = '<svg viewBox="0 0 ' + a.width + ' ' + a.height + '" preserveAspectRatio="none">';
+      a.items.forEach(function(it){
+        if(!it.seg || it.seg.length < 6) return;
+        var pts = [];
+        for(var i = 0; i < it.seg.length - 1; i += 2) pts.push(it.seg[i] + "," + it.seg[i + 1]);
+        svg += '<polygon points="' + pts.join(" ") + '" fill="rgba(' + (CAT_RGB[it.catId] || "24,144,255") + ',0.22)" stroke="' +
+               (CAT_COLOR[it.catId] || "#1890ff") + '" stroke-width="3" vector-effect="non-scaling-stroke"/>';
+      });
+      svg += "</svg>";
+      var layer = document.createElement("div");
+      layer.className = "annot-layer";
+      layer.innerHTML = svg;
+      stage.appendChild(layer);
+
+      var cats = {};
+      a.items.forEach(function(it){ cats[it.catId] = it.catName; });
+      $("#annotLegend").innerHTML = Object.keys(cats).map(function(k){
+        return '<span><i style="background:' + (CAT_COLOR[k] || "#1890ff") + '"></i>' + esc(cats[k]) + '</span>';
+      }).join("") + '<span style="color:#9aa7b1">共 ' + a.items.length + ' 条标注，叠加显示仅供参考</span>';
+    } else {
+      $("#annotLegend").innerHTML = "";
+    }
+
+    $("#annotList").innerHTML = (a && a.items.length)
+      ? a.items.map(function(it, i){
+          var pct = (a.width * a.height) ? (it.area / (a.width * a.height) * 100) : 0;
+          return '<li style="cursor:default" data-i="' + i + '">' +
+            '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;flex:0 0 auto;background:' + (CAT_COLOR[it.catId] || "#1890ff") + '"></span>' +
+            '<b>' + esc(it.catName) + '</b>' +
+            '<span class="co" style="margin-left:auto">' + Math.round(it.area).toLocaleString() + ' px²</span>' +
+            '<span class="co">' + pct.toFixed(2) + '%</span></li>';
+        }).join("")
+      : '<li class="small" style="border:0;background:transparent;color:#9aa7b1;cursor:default">尚未上传标注 JSON，该点位不参与分析</li>';
+    $("#annotCount").textContent = annotCount(p) + " 条";
+
+    $("#jsonMeta").innerHTML = a
+      ? kv("标注文件", esc(a.fileName || "--")) +
+        kv("图像尺寸", a.width + " × " + a.height) +
+        kv("标注条数", a.items.length + " 条")
+      : '<span style="color:#8c9aa6">状态</span><span style="color:#8c9aa6">未上传标注 JSON</span>';
+  }
+  $("#btnUploadJson").addEventListener("click", function(){
+    if(!state.editing) return;
+    $("#annotFile").value = "";
+    $("#annotFile").click();
+  });
+  $("#annotFile").addEventListener("change", function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      var parsed = parseAnnotJSON(String(fr.result));
+      if(parsed.err){ toast(parsed.err); return; }
+      state.editing.annot = parsed;
+      renderAnnots();
+      toast("标注 JSON 已解析：" + parsed.items.length + " 条标注");
+    };
+    fr.readAsText(f, "utf-8");
+  });
+  $("#btnRemoveJson").addEventListener("click", function(){
+    if(!state.editing) return;
+    if(!state.editing.annot){ toast("当前未上传标注 JSON"); return; }
+    askConfirm("移除标注 JSON", "确定移除该点位的标注 JSON？移除后该点位将标记为「未配置」，不参与分析。", function(){
+      state.editing.annot = null;
+      renderAnnots();
+      toast("已移除标注 JSON");
+    });
+  });
+  function renderRefPreview(){
+    var p = state.editing;
+    var img = state.pendingImg || (p && p.customImg);
+    $("#refPreview").innerHTML = img
+      ? '<img src="' + img + '" alt="参考图" style="width:100%;height:100%;object-fit:cover;display:block">'
+      : defaultSceneSVG();
+    $("#refState").textContent = state.pendingImg
+      ? ("待上传的本地图片" + (state.pendingName ? "：" + state.pendingName : ""))
+      : (p && p.customImg ? imgLabel(p) : "系统默认图");
+  }
+  $("#btnReplaceImg").addEventListener("click", function(){
+    if(!state.editing) return;
+    state.pendingImg = null;
+    state.pendingName = "";
+    renderRefPreview();
+    $("#refFile").value = "";
+    openMask("mRefImg");
+  });
+  $("#refFile").addEventListener("change", function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      state.pendingImg = fr.result;
+      state.pendingName = f.name;
+      renderRefPreview();
+      toast("已选择本地图片：" + f.name);
+    };
+    fr.readAsDataURL(f);
+  });
+  $("#refOk").addEventListener("click", function(){
+    if(!state.pendingImg){ toast("请先上传本地图片"); return; }
+    var p = state.editing;
+    p.customImg = state.pendingImg;
+    p.imgName = state.pendingName || "";
+    $("#roiBg").innerHTML = imgHTML(p);
+    $("#cfgImgTip").textContent = "参考图：" + imgLabel(p) + " " + IMG_W + "×" + IMG_H;
+    closeMask("mRefImg");
+    renderAnnots();
+    toast("参考图已替换（标注 JSON 不受影响）");
+  });
+  $("#refReset").addEventListener("click", function(){
+    var p = state.editing;
+    if(!p) return;
+    if(!p.customImg){ toast("当前已是系统默认图"); return; }
+    p.customImg = null;
+    p.imgName = "";
+    $("#roiBg").innerHTML = imgHTML(p);
+    $("#cfgImgTip").textContent = "参考图：" + imgLabel(p) + " " + IMG_W + "×" + IMG_H;
+    closeMask("mRefImg");
+    renderAnnots();
+    toast("已恢复系统默认参考图");
+  });
+  /* ================= ④ 巡视记录 ================= */
+  function renderRecTypeSeg(){
+    var cfg = APP_CFG[activeApp];
+    var cur = state.recFilter.type || "all";
+    var seg = $("#recTypeSeg");
+    seg.classList.toggle("wrap", activeApp === "hazard");
+    var html = '<button class="' + (cur === "all" ? "on" : "") + '" type="button" data-type="all">全部场景</button>';
+    cfg.types.forEach(function(t){
+      var isNew = (activeApp === "green" && (t === "1806" || t === "1807")) || activeApp === "hazard";
+      html += '<button class="' + (cur === t ? "on" : "") + '" type="button" data-type="' + t + '">' + esc(TASK_LABEL[t]) + (isNew ? '<sup class="chg-tag">新</sup>' : '') + '</button>';
+    });
+    seg.innerHTML = html;
+  }
+  function filteredRecords(){
+    var f = state.recFilter;
+    return state.records.filter(function(r){
+      if(f.type !== "all" && String(r.taskType) !== f.type) return false;
+      if(f.st === "done" && r.analyze !== "done") return false;
+      if(f.st === "fail" && r.analyze !== "fail") return false;
+      if(f.cb === "ok" && r.callback !== "ok") return false;
+      if(f.cb === "fail" && r.callback !== "fail") return false;
+      if(f.kw){
+        var k = f.kw.toLowerCase();
+        if(r.id.toLowerCase().indexOf(k) < 0 && r.taskId.toLowerCase().indexOf(k) < 0 && r.pointCode.toLowerCase().indexOf(k) < 0) return false;
+      }
+      return true;
+    });
+  }
+  function analyzeTag(s){
+    if(s === "done") return '<span class="jx-tag g">已完成</span>';
+    if(s === "running") return '<span class="jx-tag o">分析中</span>';
+    if(s === "fail") return '<span class="jx-tag r">失败</span>';
+    return '<span class="jx-tag">待分析</span>';
+  }
+  function callbackTag(s){
+    if(s === "ok") return '<span class="jx-tag g">回传成功</span>';
+    if(s === "fail") return '<span class="jx-tag r">回传失败</span>';
+    return '<span class="jx-tag">未回传</span>';
+  }
+  function renderRecords(){
+    var list = sortRecords(filteredRecords());
+    var total = list.length;
+    var pages = Math.max(1, Math.ceil(total / state.pageSize));
+    if(state.recPage > pages) state.recPage = pages;
+    var start = (state.recPage - 1) * state.pageSize;
+    var rows = list.slice(start, start + state.pageSize);
+    var body = $("#recBody");
+    syncSortUI(body.closest("table"), state.recSort);
+    if(!rows.length){
+      body.innerHTML = '<tr><td colspan="9"><div class="jx-empty"><span class="ei"></span>没有匹配的巡视记录</div></td></tr>';
+    } else {
+      body.innerHTML = rows.map(function(r){
+        var p = findPoint(r.pointCode);
+        var thumb = (p || activeApp === "hazard") ? '<span class="thumb">' + imgHTML(p, r.taskType) + '</span>' : '<span class="thumb"></span>';
+        var ops = '<button class="jx-btn ghost" type="button" data-view="' + r.id + '">' + (r.analyze === "done" ? "查看结果" : "查看详情") + '</button>';
+        return '<tr>' +
+          '<td>' + esc(r.id) + (r.chgMark ? '<sup class="chg-tag">' + r.chgMark + '</sup>' : '') + '</td><td>' + thumb + '</td>' +
+          '<td style="white-space:nowrap">' + esc(r.pointCode) + '</td>' +
+          '<td style="white-space:nowrap"><span class="jx-tag b">' + TASK_LABEL[r.taskType] + '</span></td>' +
+          '<td class="small" style="word-break:break-all">' + esc(r.taskId) + '</td>' +
+          '<td>' + analyzeTag(r.analyze) + '</td>' +
+          '<td>' + callbackTag(r.callback) + '</td>' +
+          '<td>' + esc(r.receiveTime.slice(0, 10)) + '<br><span class="small">' + esc(r.receiveTime.slice(11)) + '</span></td>' +
+          '<td>' + ops + '</td></tr>';
+      }).join("");
+    }
+    renderPager($("#recPager"), total, state.recPage, pages, function(n){ state.recPage = n; showSkeleton($("#recBody"), 9, 3, renderRecords); });
+  }
+  function bindSeg(sel, key, attr){
+    $(sel).addEventListener("click", function(e){
+      var b = e.target.closest("button");
+      if(!b) return;
+      $$("button", this).forEach(function(x){ x.classList.toggle("on", x === b); });
+      state.recFilter[key] = b.getAttribute(attr);
+      state.recPage = 1;
+      showSkeleton($("#recBody"), 9, 4, renderRecords);
+    });
+  }
+  bindSeg("#recRangeSeg", "range", "data-range");
+  bindSeg("#recTypeSeg", "type", "data-type");
+  bindSeg("#recStatusSeg", "st", "data-st");
+  bindSeg("#recCbSeg", "cb", "data-cb");
+  $("#recQuery").addEventListener("click", function(){
+    state.recFilter.kw = $("#recKw").value.trim();
+    state.recPage = 1;
+    showSkeleton($("#recBody"), 9, 4, function(){
+      renderRecords();
+      toast("查询完成，共 " + filteredRecords().length + " 条");
+    });
+  });
+  $("#recReset").addEventListener("click", function(){
+    var cfg = APP_CFG[activeApp];
+    $("#recKw").value = "";
+    $("#recFrom").value = cfg.defaultRangeFrom;
+    $("#recTo").value = cfg.defaultRangeTo;
+    state.recFilter = { range: "today", type: "all", st: "all", cb: "all", kw: "" };
+    ["#recRangeSeg", "#recTypeSeg", "#recStatusSeg", "#recCbSeg"].forEach(function(s){
+      $$("button", $(s)).forEach(function(x, i){ x.classList.toggle("on", i === 0); });
+    });
+    state.recPage = 1;
+    showSkeleton($("#recBody"), 9, 4, function(){ renderRecords(); toast("已重置筛选条件"); });
+  });
+  $("#recKw").addEventListener("keydown", function(e){ if(e.key === "Enter") $("#recQuery").click(); });
+  $("#recKw").addEventListener("input", function(){
+    state.recFilter.kw = this.value.trim();
+    state.recPage = 1;
+    renderRecords();
+  });
+  $$("th[data-key]", $("#recBody").closest("table")).forEach(function(th){
+    th.addEventListener("click", function(){
+      var k = th.getAttribute("data-key"), s = state.recSort;
+      if(s.key === k) s.desc = !s.desc;
+      else { s.key = k; s.desc = false; }
+      state.recPage = 1;
+      showSkeleton($("#recBody"), 9, 4, renderRecords);
+    });
+  });
+  $("#recBody").addEventListener("click", function(e){
+    var v = e.target.closest("[data-view]");
+    if(v){
+      var rec = findRecord(v.getAttribute("data-view"));
+      if(!rec) return;
+      state.result = { recordId: rec.id, api: state.result.api || "record" };
+      renderResult();
+      goScreen("result");
+      return;
+    }
+  });
+
+  /* ================= ⑤ 识别结果 / 调用链路详情 ================= */
+  var RESULT_COST = {
+    "1803": "1.2 s", "1804": "0.9 s", "1805": "0.8 s", "1806": "0.9 s", "1807": "0.8 s",
+    "1808": "1.3 s", "1809": "1.4 s", "1810": "1.2 s", "1811": "1.5 s", "1812": "1.1 s", "1813": "1.3 s", "1814": "1.4 s", "1815": "1.6 s", "1816": "1.5 s"
+  };
+
+  function kv(k, v){ return "<span>" + k + "</span><span>" + v + "</span>"; }
+  function addSec(hms, sec){
+    var p = hms.split(":").map(Number);
+    var s = Math.round(p[0] * 3600 + p[1] * 60 + p[2] + sec);
+    s = ((s % 86400) + 86400) % 86400;
+    function z(n){ return (n < 10 ? "0" : "") + n; }
+    return z(Math.floor(s / 3600)) + ":" + z(Math.floor((s % 3600) / 60)) + ":" + z(s % 60);
+  }
+  function modelResultText(d){
+    try { return JSON.stringify(JSON.parse(d.raw), null, 2); }
+    catch(e){ return d.raw; }
+  }
+
+  /* 按 taskType 推导 modelResult（绿化：从标注 JSON 推导；隐患：直接来自大模型 bbox_2d + 中文 label） */
+  function resultOf(rec, pt){
+    var type = String(rec.taskType);
+    var cost = RESULT_COST[type] || "--";
+    if(Number(type) >= 1808){
+      var arrH = rec.demoResult || [];
+      var boxesH = arrH.map(function(it){
+        var b = it.bbox_2d || [0, 0, 0, 0];
+        return {
+          x: b[0] / IMG_W * 100, y: b[1] / IMG_H * 100,
+          w: Math.max(0, b[2] - b[0]) / IMG_W * 100, h: Math.max(0, b[3] - b[1]) / IMG_H * 100,
+          label: it.label || ""
+        };
+      });
+      return {
+        cost: cost, boxes: boxesH,
+        legend: boxesH.length
+          ? ("红色框为模型返回的 bbox_2d（原图绝对像素坐标），共检出 " + boxesH.length + " 处隐患（最多 3 处）。")
+          : "画面未检出工地隐患，modelResult 返回空数组 []。",
+        raw: JSON.stringify(arrH)
+      };
+    }
+    if(type === "1803"){
+      var trees = (pt && pt.annot) ? pt.annot.items.filter(function(it){ return it.catId === 2 && it.bbox; }) : [];
+      var boxes = trees.map(function(it){
+        return {
+          x: it.bbox[0] / pt.annot.width * 100, y: it.bbox[1] / pt.annot.height * 100,
+          w: it.bbox[2] / pt.annot.width * 100, h: it.bbox[3] / pt.annot.height * 100,
+          label: "tree"
+        };
+      });
+      var arr = trees.map(function(it){
+        return {
+          bbox_2d: [ Math.round(it.bbox[0]), Math.round(it.bbox[1]),
+                     Math.round(it.bbox[0] + it.bbox[2]), Math.round(it.bbox[1] + it.bbox[3]) ],
+          label: "tree"
+        };
+      });
+      return {
+        cost: cost, boxes: boxes,
+        legend: boxes.length ? ("红色框为模型返回的 bbox_2d（按参考图坐标渲染），共 " + boxes.length + " 个 tree 目标。") : "模型未返回绿化目标。",
+        raw: JSON.stringify(arr)
+      };
+    }
+    /* 1806 / 1807：按 95% 达标阈值判定场景状态（口径与接口文档一致） */
+    if(type === "1806" || type === "1807"){
+      var sCatId = (type === "1806") ? 2 : 1;
+      var sPct = pt ? scenePct(pt, sCatId) : 0;
+      var sPass = sPct >= 95;
+      var sName = (type === "1806") ? "苗木绿化" : "地面铺装";
+      var o6 = { sceneStatus: sPass ? ((type === "1806") ? "greening" : "paved") : "unconstructed", confidence: sPass ? 1.0 : 0.95 };
+      if(!sPass) o6.regionCoveredPercentage = sPct;
+      var sLegend = sPass
+        ? (sName + "区域综合真实覆盖率 ≥ 95%，判定为" + ((type === "1806") ? "已苗木绿化" : "已地面铺装") + "。")
+        : (sName + "区域综合真实覆盖率 " + sPct + "%，未达 95% 达标阈值，判定为未施工。");
+      return { cost: cost, boxes: [], legend: sLegend, raw: JSON.stringify(o6) };
+    }
+    var catId = (type === "1804") ? 2 : 1;
+    var key = (type === "1804") ? "greenPercentage" : "hardened_surfacePercentage";
+    var name = (type === "1804") ? "绿化" : "硬化路面";
+    var pct = pt ? scenePct(pt, catId) : 0;
+    var o = {}; o[key] = pct;
+    return { cost: cost, boxes: [], legend: name + "区域占整幅画面的 " + pct + "%。", raw: JSON.stringify(o) };
+  }
+
+  function kpiOf(type, d, pt, rec){
+    var res = {}; try { res = JSON.parse(d.raw); } catch(e){ res = null; }
+    if(Number(type) >= 1808){
+      var cnt = (res && res.length) ? res.length : 0;
+      var labels = cnt ? res.map(function(it){ return it.label; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).join("、") : "无隐患（[]）";
+      return [
+        ["隐患目标数", cnt + " 处"],
+        ["识别标签", labels],
+        ["实际使用模型", (rec && rec.modelUsed) || (state.model.modelName || "qwen3.5-vl-35b")],
+        ["模型耗时", d.cost]
+      ];
+    }
+    if(type === "1803") return [["识别目标数", (res && res.length ? res.length : 0) + " 个"], ["标签", "tree"], ["模型耗时", d.cost], ["模型调用", "1 次"]];
+    if(type === "1806" || type === "1807"){
+      var stMap = { greening: "已苗木绿化", paved: "已地面铺装", unconstructed: "未施工", unknown: "未知" };
+      var st = res ? res.sceneStatus : "unknown";
+      var rows = [[(type === "1806" ? "绿化状态" : "铺装状态"), stMap[st] || st], ["置信度", String(res && res.confidence != null ? res.confidence : 0)]];
+      if(st === "unconstructed") rows.push(["实际覆盖占比", ((res && res.regionCoveredPercentage) || 0) + " %"]);
+      rows.push(["达标阈值", "95 %"], ["模型耗时", d.cost]);
+      return rows;
+    }
+    var pct = (type === "1804") ? (res ? res.greenPercentage : 0) : (res ? res.hardened_surfacePercentage : 0);
+    return [
+      [(type === "1804" ? "绿化占比" : "硬化路面占比"), pct + " %"],
+      ["模型耗时", d.cost]
+    ];
+  }
+
+  /* 回传工地平台：直接透传模型返回结果，不做二次加工 */
+  function modelResultFor(rec, d, pt, type){
+    if(Number(type) >= 1808 || type === "1803"){ try { return JSON.parse(d.raw); } catch(e){ return []; } }
+    if(type === "1806" || type === "1807"){ try { return JSON.parse(d.raw); } catch(e){ return {}; } }
+    var res = {}; try { res = JSON.parse(d.raw); } catch(e){ res = {}; }
+    var pct = (type === "1804") ? (res.greenPercentage || 0) : (res.hardened_surfacePercentage || 0);
+    var out = {};
+    if(type === "1804") out.greenPercentage = pct; else out.hardened_surfacePercentage = pct;
+    return out;
+  }
+  function cbJson(rec, d, pt, type){
+    var mr = JSON.stringify(modelResultFor(rec, d, pt, type), null, 2).replace(/\n/g, "\n      ");
+    var item = {
+      taskId: rec.taskId,
+      taskType: activeApp === "hazard" ? String(type) : Number(type),
+      positionCode: rec.pointCode,
+      inspectionRecordId: inspIdOf(rec),
+      modelResult: modelResultFor(rec, d, pt, type)
+    };
+    if(activeApp === "hazard"){
+      item.imageInput = "http://minio.example.com:9000/patrol-shoot/2026/11/18/" + inspIdOf(rec) + "_1760000000000.jpg";
+      item.timestamp = rec.receiveTime;
+      return JSON.stringify({ dataList: [ item ] }, null, 2);
+    }
+    return '{\n  "dataList": [\n    {\n' +
+      '      "taskId": "' + rec.taskId + '",\n' +
+      '      "taskType": ' + type + ',\n' +
+      '      "positionCode": "' + rec.pointCode + '",\n' +
+      '      "inspectionRecordId": "' + inspIdOf(rec) + '",\n' +
+      '      "modelResult": ' + mr + '\n' +
+      '    }\n  ]\n}';
+  }
+
+  /* ----- 各环节接口的请求 / 响应 ----- */
+  function inspIdOf(rec){ return rec.inspId || ("R-" + rec.id); }
+  function recordFields(rec, type){
+    var dt = activeApp === "hazard" ? "2026/11/18" : "2026/10/12";
+    return {
+      taskId: rec.taskId,
+      taskType: rec.batch ? rec.batch : [Number(type)],
+      positionCode: rec.pointCode,
+      inspectionRecordId: inspIdOf(rec),
+      imageUrl: "http://minio.example.com:9000/patrol-shoot/" + dt + "/" + inspIdOf(rec) + "_1760000000000.jpg"
+    };
+  }
+  function recordReqJson(rec, type){
+    return JSON.stringify([recordFields(rec, type)], null, 2);
+  }
+  function renderApi(rec, d, pt, type){
+    var cfg = APP_CFG[activeApp];
+    var api = state.result.api || "record";
+    var done = rec.analyze === "done";
+    var running = rec.analyze === "running";
+
+    $$("#apiTabs button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-api") === api); });
+
+    if(api === "record"){
+      $("#apiKv").innerHTML =
+        kv("接口名称", "下发巡视记录") +
+        kv("接口地址", cfg.recordUrl + (activeApp === "hazard" ? '<sup class="chg-tag">新</sup>' : "")) +
+        kv("提供方 / 调用方", "极星 / " + cfg.platformName) +
+        kv("请求方式", "POST") +
+        kv("场景拆分", rec.batch ? ('<span class="chg">多场景下发（' + rec.batch.join(" / ") + "），已拆分为 " + rec.batch.length + ' 条单场景记录</span><sup class="chg-tag">新</sup>') : "单场景（taskType 传单元素数组），无需拆分") +
+        kv("接收时间", rec.receiveTime);
+      $("#apiReq").textContent = "POST " + cfg.recordUrl + "\nContent-Type: application/json\n\n// taskType 为场景 ID 数组（单场景传单元素数组）；为空或含不支持场景时整条返回失败（code 1），不入库不拆分\n\n" + recordReqJson(rec, type);
+      $("#apiResp").textContent = '{\n  "code": 0,\n  "msg": "操作成功",\n  "data": null\n}';
+      return;
+    }
+
+    if(api === "model"){
+      var m = state.model;
+      var imgName = rec.id + "_1760000000000.jpg";
+      var jsonName = (pt && pt.annot && pt.annot.fileName) ? pt.annot.fileName.split("/").pop() : (rec.pointCode + ".json");
+      var isHazard = activeApp === "hazard";
+      $("#apiKv").innerHTML =
+        kv("接口名称", cfg.modelApiName) +
+        (isHazard ? kv("接口路径", "POST " + cfg.modelApiUrl) : "") +
+        kv("模型地址", m.modelAddr || "服务端默认") +
+        kv("模型名称", m.modelName || "服务端默认") +
+        kv("请求方式", "POST　multipart/form-data") +
+        kv("请求参数", isHazard
+          ? '<span class="chg">imageFile · taskType · modelUrl / modelName（选填，不传 jsonFile）</span><sup class="chg-tag">新</sup>'
+          : '<span class="chg">imageFile · jsonFile · taskType · modelUrl / modelName（选填）</span><sup class="chg-tag">改</sup>') +
+        kv("出参方式", isHazard ? "data.modelResult（JSON 数组，无隐患返回 []）" : "data.modelResult（JSON 对象/数组，非字符串）") +
+        kv("调用次数", "1 次") +
+        kv("状态", done ? '<span class="jx-tag g">成功</span>' : (running ? '<span class="jx-tag o">进行中</span>' : '<span class="jx-tag r">未发起调用</span>'));
+      if(!done){
+        $("#apiReq").textContent = "// 未发起模型调用\n// " + (running ? "分析进行中…" : "原因：" + (rec.failReason || "分析失败"));
+        $("#apiResp").textContent = "// 无模型响应";
+        return;
+      }
+      var B = "----WebKitFormBoundary7d2aQ9xLpK1";
+      var L = [];
+      L.push("POST " + cfg.modelApiUrl);
+      L.push("Content-Type: multipart/form-data; boundary=" + B);
+      L.push("");
+      L.push("--" + B);
+      L.push('Content-Disposition: form-data; name="imageFile"; filename="' + imgName + '"');
+      L.push("Content-Type: image/jpeg");
+      L.push("");
+      L.push("<巡视记录图片二进制>");
+      if(!isHazard){
+        L.push("--" + B);
+        L.push('Content-Disposition: form-data; name="jsonFile"; filename="' + jsonName + '"');
+        L.push("Content-Type: application/json");
+        L.push("");
+        L.push(pt && pt.annot ? JSON.stringify(pt.annot.raw) : "<点位标注 JSON>");
+      }
+      L.push("--" + B);
+      L.push('Content-Disposition: form-data; name="taskType"');
+      L.push("");
+      L.push(type);
+      if(m.modelAddr){
+        L.push("--" + B);
+        L.push('Content-Disposition: form-data; name="modelUrl"');
+        L.push("");
+        L.push(m.modelAddr);
+      }
+      if(m.modelName){
+        L.push("--" + B);
+        L.push('Content-Disposition: form-data; name="modelName"');
+        L.push("");
+        L.push(m.modelName);
+      }
+      L.push("--" + B + "--");
+      $("#apiReq").textContent = isHazard
+        ? ("// 工地隐患检测接口无需上传 jsonFile；modelUrl（完整 URL）/ modelName 选填，留空使用服务端默认配置\n\n" + L.join("\n"))
+        : ("// 调用目标地址以接口文档为准；模型地址 / 模型名称选填，填写时作为字段随请求一并透传，留空走服务端默认\n\n" + L.join("\n"));
+      $("#apiResp").textContent = isHazard
+        ? ('{\n  "code": 200,\n  "message": "success",\n  "data": {\n    "taskType": ' + type + ',\n    "fileName": "' + imgName + '",\n    "modelUsed": "' + (m.modelName || "qwen3.5-vl-35b") + '",\n    "baseUrlUsed": "' + (m.modelAddr || "http://172.35.1.1:8080/apis/ais-v2/chat/completions") + '",\n    "modelResult": ' +
+          JSON.stringify(modelResultFor(rec, d, pt, type), null, 2).replace(/\n/g, "\n    ") + '\n  }\n}')
+        : ('{\n  "code": 200,\n  "message": "success",\n  "data": {\n    "taskType": ' + type + ',\n    "fileName": "' + jsonName + '",\n    "modelUsed": "' + (m.modelName || "qwen3.7-plus") + '",\n    "baseUrlUsed": "' + (m.modelAddr ? "http://" + m.modelAddr + "/v1" : "https://dashscope.aliyuncs.com/compatible-mode/v1") + '",\n    "modelResult": ' +
+          JSON.stringify(modelResultFor(rec, d, pt, type), null, 2).replace(/\n/g, "\n    ") + '\n  }\n}');
+      return;
+    }
+
+    /* 接收点位识别结果（极星 → 工地平台） */
+    $("#apiKv").innerHTML =
+      kv("接口名称", "接收点位识别结果") +
+      kv("接口地址", cfg.cbUrl + (activeApp === "hazard" ? '<sup class="chg-tag">新</sup>' : "")) +
+      kv("提供方 / 调用方", cfg.platformName + " / 极星") +
+      kv("回传状态", callbackTag(rec.callback)) +
+      kv("回传时间", rec.callback === "ok" ? addSec(rec.receiveTime.slice(11), 1.64) : "--") +
+      kv("重试次数", String(rec.cbRetry || 0));
+    if(!done){
+      $("#apiReq").textContent = "// 分析未完成，暂未回传";
+      $("#apiResp").textContent = "// 无响应";
+      return;
+    }
+    $("#apiReq").textContent = "POST " + cfg.cbUrl + "\nContent-Type: application/json\n\n" + cbJson(rec, d, pt, type);
+    $("#apiResp").textContent = rec.callback === "ok"
+      ? '{\n  "code": 0,\n  "msg": "操作成功",\n  "data": null\n}'
+      : (rec.callback === "fail"
+          ? '{\n  "code": 1,\n  "msg": "' + (rec.failReason || "回传失败") + '",\n  "data": null\n}'
+          : '// 尚未回传');
+  }
+
+  function renderResult(){
+    var rec = findRecord(state.result.recordId) || state.records[0];
+    if(!rec) return;
+    var type = String(rec.taskType);
+    var pt = findPoint(rec.pointCode);
+    var d = resultOf(rec, pt);
+    var done = rec.analyze === "done";
+
+    $("#resultBg").innerHTML = (pt || activeApp === "hazard") ? imgHTML(pt, rec.taskType) : defaultSceneSVG();
+    $$(".roi-box", $("#resultStage")).forEach(function(n){ n.remove(); });
+    if(done) d.boxes.forEach(function(b){
+      var el = document.createElement("div");
+      el.className = "roi-box det";
+      el.style.left = b.x + "%"; el.style.top = b.y + "%";
+      el.style.width = b.w + "%"; el.style.height = b.h + "%";
+      el.innerHTML = '<span class="lb">' + esc(b.label || "tree") + '</span>';
+      $("#resultStage").appendChild(el);
+    });
+    $("#resultLegend").textContent = done ? d.legend
+      : (rec.analyze === "running" ? "分析中，暂无识别渲染。" : "分析失败，无识别渲染。");
+
+    if(done){
+      $("#resultKpi").innerHTML = kpiOf(type, d, pt, rec).map(function(k){ return "<div><span>" + k[0] + "</span><b>" + k[1] + "</b></div>"; }).join("");
+      $("#resultJson").textContent = modelResultText(d);
+    } else {
+      $("#resultKpi").innerHTML = '<div style="grid-column:1/-1;background:#f7f9fb;border:1px solid #eef0f2;border-radius:3px;padding:16px;text-align:center;color:#8c9aa6">' +
+        (rec.analyze === "running" ? "分析中，暂无识别结果" : "分析失败，无识别结果") + '</div>';
+      $("#resultJson").textContent = rec.analyze === "running" ? "// 分析中…" : ("// 无识别结果：" + (rec.failReason || ""));
+    }
+
+    $("#rsRecordId").textContent = rec.id;
+    $("#rsId").textContent = rec.id;
+    $("#rsPoint").textContent = rec.pointCode;
+    $("#rsTask").textContent = rec.taskId;
+    var isNewScene = Number(type) >= 1806;
+    $("#rsScene").innerHTML = esc(TASK_FULL[type]) +
+      (isNewScene ? '<sup class="chg-tag">新</sup>' : (rec.batch ? '<sup class="chg-tag">改</sup>' : ""));
+    $("#rsStatus").innerHTML = analyzeTag(rec.analyze);
+    $("#rsRecv").textContent = rec.receiveTime;
+    $("#rsCost").textContent = done ? d.cost : "--";
+    $("#rsCallCount").textContent = done ? "1 次" : "0 次";
+
+    renderApi(rec, d, pt, type);
+  }
+  $("#apiTabs").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-api]");
+    if(!b) return;
+    state.result.api = b.getAttribute("data-api");
+    renderResult();
+  });
+
+  /* ================= ⑥ 记录保留设置 ================= */
+  function ovItem(k, v){ return "<div><span>" + k + "</span><b>" + v + "</b></div>"; }
+  function renderRetention(){
+    var r = state.retention;
+    $("#retOverview").innerHTML =
+      ovItem("记录总数", state.retTotal.toLocaleString() + " 条") +
+      ovItem("占用空间", state.retSize);
+    $("#retAutoOffNote").style.display = r.auto ? "none" : "";
+    $("#retLogBody").innerHTML = state.retLog.map(function(l){
+      return '<tr><td>' + l.time + '</td><td>' + l.count + ' 条</td><td>' + l.size + '</td></tr>';
+    }).join("");
+  }
+  function syncRetForm(){
+    var r = state.retention;
+    $("#retCustom").value = r.days;
+    $("#retAuto").checked = r.auto;
+    $("#retTime").value = r.time;
+  }
+  $("#retCustom").addEventListener("input", function(){
+    var raw = this.value.trim();
+    var n = parseInt(raw, 10);
+    $("#retErr").classList.remove("on"); this.classList.remove("bad");
+    if(raw !== "" && n >= 1 && n <= 3650){
+      state.retention.days = n;
+      renderRetention();
+    }
+  });
+  $("#retAuto").addEventListener("change", function(){
+    state.retention.auto = this.checked;
+    renderRetention();
+    toast(this.checked ? "自动清理已开启" : "自动清理已关闭");
+  });
+  $("#retTime").addEventListener("change", function(){
+    state.retention.time = this.value;
+    renderRetention();
+  });
+  $("#retSave").addEventListener("click", function(){
+    var r = state.retention;
+    var raw = $("#retCustom").value.trim();
+    var n = parseInt(raw, 10);
+    if(raw === "" || !(n >= 1 && n <= 3650)){
+      $("#retErr").classList.add("on"); $("#retCustom").classList.add("bad");
+      toast("请输入 1～3650 之间的保存时长"); return;
+    }
+    r.days = n;
+    $("#retErr").classList.remove("on"); $("#retCustom").classList.remove("bad");
+    if(r.auto && !/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time)){ toast("每日清理时间格式应为 HH:mm"); return; }
+    renderRetention();
+    toast("保留设置已保存：保留 " + r.days + " 天" + (r.auto ? "，每日 " + r.time + " 自动清理" : "，自动清理已关闭"));
+  });
+  $("#retReset").addEventListener("click", function(){
+    state.retention = { days: 30, auto: true, time: "03:00" };
+    syncRetForm();
+    renderRetention();
+    toast("已恢复默认设置（保留 30 天，每日 03:00 自动清理）");
+  });
+
+  /* ================= ⑦ 大模型配置 ================= */
+  function addrValid(v){ return /^[A-Za-z0-9._\-]+:\d{1,5}$/.test(v); }
+  function urlValid(v){ return /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(v); }
+  function renderModelCfg(){
+    var isHazard = activeApp === "hazard";
+    $("#mcAddrLabel").innerHTML = isHazard
+      ? '模型推理地址（完整 URL，选填）<sup class="chg-tag">新</sup>'
+      : '模型地址（IP:端口，选填）<sup class="chg-tag">改</sup>';
+    $("#mcAddr").placeholder = isHazard
+      ? "例如 http://172.35.1.1:8080/apis/ais-v2/chat/completions，留空使用服务端默认"
+      : "例如 172.16.210.88:9000，留空使用服务端默认";
+    $("#mcAddrTip").innerHTML = isHazard
+      ? '工地隐患检测接口（<code>POST /api/v1/image/analysis</code>）支持动态指定模型推理地址。此处填写<b>完整 URL</b>，作为 <b>modelUrl</b> 字段随请求一并透传，配置后对本模块全部场景（1808~1816）生效；<b>留空时模型侧使用服务端默认配置</b>。'
+      : '绿化恢复检测接口由模型侧封装提供。此处填写实际调用的模型地址，<b>仅需 IP 与端口</b>，无需协议、路径、请求方式、超时时间与鉴权信息；作为 <b>modelUrl</b> 字段随请求一并透传，配置后对本模块全部场景生效；<b>留空时模型侧使用服务端默认配置</b>。';
+    $("#mcName").placeholder = isHazard
+      ? "例如 ev-vlm-35b，留空使用服务端默认模型"
+      : "例如 ev-vlm-32b，留空使用服务端默认模型";
+    $("#mcAddr").value = state.model.modelAddr;
+    $("#mcName").value = state.model.modelName || "";
+  }
+  $("#mcSave").addEventListener("click", function(){
+    var m = state.model;
+    var isHazard = activeApp === "hazard";
+    m.modelAddr = $("#mcAddr").value.trim();
+    m.modelName = $("#mcName").value.trim();
+    if(m.modelAddr){
+      if(isHazard && !urlValid(m.modelAddr)){ toast("模型推理地址格式应为完整 URL，例如 http://172.35.1.1:8080/apis/ais-v2/chat/completions"); return; }
+      if(!isHazard && !addrValid(m.modelAddr)){ toast("模型地址格式应为 IP:端口，例如 172.16.210.88:9000"); return; }
+    }
+    renderModelCfg();
+    toast("大模型配置已保存" + (!m.modelAddr && !m.modelName ? "（均留空，使用服务端默认）" : ""));
+  });
+
+  /* ================= 应用切换 & 屏幕切换（hash 路由）/ 全局事件 ================= */
+  function syncAppShell(){
+    var cfg = APP_CFG[activeApp];
+    $$(".app-mt").forEach(function(el){ el.textContent = cfg.name; });
+    $$(".app-crumb").forEach(function(el){ el.textContent = cfg.name; });
+    $$("#appSwitcher button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-switch-app") === activeApp); });
+    $("#navConfigBtn").style.display = cfg.hasConfig ? "" : "none";
+    $("#apiTabRec").textContent = "下发巡视记录　" + (activeApp === "hazard" ? "隐患平台" : "工地平台") + " → 极星";
+    $("#apiTabCb").textContent = "接收点位识别结果　极星 → " + (activeApp === "hazard" ? "隐患平台" : "工地平台");
+  }
+  function switchApp(appKey, targetScreen){
+    if(!appStates[appKey]) return;
+    activeApp = appKey;
+    state = appStates[appKey];
+    var cfg = APP_CFG[activeApp];
+    $("#pointKw").value = state.pointFilter.kw || "";
+    $("#recKw").value = state.recFilter.kw || "";
+    $("#recFrom").value = cfg.defaultRangeFrom;
+    $("#recTo").value = cfg.defaultRangeTo;
+    $$("button", $("#pointStatusSeg")).forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-status") === state.pointFilter.status); });
+    $$("button", $("#recRangeSeg")).forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-range") === state.recFilter.range); });
+    $$("button", $("#recStatusSeg")).forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-st") === state.recFilter.st); });
+    $$("button", $("#recCbSeg")).forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-cb") === state.recFilter.cb); });
+    syncAppShell();
+    renderRecTypeSeg();
+    renderPoints();
+    renderRecords();
+    renderResult();
+    syncRetForm();
+    renderRetention();
+    renderModelCfg();
+    var curScreen = targetScreen || screenFromHash();
+    if(curScreen === "config" && !cfg.hasConfig) curScreen = "points";
+    if(targetScreen || curScreen !== screenFromHash()) goScreen(curScreen);
+  }
+  $("#appSwitcher").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-switch-app]");
+    if(!b) return;
+    var k = b.getAttribute("data-switch-app");
+    if(k === activeApp) return;
+    var cur = screenFromHash();
+    var next = (cur === "appcenter") ? "points" : cur;
+    switchApp(k, next);
+    toast("已切换至「" + APP_CFG[k].name + "」应用控制台");
+  });
+
+  var lastHash = "";
+  function validScreen(n){ return !!n && !!$('.screen[data-screen="' + n + '"]'); }
+  function screenFromHash(){
+    var h = (location.hash || "").replace(/^#\/?/, "").split("?")[0];
+    if(h === "config" && !APP_CFG[activeApp].hasConfig) return "points";
+    return validScreen(h) ? h : "appcenter";
+  }
+  function goScreen(name){
+    if(!validScreen(name)) name = "appcenter";
+    if(name === "config" && !APP_CFG[activeApp].hasConfig) name = "points";
+    if(name === "points") renderPoints();
+    if(name === "config" && !state.editing && state.points.length){
+      state.editing = state.points[0];
+      renderConfig();
+    }
+    var s = $('.screen[data-screen="' + name + '"]');
+    $$(".screen").forEach(function(x){ x.classList.toggle("on", x === s); });
+    $$(".pnav .scr button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-screen") === name); });
+    var main = $(".jx-main", s);
+    if(main) main.scrollTop = 0;
+    var target = "#/" + name;
+    if(location.hash !== target){ lastHash = target; location.hash = target; }
+  }
+  window.addEventListener("hashchange", function(){
+    if(location.hash === lastHash) return;
+    goScreen(screenFromHash());
+  });
+  $$(".pnav .scr button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var name = b.getAttribute("data-screen");
+      if(name === "config"){
+        if(!APP_CFG[activeApp].hasConfig){ toast("工地隐患监测无需点位配置"); return; }
+        var cur = state.editing && findPoint(state.editing.code);
+        if(cur) state.editing = cur;
+        else if(state.points.length){ openConfig(state.points[0].code); return; }
+        else { toast("暂无点位，请先新增点位"); return; }
+      }
+      if(name === "result" && !findRecord(state.result.recordId)){
+        state.result.recordId = state.records[0].id;
+      }
+      goScreen(name);
+    });
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Escape") return;
+    var open = document.querySelector(".mask.on");
+    if(open) open.classList.remove("on");
+  });
+  document.addEventListener("click", function(e){
+    if(e.target.closest("[data-close]")){
+      var m = e.target.closest(".mask");
+      if(m) m.classList.remove("on");
+      return;
+    }
+    if(e.target.classList.contains("mask")){ e.target.classList.remove("on"); return; }
+
+    var app = e.target.closest("[data-app]");
+    if(app){
+      var key = app.getAttribute("data-appkey");
+      if(key && appStates[key]){
+        switchApp(key, "points");
+        toast("已进入「" + APP_CFG[key].name + "」应用控制台");
+      } else {
+        toast("演示原型：" + app.getAttribute("data-app") + " 控制台");
+      }
+      return;
+    }
+    var go = e.target.closest("[data-go]");
+    if(go){ goScreen(go.getAttribute("data-go")); return; }
+
+    var cfg = e.target.closest("[data-cfg]");
+    if(cfg){ openConfig(cfg.getAttribute("data-cfg")); return; }
+
+    var t = e.target.closest("[data-toast]");
+    if(t) toast(t.getAttribute("data-toast"));
+  });
+  /* ================= 初始化 ================= */
+  renderApps();
+  switchApp("green", screenFromHash());
+})();
+</script>
+</body>
+</html>
