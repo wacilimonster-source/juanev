@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>无人机巡检识别 · 产品需求文档</title>
+<style>
+  :root{--ink:#17202b;--muted:#607080;--line:#dce3e8;--soft:#f4f7f9;--brand:#0768a9;--green:#18794e;--red:#c0392b;--warn:#a05a00;--white:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:#eef2f4;color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;font-size:14px;line-height:1.7}
+  header{background:#111d29;color:#fff;border-bottom:4px solid var(--brand)}
+  .wrap{max-width:1180px;margin:auto;padding:0 28px}
+  .head{padding:30px 0 26px;display:flex;justify-content:space-between;gap:32px;align-items:flex-end}
+  h1{margin:0;font-size:27px;font-weight:700}
+  header p{margin:6px 0 0;color:#c6d3dd}
+  .meta{text-align:right;color:#aebdca;font-size:13px;white-space:nowrap}
+  main{max-width:1180px;margin:24px auto 44px;background:var(--white);border:1px solid var(--line);padding:28px 40px}
+  h2{font-size:19px;margin:32px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--brand)}
+  h2:first-child{margin-top:0}
+  h3{font-size:15px;margin:22px 0 8px;color:#194866}
+  p{margin:8px 0}
+  .lead{font-size:15px;color:#334451}
+  table{width:100%;border-collapse:collapse;margin:10px 0 16px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#eaf1f5;color:#24485f;font-weight:700}
+  code{font-family:Consolas,monospace;background:#edf1f4;padding:1px 4px;color:#174661;font-size:13px}
+  .small{font-size:12px;color:var(--muted)}
+  .note{border-left:4px solid var(--warn);background:#fff8eb;padding:9px 14px;margin:12px 0}
+  .note.ok{border-left-color:var(--green);background:#eef9f3}
+  .flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:#f3f8fb;border:1px solid #cbdde8;padding:13px;margin:12px 0}
+  .step{background:#fff;border:1px solid #b9cbd7;padding:6px 10px;font-size:13px}
+  .arrow{color:var(--brand);font-weight:700}
+  .swim td.empty{background:#fbfcfd}
+  .swim .num{display:inline-block;min-width:16px;color:var(--brand);font-weight:700}
+  .stateflow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+  .state{background:#fff;border:1px solid #b9cbd7;padding:5px 12px;font-size:13px}
+  .state.run{border-color:#e0a458;color:var(--warn);background:#fff8eb}
+  .state.ok{border-color:#7fc3a1;color:var(--green);background:#eef9f3}
+  .state.bad{border-color:#e0a09a;color:var(--red);background:#fdeceb}
+  .axis{border-left:2px solid #cbdde8;margin:14px 0 16px 7px;padding-left:18px}
+  .axis .pt{position:relative;margin-bottom:9px;font-size:13px}
+  .axis .pt:before{content:"";position:absolute;left:-24px;top:7px;width:9px;height:9px;background:var(--brand);border-radius:50%}
+  .toc{background:var(--soft);border:1px solid var(--line);padding:14px 20px;margin:18px 0 6px}
+  .toc ol{margin:6px 0 0;padding-left:22px;columns:2;column-gap:36px}
+  .toc a{color:#194866;text-decoration:none}
+  .toc a:hover{color:var(--brand);text-decoration:underline}
+  footer{max-width:1180px;margin:-28px auto 36px;color:#748390;text-align:center;font-size:12px}
+  /* 本次需求变更标记：红字 + 角标（新=新增，改=修改） */
+  .chg{color:var(--red);font-weight:600}
+  .chg-tag{display:inline-block;margin-left:3px;padding:0 4px;font-size:10px;line-height:15px;font-weight:600;font-style:normal;color:#fff;background:var(--red);border-radius:2px;vertical-align:super}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head">
+    <div>
+      <h1>无人机巡检识别 · 产品需求文档</h1>
+      <p>智慧工地一体化平台 ↔ 极星算法推理平台（线路云版本）｜ 独立模块，不与既有视觉任务流程关联</p>
+    </div>
+    <div class="meta">
+      承载平台：极星算法推理平台（线路云版本） · 应用中心<br>
+      版本 v0.7（待评审）｜ 2026-10-15
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="toc">
+    <b>目录</b>
+    <ol>
+      <li><a href="#s1">背景与需求概述</a></li>
+      <li><a href="#s2">业务流程</a></li>
+      <li><a href="#s3">接口依赖</a></li>
+      <li><a href="#s4">场景与大模型配置</a></li>
+      <li><a href="#s5">点位配置规则</a></li>
+      <li><a href="#s6">分析流程与自动回传</a></li>
+      <li><a href="#s7">记录保留与自动清理</a></li>
+    </ol>
+  </div>
+  <p class="small" style="margin-top:10px">变更标记说明：文中红色角标 <sup class="chg-tag">新</sup> 表示本次需求新增内容、<sup class="chg-tag">改</sup> 表示在原有内容上修改（依据《绿化恢复检测接口文档 v5.2》与多场景下发拆分需求）；评审定稿后移除。</p>
+
+  <h2 id="s1">1. 背景与需求概述</h2>
+  <table>
+    <thead><tr><th style="width:120px">项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>建设背景<sup class="chg-tag">改</sup></td><td>工地无人机按点位巡航拍摄，需自动识别树木、绿化面积、硬化路面占比、苗木绿化与地面铺装施工状态等，并把识别结果回传工地平台。</td></tr>
+      <tr><td>版本</td><td><b>基于线路云版本开发</b>，沿用线路云的应用中心与页面交互规范，在「应用中心 → AI 应用」新增一张应用卡承载。</td></tr>
+      <tr><td>模型调用</td><td>模型推理<b>单独调用</b>，不内嵌本模块。调用<b>《绿化恢复检测接口》</b>（模型侧在算法外封装一层）：请求为 <code>multipart/form-data</code>，固定传入图片、标注 JSON 与场景类型；响应返回结构化 <code>modelResult</code>。</td></tr>
+      <tr><td>流程独立</td><td>与既有视觉任务（场景字典、视频任务、报警记录）完全独立，不共用任务、场景与报警链路。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.1 模块信息</h3>
+  <table>
+    <thead><tr><th style="width:120px">项目</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>模块名称</td><td>无人机巡检识别</td></tr>
+      <tr><td>应用入口</td><td>极星算法推理平台（线路云版本） → 应用中心 → AI应用 → 无人机巡检识别 → 应用控制台</td></tr>
+      <tr><td>模块页面</td><td>点位管理、点位配置（参考图 / 标注 JSON）、巡视记录、识别结果、<b>大模型配置</b>、记录保留设置</td></tr>
+      <tr><td>配套原型</td><td>《无人机巡检识别 · 高保真原型》</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s2">2. 业务流程</h2>
+  <table class="swim">
+    <thead><tr><th style="width:32%">智慧工地平台</th><th style="width:39%">极星（线路云）</th><th>模型侧</th></tr></thead>
+    <tbody>
+      <tr><td><span class="num">①</span>下发点位基础信息</td><td class="empty"></td><td class="empty"></td></tr>
+      <tr><td class="empty"></td><td><span class="num">②</span>上传参考图 / 上传标注 JSON</td><td class="empty"></td></tr>
+      <tr><td><span class="num">③</span>下发巡视记录</td><td class="empty"></td><td class="empty"></td></tr>
+      <tr><td class="empty"></td><td><span class="num">④</span>按点位匹配配置、按场景调用模型</td><td><span class="num">④</span>模型推理</td></tr>
+      <tr><td><span class="num">⑤</span>接收识别结果</td><td><span class="num">⑤</span>自动回传识别结果</td><td class="empty"></td></tr>
+    </tbody>
+  </table>
+  <p class="small">①②③⑤为接口交互；②为极星侧人工配置，一个点位一套配置、各场景共用；④为极星调用模型侧封装接口。一个点位代表一台无人机的一个巡航地点，同一批可含多个设备、多个地点。</p>
+
+  <h2 id="s3">3. 接口依赖</h2>
+  <p class="lead">本模块接口<b>均为已有接口</b>；本需求不定义接口字段与报文，字段、示例以接口文档为准。</p>
+  <table>
+    <thead><tr><th style="width:46px">序号</th><th>接口名称</th><th style="width:170px">方向</th><th style="width:110px">提供方</th><th style="width:70px">方式</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>下发点位基础信息</td><td>工地平台 → 极星</td><td>极星</td><td>POST</td></tr>
+      <tr><td>2</td><td>下发巡视记录</td><td>工地平台 → 极星</td><td>极星</td><td>POST</td></tr>
+      <tr><td>3</td><td>接收点位识别结果</td><td>极星 → 工地平台</td><td>工地平台</td><td>POST</td></tr>
+      <tr><td>4</td><td>绿化恢复检测（模型侧封装）</td><td>极星 → 模型侧</td><td>模型侧</td><td>POST</td></tr>
+    </tbody>
+  </table>
+  <p class="small">接口 1 / 2 由极星提供、工地平台调用，接口 3 由工地平台提供、极星调用；接口 4 由模型侧封装提供，模型地址在「大模型配置」中维护（见 4.2），报文结构见 3.2。接口 2 支持一条巡视记录携带多个场景 ID（<code>taskType</code> 数组），极星按场景拆分处理（见第 6 节）。<sup class="chg-tag">改</sup></p>
+
+  <h3 id="s3-2">3.2 模型调用接口（绿化恢复检测）</h3>
+  <p class="lead">接口以《绿化恢复检测接口文档》为准，本模块只负责按约定组装请求、解析响应。</p>
+  <table>
+    <thead><tr><th style="width:170px">项</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>调用地址</td><td>以《绿化恢复检测接口文档》为准，本模块不单独维护。</td></tr>
+      <tr><td>请求方法</td><td><code>POST</code>，<code>Content-Type: multipart/form-data</code></td></tr>
+      <tr><td>请求参数<sup class="chg-tag">改</sup></td><td><code>imageFile</code>（巡视记录图片）、<code>jsonFile</code>（点位标注 JSON）、<code>taskType</code>（1803 / 1804 / 1805 / 1806 / 1807）、<code>modelUrl</code>（模型地址，选填，随请求一并透传）、<code>modelName</code>（模型名称，选填，随请求一并透传）</td></tr>
+      <tr><td>认证方式</td><td>与主接口一致，本模块不单独维护</td></tr>
+      <tr><td>响应结构<sup class="chg-tag">改</sup></td><td><code>data.modelResult</code>，为 JSON 对象或数组（<b>非字符串</b>）；失败或无目标时数值返回 <code>0</code>、数组返回 <code>[]</code>，不返回 <code>null</code>。另含 <code>data.modelUsed</code>（本次实际使用模型名称）与 <code>data.baseUrlUsed</code>（本次实际使用服务地址）</td></tr>
+      <tr><td>场景返回<sup class="chg-tag">改</sup></td><td>1803 → <code>[{"bbox_2d":[x1,y1,x2,y2],"label":"tree"}]</code>；1804 → <code>{"greenPercentage":37.47}</code>；1805 → <code>{"hardened_surfacePercentage":30.32}</code>；1806 / 1807 → <code>{"sceneStatus":"greening|paved|unconstructed","confidence":0.95}</code>，未达标时附 <code>regionCoveredPercentage</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.1 系统环境地址</h3>
+  <table>
+    <thead><tr><th style="width:220px">系统</th><th style="width:130px">环境</th><th>地址</th></tr></thead>
+    <tbody>
+      <tr><td>智慧工地一体化平台</td><td>预生产</td><td><code>https://172.16.210.126:8091</code>　<code>https://zhgd-pre.qd-metro.com:8091</code></td></tr>
+      <tr><td>智慧工地一体化平台</td><td>正式</td><td><code>https://zhgd.qd-metro.com:8081</code></td></tr>
+      <tr><td>极视角（极星）</td><td>测试 / 正式</td><td>待提供</td></tr>
+    </tbody>
+  </table>
+  <p class="small">通用约定：HTTPS + JSON + UTF-8；响应码 <code>0</code>=操作成功，<code>1</code>=操作失败（原因见 msg）。</p>
+
+  <h3>3.3 下发与回传报文定义<sup class="chg-tag">新</sup></h3>
+  <p class="lead">接口② 下发巡视记录（工地平台 → 极星，POST，<code>application/json</code>）。</p>
+  <table>
+    <thead><tr><th style="width:180px">字段（dataList 元素内）</th><th style="width:120px">类型</th><th style="width:60px">必填</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>taskId</code></td><td>String</td><td>是</td><td>任务 ID；同一次下发的拆分记录共用</td></tr>
+      <tr><td><code>positionCode</code></td><td>String</td><td>是</td><td>点位编码</td></tr>
+      <tr><td><code>inspectionRecordId</code></td><td>String</td><td>是</td><td>工地平台巡视记录 ID；同批拆分记录共用，回传时原样带回</td></tr>
+      <tr><td><code>imageUrl</code></td><td>String</td><td>是</td><td>巡视记录图片地址；同批拆分记录共用</td></tr>
+      <tr><td><code>taskType</code></td><td>Array[Integer]</td><td>是</td><td>场景 ID <b>数组</b>（如 <code>[1803,1804,1806]</code>）；单场景也传单元素数组（如 <code>[1803]</code>），口径统一</td></tr>
+    </tbody>
+  </table>
+  <pre style="background:#f6f8fa;border:1px solid var(--line);padding:10px 12px;font-size:12px;overflow:auto;margin:8px 0">POST /api/model/xingji/open/patrol/inspection/record
+Content-Type: application/json
+
+{
+  "dataList": [ {
+    "taskId": "e9ac5bdfdcfe4e7d8f72b39251011276",
+    "positionCode": "QD-GD-0001",
+    "inspectionRecordId": "R-20261012-089",
+    "imageUrl": "http://minio.example.com:9000/patrol-shoot/R-20261012-089.jpg",
+    "taskType": [1803, 1804]
+  } ]
+}</pre>
+  <p class="small"><b>下发校验：</b><code>taskType</code> 为空数组、缺字段或含不支持的场景 ID 时，<b>整条返回失败（code 1）</b>，不入库、不拆分，由工地平台修正后重新下发。</p>
+  <p class="small"><b>拆分规则：</b>极星收到后对 <code>taskType</code> 数组<b>逐个场景生成一条独立巡视记录</b>（极星记录 ID 由极星生成）；<code>taskId</code> / <code>inspectionRecordId</code> / <code>positionCode</code> / <code>imageUrl</code> 原样带入每条拆分记录，<code>taskType</code> 单值化。拆分后所有环节仅面向单场景记录（见第 6 节）。</p>
+  <p class="lead" style="margin-top:16px">接口③ 接收点位识别结果（极星 → 工地平台，POST，<code>application/json</code>）：拆分后<b>逐条独立回调</b>，每条 <code>taskType</code> 为单值；工地平台按 <code>inspectionRecordId</code> + <code>taskType</code> 关联（单场景口径下一对一，多场景口径下一对多）。</p>
+  <table>
+    <thead><tr><th style="width:180px">字段（dataList 元素内）</th><th style="width:120px">类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>taskId</code></td><td>String</td><td>任务 ID，下发原值</td></tr>
+      <tr><td><code>taskType</code></td><td>Integer</td><td>单场景 ID</td></tr>
+      <tr><td><code>positionCode</code></td><td>String</td><td>点位编码</td></tr>
+      <tr><td><code>inspectionRecordId</code></td><td>String</td><td>工地平台巡视记录 ID，下发原值</td></tr>
+      <tr><td><code>modelResult</code></td><td>Object / Array</td><td>模型返回内容原样（见 6.3），极星不做二次加工</td></tr>
+    </tbody>
+  </table>
+  <pre style="background:#f6f8fa;border:1px solid var(--line);padding:10px 12px;font-size:12px;overflow:auto;margin:8px 0">POST /constructionServer/public/patrol/point/analysis/receive
+Content-Type: application/json
+
+{
+  "dataList": [ {
+    "taskId": "e9ac5bdfdcfe4e7d8f72b39251011276",
+    "taskType": 1803,
+    "positionCode": "QD-GD-0001",
+    "inspectionRecordId": "R-20261012-089",
+    "modelResult": [{"bbox_2d": [93, 357, 138, 451], "label": "tree"}]
+  } ]
+}</pre>
+
+  <h2 id="s4">4. 场景与大模型配置</h2>
+  <h3>4.1 场景（taskType 固定）</h3>
+  <table>
+    <thead><tr><th style="width:90px">taskType</th><th style="width:180px">场景名称</th><th>识别目标</th><th style="width:200px">输出形式</th></tr></thead>
+    <tbody>
+      <tr><td>1803</td><td>树木识别</td><td>画面中树木、灌木等绿化目标及边界框</td><td>目标框数组 <code>[{"bbox_2d":[x1,y1,x2,y2],"label":"tree"}]</code>；无目标为 <code>[]</code></td></tr>
+      <tr><td>1804</td><td>绿化面积分析</td><td>绿化区域占整幅画面的比例</td><td><code>{"greenPercentage":37.47}</code>，保留两位小数</td></tr>
+      <tr><td>1805</td><td>硬化路面百分比分析</td><td>硬化路面占整幅画面的比例</td><td><code>{"hardened_surfacePercentage":30.32}</code>，保留两位小数</td></tr>
+      <tr><td>1806<sup class="chg-tag">新</sup></td><td>苗木绿化状态识别</td><td>绿化区域是否已被苗木完全覆盖（综合真实绿化率 ≥ 95% 达标）</td><td>达标 <code>{"sceneStatus":"greening","confidence":1.0}</code>；未达标 <code>{"sceneStatus":"unconstructed","confidence":0.95,"regionCoveredPercentage":8.45}</code></td></tr>
+      <tr><td>1807<sup class="chg-tag">新</sup></td><td>地面铺装状态识别</td><td>硬化路面区域是否已完全铺装（综合真实铺装率 ≥ 95% 达标）</td><td>达标 <code>{"sceneStatus":"paved","confidence":1.0}</code>；未达标同 1806</td></tr>
+    </tbody>
+  </table>
+  <p class="small"><b>sceneStatus 枚举：</b><code>greening</code> 已苗木绿化（1806）、<code>paved</code> 已地面铺装（1807）、<code>unconstructed</code> 大片未施工 / 未达标（1806 / 1807）、<code>unknown</code> 异常降级默认值；<code>regionCoveredPercentage</code> 仅在未达标时返回。<sup class="chg-tag">新</sup></p>
+
+  <h3>4.2 大模型配置</h3>
+  <p class="small">配置入口在本模块侧边栏「<b>大模型配置</b>」，<b>不是</b>极星场景管理里自带的场景配置。本页<b>只维护模型地址与模型名称</b>，不含场景参数配置。<sup class="chg-tag">改</sup></p>
+  <table>
+    <thead><tr><th style="width:150px">配置项</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>模型地址<sup class="chg-tag">改</sup></td><td>选填，<b>仅需 IP:端口</b>（如 <code>172.16.210.88:9000</code>）。作为请求字段 <code>modelUrl</code> <b>随请求一并透传</b>，<b>不作为</b>极星的调用目标地址；<b>留空时模型侧使用服务端默认配置</b>。</td></tr>
+      <tr><td>模型名称<sup class="chg-tag">新</sup></td><td>选填（如 <code>ev-vlm-32b</code>）。作为请求字段 <code>modelName</code> 随请求一并透传；<b>留空时模型侧使用服务端默认模型</b>。</td></tr>
+      <tr><td>请求方式 / 超时 / 鉴权</td><td><b>不配置。</b>接口固定为 <code>POST multipart/form-data</code>；超时与鉴权沿用平台默认，无需在本页维护。</td></tr>
+      <tr><td>场景参数</td><td><b>不再配置。</b>场景 ID 由平台固定，不支持新增或修改；<code>temperature</code> / <code>top_p</code> / <code>max_tokens</code> 与提示词（Prompt）均不在本页维护，接口调用不携带提示词。</td></tr>
+    </tbody>
+  </table>
+  <p class="small"><b>保存校验：</b>模型地址与模型名称均为<b>选填</b>；填写时模型地址格式须为 <code>IP:端口</code>。保存后对后续新到的巡视记录生效；均留空时模型侧使用服务端默认配置。<sup class="chg-tag">改</sup></p>
+  <div class="note ok"><b>调用口径：</b>极星按 <code>imageFile</code>（巡视记录图片）+ <code>jsonFile</code>（点位标注 JSON）+ <code>taskType</code>（场景）+ <code>modelUrl</code> / <code>modelName</code>（模型配置透传，选填）调用绿化恢复检测接口；接口返回结构化 <code>modelResult</code>，极星<b>原样回传</b>工地平台，不做二次加工（见第 6 节）。<sup class="chg-tag">改</sup></div>
+
+  <h2 id="s5">5. 点位配置规则</h2>
+  <table>
+    <thead><tr><th style="width:130px">配置项</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>点位来源</td><td>全部由工地平台下发自动创建，极星侧不提供手动新增与删除。</td></tr>
+      <tr><td>参考图</td><td>每点位 1 张。未上传时使用系统默认图；支持上传本地图片替换，并可一键恢复默认图。参考图仅作底图与标注预览，<b>不参与模型入参</b>。</td></tr>
+      <tr><td>标注 JSON</td><td><b>每个点位上传 1 个 COCO 单图标注文件</b>（含 <code>images</code> / <code>annotations</code> / <code>categories</code> 三个顶层字段）。上传后解析并在参考图上叠加显示标注区域，供人工核对；分析时该文件作为 <code>jsonFile</code> 原样传给接口。</td></tr>
+      <tr><td>配置状态</td><td>已上传合法标注 JSON 记为「已配置」，否则「未配置」；未配置的点位不参与分析。</td></tr>
+      <tr><td>场景与配置关系<sup class="chg-tag">改</sup></td><td>点位不绑定场景，1803 / 1804 / 1805 / 1806 / 1807 共用同一套参考图与标注 JSON，记录携带哪个 taskType 就调用对应场景。</td></tr>
+      <tr><td>配置生效</td><td>上传标注 JSON 后<b>即时生效</b>（页面无「保存配置」步骤）；对后续新到的巡视记录生效，已完成的历史记录不回溯重算。</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>标注 JSON 字段说明：</b><code>categories</code> 定义类别——<code>1</code> 硬化路面、<code>2</code> 绿化、<code>3</code> 建筑。</div>
+
+  <h3>5.1 标注 JSON 解析与渲染</h3>
+  <table>
+    <thead><tr><th style="width:110px">环节</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>解析</td><td>取 <code>images[0]</code> 的 <code>width</code> / <code>height</code> / <code>file_name</code>；遍历 <code>annotations</code>，读取 <code>category_id</code>（映射类别名）、<code>segmentation[0]</code>（扁平坐标 <code>[x1,y1,x2,y2,…]</code>，可为浮点）与 <code>area</code>（像素²）；<code>iscrowd=1</code> 的条目跳过。</td></tr>
+      <tr><td>渲染</td><td>以参考图为底图，按 <code>segmentation</code> 坐标叠加多边形，并按类别配色（<code>1</code> 硬化路面 / <code>2</code> 绿化 / <code>3</code> 建筑）；叠加仅作人工核对，<b>不参与编辑与模型入参</b>。</td></tr>
+      <tr><td>清单与摘要</td><td>右侧「标注清单」逐条列出 类别 / 面积（px²）/ 占全图比例（<code>area ÷ width × height</code>）；「JSON 摘要」显示 标注文件 / 图像尺寸 / 标注条数。</td></tr>
+      <tr><td>校验</td><td>缺 <code>images</code> / <code>annotations</code> / <code>categories</code>，或缺 <code>width</code> / <code>height</code>，上传即拦截提示（点位保持「未配置」）。</td></tr>
+    </tbody>
+  </table>
+  <p class="small"><b>说明：</b>占比取多边形 <code>area</code>，<b>不等于</b> <code>bbox</code> 外接矩形面积；坐标为浮点，渲染按原值绘制。</p>
+
+  <h2 id="s6">6. 分析流程与自动回传</h2>
+  <div class="flow">
+    <span class="step">收到巡视记录（可含多场景）<sup class="chg-tag">改</sup></span><span class="arrow">→</span>
+    <span class="step">按场景拆分<sup class="chg-tag">新</sup></span><span class="arrow">→</span>
+    <span class="step">匹配点位</span><span class="arrow">→</span>
+    <span class="step">校验点位已配置</span><span class="arrow">→</span>
+    <span class="step">下载图片</span><span class="arrow">→</span>
+    <span class="step">读取标注 JSON</span><span class="arrow">→</span>
+    <span class="step">调用模型</span><span class="arrow">→</span>
+    <span class="step">组装识别结果</span><span class="arrow">→</span>
+    <span class="step">自动回调工地平台</span>
+  </div>
+  <p class="small">分析完成后<b>自动回传</b>，无人工复核环节；拆分后每条记录调用模型一次。<b>多场景拆分口径：</b>下发报文中同一条巡视记录可携带多个场景 ID（<code>taskType</code> 数组）；极星收到后按场景<b>拆分为多条单场景记录</b>，拆分后每条记录独立分析、独立回传；同批记录共用 <code>taskId</code> / <code>inspectionRecordId</code> / 点位与图片，工地平台按 <code>inspectionRecordId</code> + <code>taskType</code> 关联；同批共用同一图片与标注 JSON，平台<b>只下载 / 读取一次</b>，各拆分记录复用；每条分析完成即独立回传，不等同批全部完成。<sup class="chg-tag">改</sup></p>
+  <div class="note ok"><b>回传口径：</b>工地平台接收的 <code>modelResult</code> 即模型返回内容原样（1804 为绿化占比、1805 为硬化路面占比、1806 / 1807 为状态判定结果）；极星不做面积换算、不补充面积字段。1803 为目标框列表。<sup class="chg-tag">改</sup></div>
+
+  <h3>6.1 状态与异常处理</h3>
+  <div class="stateflow">
+    <span class="state">待分析</span><span class="arrow">→</span>
+    <span class="state run">分析中</span><span class="arrow">→</span>
+    <span class="state ok">已完成</span><span class="arrow">/</span>
+    <span class="state bad">失败</span>
+  </div>
+  <table>
+    <thead><tr><th style="width:200px">异常场景</th><th>系统处理</th></tr></thead>
+    <tbody>
+      <tr><td>下发报文校验失败<sup class="chg-tag">新</sup></td><td><code>taskType</code> 为空数组、缺字段或含不支持的场景 ID 时，接口整条返回失败（code 1），不入库、不拆分；由工地平台修正后重新下发。</td></tr>
+      <tr><td>点位不存在</td><td>按接口约定返回失败，该条记录标记「点位未匹配」。</td></tr>
+      <tr><td>点位未上传标注 JSON</td><td>不调用模型、不回传结果，标记「未配置」。</td></tr>
+      <tr><td>标注 JSON 解析失败</td><td>上传时即校验并拦截提示（非法 JSON / 缺 <code>images</code>、<code>annotations</code>、<code>categories</code> / 缺 <code>width</code>、<code>height</code>），不生效；点位保持「未配置」。</td></tr>
+      <tr><td>图片下载失败 / 模型调用失败</td><td>记录失败原因，标记「失败」；不提供手动重试，由工地平台重新下发巡视记录。</td></tr>
+      <tr><td>回传失败</td><td>保留识别结果，回传状态标记「失败」；不提供手动重传，由工地平台重新下发巡视记录。</td></tr>
+      <tr><td>同批部分场景失败<sup class="chg-tag">新</sup></td><td>拆分后各场景独立流转，单个场景失败仅标记该条记录，不影响同批其他场景的分析与回传；失败场景由工地平台按原口径重新下发。</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th style="width:170px">状态项</th><th>取值</th></tr></thead>
+    <tbody>
+      <tr><td>分析状态</td><td>待分析 / 分析中 / 已完成 / 失败</td></tr>
+      <tr><td>回传状态</td><td>待回传 / 成功 / 失败</td></tr>
+      <tr><td>点位配置状态</td><td>已配置 / 未配置</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 识别结果详情页</h3>
+  <p class="small">以「接口请求与响应」为核心，用于排障与对账；页面<b>只读</b>，不提供重新分析 / 重新回传 / 重试入口；识别结果由该条记录自带的 taskType 决定，不做场景切换。失败记录同样可进入查看。</p>
+  <table>
+    <thead><tr><th style="width:170px">版面（自上而下）</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>概览信息条</td><td>全宽单行，展示项自适应排列：记录 ID、点位编码、任务 ID、场景、分析状态、接收时间、分析耗时、模型调用次数。</td></tr>
+      <tr><td>识别画面 / 识别结果<sup class="chg-tag">改</sup></td><td>左右两栏。左栏原图与识别渲染（1803 叠加目标框，1804 / 1805 展示占比，1806 / 1807 展示状态判定）；右栏 modelResult 指标与内容。</td></tr>
+      <tr><td>接口请求与响应<sup class="chg-tag">改</sup></td><td>全宽卡片，按环节切换，每环节「请求 | 响应」并排：① 下发巡视记录（<code>taskType</code> 数组报文，单场景为单元素数组，报文定义见 3.3）、② 模型调用（<code>multipart/form-data</code>，拆分后单场景）、③ 接收点位识别结果（拆分后单场景，报文定义见 3.3）。</td></tr>
+    </tbody>
+  </table>
+  <p class="small">失败信息不单独设区块：分析失败体现在概览「分析状态 = 失败」及模型调用环节的未调用原因；回传失败体现在回传环节的失败响应。</p>
+
+  <h3>6.3 回传报文（modelResult）</h3>
+  <p class="small">回传工地平台时，<code>modelResult</code> 即模型返回内容原样，极星不做面积换算、不补充面积字段。1803 为目标框数组。多场景下发的巡视记录按<b>拆分后的单场景记录逐条回传</b>，<code>inspectionRecordId</code> 为下发报文原值。<sup class="chg-tag">改</sup></p>
+  <table>
+    <thead><tr><th style="width:90px">taskType</th><th>回传 modelResult</th></tr></thead>
+    <tbody>
+      <tr><td>1803</td><td><code>[{"bbox_2d":[92,83,799,139],"label":"tree"}]</code></td></tr>
+      <tr><td>1804</td><td><code>{"greenPercentage":37.47}</code></td></tr>
+      <tr><td>1805</td><td><code>{"hardened_surfacePercentage":30.32}</code></td></tr>
+      <tr><td>1806<sup class="chg-tag">新</sup></td><td>达标 <code>{"sceneStatus":"greening","confidence":1.0}</code>；未达标 <code>{"sceneStatus":"unconstructed","confidence":0.95,"regionCoveredPercentage":8.45}</code></td></tr>
+      <tr><td>1807<sup class="chg-tag">新</sup></td><td>达标 <code>{"sceneStatus":"paved","confidence":1.0}</code>；未达标同 1806</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s7">7. 记录保留与自动清理</h2>
+  <p class="lead">巡视记录（含原图、识别结果与回传报文）仅保留固定时长，超出部分自动清理，避免存储无限增长；保存时长支持配置。</p>
+
+  <h3>7.1 保留策略配置</h3>
+  <table>
+    <thead><tr><th style="width:150px">配置项</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>保存时长</td><td>必填。默认 <b>30 天</b>，<b>仅支持自定义</b> 1～3650 天整数（不提供快捷选项），超范围禁止保存并提示。</td></tr>
+      <tr><td>自动清理</td><td>开关，默认<b>开启</b>；关闭后超出时长的记录不再清理，页面给出风险提示。</td></tr>
+      <tr><td>每日清理时间</td><td><code>HH:mm</code>，默认 <b>03:00</b>，建议业务低峰时段。</td></tr>
+      <tr><td>配置生效</td><td>保存后立即生效，对后续清理任务生效。</td></tr>
+      <tr><td>恢复默认</td><td>一键恢复为「30 天 / 自动清理开启 / 03:00」。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 清理规则</h3>
+  <div class="axis">
+    <div class="pt">数据起始时间</div>
+    <div class="pt"><b>保留期起点</b> = 当前日期 − 保存时长 + 1 天（如 2026-10-12 保留 30 天 → 起点 2026-09-13 00:00）</div>
+    <div class="pt">早于保留期起点的记录（含原图、识别结果、回传报文）在每日清理时间删除，<b>不可恢复</b></div>
+  </div>
+  <p class="small">自动清理开启时每日执行一次，关闭时不执行；点位配置与点位基础信息<b>不参与清理</b>，长期保留；缩短保存时长后，超出新时长的记录在下次清理时一并清理。</p>
+
+  <h3>7.3 页面内容</h3>
+  <table>
+    <thead><tr><th style="width:150px">区块</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>保留策略</td><td>保存时长（自定义 1～3650 天）、自动清理开关、每日清理时间、恢复默认 / 保存设置；关闭自动清理时展示风险提示。</td></tr>
+      <tr><td>存储概览</td><td>记录总数、占用空间。</td></tr>
+      <tr><td>清理记录</td><td>最近 5 次清理日志：清理时间、清理条数、释放空间。</td></tr>
+    </tbody>
+  </table>
+  <p class="small">保留策略仅在「记录保留设置」页维护，巡视记录列表页不展示保留策略提示。</p>
+</main>
+
+<footer>无人机巡检识别 · 产品需求文档 v0.7 ｜ 接口字段以《绿化恢复检测接口文档》《绿化标注 JSON 文件说明》为准</footer>
+</body>
+</html>

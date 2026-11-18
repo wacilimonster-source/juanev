@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本记录 · 青岛地铁-智能巡视</title>
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --line:#e6e8ec;
+    --text:#1c2128;
+    --sub:#6b7280;
+    --accent:#1677ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font:14px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",Arial,sans-serif;
+    color:var(--text);background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 72px}
+  .back{
+    display:inline-block;margin-bottom:24px;font-size:13px;
+    color:var(--sub);text-decoration:none;
+  }
+  .back:hover{color:var(--accent)}
+  header{margin-bottom:22px}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.2px}
+  .desc{margin-top:6px;color:var(--sub);font-size:13px}
+
+  .entry{
+    display:flex;gap:20px;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:18px 20px;margin-bottom:14px;
+  }
+  .entry .meta{flex:0 0 104px;padding-right:16px;border-right:1px solid #f1f2f4}
+  .entry .date{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .entry .type{margin-top:4px;font-size:12px;color:#9aa1ab}
+  .entry .body{flex:1;min-width:0}
+  .head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .file{
+    font-size:14px;color:var(--text);text-decoration:none;
+    border-bottom:1px solid #dbe4f5;
+  }
+  .file:hover{color:var(--accent);border-color:var(--accent)}
+  .badge{
+    font-size:11px;color:var(--accent);background:#e8f1ff;
+    border-radius:4px;padding:1px 6px;line-height:1.5;
+  }
+  .badge.old{color:#8b95a4;background:#f2f4f6}
+  .ver{margin-left:auto;font-size:12px;color:#9aa1ab;font-variant-numeric:tabular-nums}
+
+  .changes{list-style:none;margin-top:10px}
+  .changes li{
+    padding:7px 0;font-size:13px;color:#4b5563;
+    border-top:1px dashed var(--line);
+  }
+  .changes li:first-child{border-top:none;padding-top:2px}
+  .req{
+    display:inline-block;margin-right:8px;padding:0 6px;
+    font-size:11px;border-radius:4px;vertical-align:1px;
+    color:var(--accent);background:#e8f1ff;
+  }
+  .req.mod{color:#ad6800;background:#fff4e0}
+  .req.doc{color:#5b6472;background:#f0f2f5}
+  .note{margin-top:16px;font-size:12px;color:#9aa1ab}
+
+  @media (max-width:560px){
+    .wrap{padding:28px 16px 56px}
+    .entry{flex-direction:column;gap:12px;padding:16px}
+    .entry .meta{
+      display:flex;align-items:baseline;gap:8px;
+      padding:0 0 8px;border-right:none;border-bottom:1px solid #f1f2f4;
+    }
+    .entry .type{margin-top:0}
+    .ver{margin-left:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="../../index.html">← 返回目录页</a>
+
+  <header>
+    <h1>青岛地铁-智能巡视</h1>
+    <p class="desc">原型与文档版本记录 · 共 2 个版本，新记录在最上方</p>
+  </header>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-18</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/无人机巡检识别高保真原型20261118.html">无人机巡检识别高保真原型</a>
+        <span class="badge">最新</span>
+        <span class="ver">2026-11-18 版</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req">原型 · 新增</span>首版归档《无人机巡检识别 · 高保真原型》（极星算法推理平台应用中心模块）</li>
+        <li><span class="req doc">页面 · 覆盖</span>包含应用中心、点位管理、点位配置、巡视记录、识别结果详情、记录保留设置、大模型配置 7 个页面</li>
+        <li><span class="req doc">变更 · 标注</span>界面内保留红色需求变更角标（多场景拆分、1806/1807 状态识别、大模型配置透传）</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-18</div>
+      <div class="type">文档</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="无人机巡检识别需求文档20261118.html">无人机巡检识别需求文档</a>
+        <span class="ver">2026-11-18 版</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req doc">文档 · 新增</span>首版归档《无人机巡检识别 · 产品需求文档》（v0.7 待评审）</li>
+        <li><span class="req doc">内容 · 涵盖</span>背景概述、业务流程、接口依赖与报文定义、五类场景与大模型配置、点位配置规则、多场景拆分分析与自动回传、记录保留与清理策略</li>
+        <li><span class="req doc">变更 · 标注</span>文中保留《绿化恢复检测接口文档 v5.2》与多场景下发拆分需求的新增/改动角标</li>
+      </ul>
+    </div>
+  </article>
+
+  <p class="note">记录只追加、不改历史；同名文件按日期沉淀，最新版作为目录页入口，旧版原样保留可回溯。</p>
+
+</div>
+</body>
+</html>
