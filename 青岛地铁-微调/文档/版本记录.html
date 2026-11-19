@@ -85,8 +85,30 @@
 
   <header>
     <h1>青岛地铁-微调</h1>
-    <p class="desc">原型与文档版本记录 · 共 4 个版本，新记录在最上方</p>
+    <p class="desc">原型与文档版本记录 · 共 5 个版本，新记录在最上方</p>
   </header>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-19</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/大模型微调交付版原型20261119.html">大模型微调交付版原型</a>
+        <span class="badge">最新</span>
+        <span class="ver">2026-11-19 版</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req doc">数据集 · 删除</span>快速微调任务创建页删除「自定义测试集」选项，测试数据集固定为当前训练集自动拆分，同步移除测试集候选列表与提交校验</li>
+        <li><span class="req doc">数据集 · 删除</span>删除用途为测试数据的预置数据集「站台越线测试集」</li>
+        <li><span class="req mod">数据集 · 改动</span>创建数据集的数据用途只保留「微调数据」，测试数据、推理数据置灰不可选</li>
+        <li><span class="req mod">数据集 · 改动</span>删除创建数据集的用途预选逻辑，从快速微调、模型测评进入创建页不再默认测试数据</li>
+        <li><span class="req doc">数据集 · 删除</span>微调任务与模型测评的「创建测试数据集」入口，测评数据集提示改为只选平台数据集版本</li>
+        <li><span class="req doc">原型 · 调整</span>改动导航需求 18 由「新增」改为「删除」，同步更新需求 22、23 的说明文案</li>
+      </ul>
+    </div>
+  </article>
 
   <article class="entry">
     <div class="meta">
@@ -96,7 +118,7 @@
     <div class="body">
       <div class="head">
         <a class="file" href="../原型/大模型微调交付版原型20261118.html">大模型微调交付版原型</a>
-        <span class="badge">最新</span>
+        <span class="badge old">历史</span>
         <span class="ver">2026-11-18 版</span>
       </div>
       <ul class="changes">
