@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视觉算法生态平台 · 赛题与打榜公开访问改造原型</title>
+<style>
+:root{
+  --blue:#2B5CE6;
+  --blue-2:#1D5BFF;
+  --blue-deep:#0E2160;
+  --red:#A61C34;
+  --annot:#E8112D;
+  --ink:#1D2129;
+  --ink-2:#4E5969;
+  --ink-3:#86909C;
+  --line:#E5E8EF;
+  --bg:#F2F4F8;
+  --card:#fff;
+  --radius:4px;
+  --shadow:0 2px 10px rgba(17,24,39,.06);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14px;padding-bottom:100px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+
+/* ---------------- Header ---------------- */
+.site-header{height:60px;background:linear-gradient(90deg,#0B3ED6 0%,#1D5BFF 58%,#2E72FF 100%);position:sticky;top:0;z-index:40;box-shadow:0 1px 0 rgba(255,255,255,.08)}
+.header-inner{max-width:1440px;height:100%;margin:0 auto;padding:0 28px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:9px;color:#fff;min-width:224px}
+.brand-mark{width:34px;height:34px;flex:none}
+.brand-text b{display:block;font-size:14px;letter-spacing:.6px;line-height:1.2}
+.brand-text span{display:block;font-size:8px;letter-spacing:1.1px;opacity:.72;margin-top:3px}
+.main-nav{display:flex;gap:54px;margin:0 auto}
+.main-nav a{color:rgba(255,255,255,.76);font-size:15px;height:60px;display:flex;align-items:center;position:relative;transition:color .15s}
+.main-nav a:hover{color:#fff}
+.main-nav a.active{color:#fff;font-weight:600}
+.main-nav a.active::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:54px;height:3px;background:#fff;border-radius:2px 2px 0 0}
+.nav-actions{display:flex;align-items:center;gap:12px;margin-left:auto}
+.auth-slot{display:flex;align-items:center;gap:8px}
+.btn-header{height:30px;padding:0 15px;border-radius:2px;font-size:13px;border:1px solid rgba(255,255,255,.7);background:transparent;color:#fff;transition:.15s}
+.btn-header:hover{background:rgba(255,255,255,.12)}
+.btn-header.solid{background:#fff;color:#1D5BFF;border-color:#fff;font-weight:600}
+.btn-header.solid:hover{background:#EDF3FF}
+.user-wrap{position:relative}
+.user-chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px;background:transparent;border:0;color:#fff;font-size:13px;border-radius:3px}
+.user-chip:hover{background:rgba(255,255,255,.1)}
+.avatar{width:26px;height:26px;border-radius:50%;background:#D9DEE8;display:inline-flex;align-items:center;justify-content:center;color:#87909F;overflow:hidden;flex:none}
+.user-menu{position:absolute;right:0;top:40px;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 10px 30px rgba(17,24,39,.16);min-width:132px;padding:6px;display:none;color:var(--ink)}
+.user-menu.open{display:block}
+.user-menu button{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:3px;font-size:13px;color:var(--ink-2)}
+.user-menu button:hover{background:#F2F4F8;color:var(--ink)}
+.nav-tenant{height:30px;padding:0 12px;border-radius:2px;background:rgba(255,255,255,.18);display:flex;align-items:center;gap:7px;font-size:12px;color:#fff;white-space:nowrap}
+.nav-workbench{background:transparent;border:0;color:#fff;font-size:13px;padding:0 4px;white-space:nowrap}
+.nav-workbench:hover{opacity:.8}
+
+/* ---------------- Layout ---------------- */
+main{padding:24px 0 40px}
+.page-wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.view{display:none}
+.view.active{display:block}
+.panel{background:#fff;border:1px solid #EDF0F5;border-radius:var(--radius);box-shadow:var(--shadow)}
+
+/* ---------------- Race list ---------------- */
+.race-list{display:flex;flex-direction:column;gap:18px}
+.race-card{position:relative;height:206px;border-radius:4px;background:linear-gradient(110deg,#101E5E 0%,#1B2E92 48%,#2A4FC4 100%);box-shadow:0 8px 24px rgba(16,30,94,.18);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.race-card:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(16,30,94,.24)}
+.race-card-bg{position:absolute;inset:0;overflow:hidden;border-radius:4px;z-index:0}
+.race-card-content{position:relative;z-index:2;padding:32px 40px;color:#fff;max-width:62%}
+.race-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.race-title-row h2{font-size:24px;margin:0;font-weight:700;letter-spacing:.4px;line-height:1.3}
+.race-meta{margin:15px 0 0;font-size:14px;color:rgba(255,255,255,.9);line-height:1.6}
+.race-meta b{font-weight:600;color:#fff}
+.race-art{position:absolute;inset:0;z-index:1;pointer-events:none}
+.race-art .ring{position:absolute;border:1px solid rgba(160,190,255,.26);border-radius:50%}
+.race-art .r1{width:520px;height:520px;right:-40px;top:-150px;transform:rotate(-16deg) scaleY(.52)}
+.race-art .r2{width:430px;height:430px;right:6px;top:-105px;transform:rotate(-16deg) scaleY(.52)}
+.race-art .r3{width:340px;height:340px;right:52px;top:-60px;transform:rotate(-16deg) scaleY(.52)}
+.race-art .glow{position:absolute;width:300px;height:300px;right:60px;top:-40px;border-radius:50%;background:radial-gradient(circle,rgba(88,135,255,.35),rgba(88,135,255,0) 68%)}
+.race-art .sphere{position:absolute;width:156px;height:156px;right:108px;top:24px;border-radius:50%;background:radial-gradient(circle at 32% 27%,#EAF3FF 0%,#A9C7FF 16%,#5C87FF 43%,#2748B8 70%,#0B1E63 100%);box-shadow:0 0 60px rgba(90,140,255,.5),inset -18px -20px 40px rgba(4,12,40,.55);display:flex;align-items:center;justify-content:center}
+.race-art .sphere span{font-size:46px;font-weight:800;color:rgba(255,255,255,.75);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.22)}
+.race-art .dot{position:absolute;border-radius:50%;background:#BBD2FF;opacity:.7;box-shadow:0 0 8px rgba(187,210,255,.9)}
+.race-art .d1{width:6px;height:6px;right:88px;top:56px}
+.race-art .d2{width:4px;height:4px;right:292px;top:142px}
+.race-art .d3{width:5px;height:5px;right:250px;top:36px}
+
+/* ---------------- Status ---------------- */
+.status{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:2px;font-size:12px;font-weight:500;line-height:1;white-space:nowrap}
+.status.live{background:rgba(115,209,61,.18);color:#BFF5A8;border:1px solid rgba(160,235,120,.35)}
+.status.ended{background:rgba(255,255,255,.22);color:#EEF1F8;border:1px solid rgba(255,255,255,.28)}
+.status.on-light.live{background:#EAF8E4;color:#3A9A22;border-color:#CDEDC0}
+.status.on-light.ended{background:#F2F3F5;color:#86909C;border-color:#E5E6EB}
+
+/* ---------------- Detail common ---------------- */
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px 18px}
+.crumb-tag{display:inline-block;background:#000;color:#fff;font-size:11px;padding:3px 8px;border-radius:2px;margin-bottom:10px;letter-spacing:.5px}
+.detail-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.detail-title-row h1{font-size:22px;margin:0;font-weight:600;letter-spacing:.3px}
+.detail-sub{margin:10px 0 0;color:var(--ink-2);font-size:13px;line-height:1.6}
+.detail-sub b{font-weight:600;color:var(--ink)}
+.btn-outline{height:32px;padding:0 20px;border:1px solid #2B5CE6;color:#2B5CE6;background:#fff;border-radius:2px;font-size:13px;transition:.15s;white-space:nowrap}
+.btn-outline:hover{background:#F2F6FF}
+.btn-muted{height:32px;padding:0 20px;border:1px solid #DCDFE6;color:#A8AEBB;background:#F7F8FA;border-radius:2px;font-size:13px;cursor:default;white-space:nowrap}
+.tabs{display:flex;gap:38px;padding:0 24px;border-bottom:1px solid var(--line);position:relative}
+.tab{background:none;border:0;padding:14px 0 13px;color:var(--ink-2);font-size:14px;position:relative;transition:color .15s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:#2B5CE6;font-weight:600}
+.tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#2B5CE6}
+.tab-panel{display:none;padding:24px 26px 30px;min-height:420px}
+.tab-panel.active{display:block}
+
+/* ---------------- Document style ---------------- */
+.doc{color:#3D4552;font-size:13.5px;line-height:1.95}
+.doc h3{font-size:15px;margin:24px 0 8px;font-weight:600;color:var(--ink)}
+.doc h3:first-child{margin-top:0}
+.doc p{margin:7px 0}
+.doc .muted{color:var(--ink-2)}
+.doc ul{margin:6px 0;padding-left:20px}
+.doc li{margin:3px 0}
+.doc table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}
+.doc th,.doc td{border:1px solid #E5E8EF;padding:8px 10px;text-align:left;vertical-align:top}
+.doc th{background:#F7F8FA;font-weight:600;color:var(--ink)}
+.doc pre{background:#F7F8FA;border:1px solid #ECEEF3;border-radius:4px;padding:14px 16px;overflow:auto;font-size:12px;line-height:1.7;color:#384252;margin:10px 0}
+.doc .inline-note{background:#F7F9FF;border-left:3px solid #2B5CE6;padding:10px 14px;border-radius:0 3px 3px 0;color:var(--ink-2);font-size:13px;margin:12px 0}
+
+/* ---------------- Dataset table ---------------- */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#F7F8FA;color:var(--ink-2);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid #EDF0F5;white-space:nowrap}
+.data-table td{padding:13px 14px;border-bottom:1px solid #F0F2F6;color:var(--ink-2)}
+.data-table td:first-child{color:var(--ink);font-weight:500}
+.data-table .plus{width:20px;height:20px;border:1px solid #D9DEE8;background:#fff;border-radius:2px;color:var(--ink-2);font-size:13px;line-height:1;margin-right:8px;vertical-align:middle}
+.data-table .expand-row{display:none}
+.data-table .expand-row.open{display:table-row}
+.data-table .expand-row td{background:#FAFBFD;color:var(--ink-2);font-size:12.5px;line-height:1.8}
+
+/* ---------------- Rank list ---------------- */
+.filter-bar{background:#fff;border:1px solid #EDF0F5;border-radius:4px;box-shadow:var(--shadow);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.filter-label{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.chip{height:26px;padding:0 12px;border-radius:2px;border:1px solid transparent;background:transparent;color:var(--ink-2);font-size:13px;transition:.15s}
+.chip:hover{color:var(--blue)}
+.chip.active{border-color:#2B5CE6;color:#2B5CE6;background:#F2F6FF}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin:16px 0 18px;gap:16px}
+.select{height:32px;border:1px solid #E1E5EC;background:#fff;border-radius:2px;padding:0 34px 0 12px;font-size:13px;color:var(--ink-2);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%2386909C' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;min-width:150px}
+.search{position:relative}
+.search input{height:32px;width:290px;border:1px solid #E1E5EC;border-radius:2px;padding:0 34px 0 12px;font-size:13px;outline:none;color:var(--ink)}
+.search input::placeholder{color:#B4BAC6}
+.search input:focus{border-color:#2B5CE6}
+.search svg{position:absolute;right:11px;top:9px;opacity:.45;pointer-events:none}
+.rank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rank-card{background:#fff;border:1px solid #EDF0F5;border-radius:4px;box-shadow:0 2px 8px rgba(17,24,39,.05);display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s;overflow:visible}
+.rank-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(17,24,39,.09)}
+.rank-card-top{padding:16px 18px 14px;background:linear-gradient(135deg,#FEFAFB 0%,#F7F9FF 70%,#F3F6FF 100%);border-bottom:1px solid #F2F3F6;border-radius:4px 4px 0 0;min-height:132px}
+.rank-card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;font-size:16px;font-weight:600;color:var(--ink);line-height:1.4}
+.badge-applied{display:none;align-items:center;height:20px;padding:0 7px;background:#B9BEC9;color:#fff;font-size:11px;border-radius:2px;font-weight:400;white-space:nowrap;margin-top:2px}
+.rank-desc{margin:9px 0 11px;font-size:12px;line-height:1.7;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px}
+.cat-tag{display:inline-flex;align-items:center;height:20px;padding:0 7px;border:1px solid #7EA2F8;color:#2B5CE6;font-size:11px;border-radius:2px;background:#F7F9FF}
+.rank-card-body{padding:12px 18px 16px;display:flex;flex-direction:column;flex:1}
+.rank-meta{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink-2);padding-bottom:12px;border-bottom:1px solid #F0F2F6}
+.rank-meta span{display:flex;align-items:center;gap:7px}
+.rank-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-top:12px;margin-top:auto}
+.rank-score{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+.rank-score>div{min-width:0}
+.score-block{min-width:0;flex:1}
+.val-row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.trophy-ico{color:#C9A063;flex:none}
+.rank-score .label{font-size:11px;color:var(--ink-3);line-height:1.2}
+.rank-score .val{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+.rank-score .user{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px;flex:none}
+.btn-enter{height:30px;padding:0 13px;border:0;border-radius:2px;background:var(--red);color:#fff;font-size:12.5px;white-space:nowrap;transition:.15s}
+.btn-enter:hover{background:#8E172C}
+.list-foot{display:flex;align-items:center;justify-content:space-between;margin-top:22px;color:var(--ink-3);font-size:13px}
+.pager{display:flex;align-items:center;gap:6px}
+.pager button{min-width:26px;height:26px;border:1px solid #E1E5EC;background:#fff;color:var(--ink-2);border-radius:2px;font-size:12px;padding:0 6px}
+.pager button.active{background:#2B5CE6;border-color:#2B5CE6;color:#fff}
+.pager button:disabled{opacity:.45;cursor:default}
+.empty{display:none;flex-direction:column;align-items:center;justify-content:center;padding:70px 0;color:#9AA3B2;font-size:13px;background:#fff;border:1px solid #EDF0F5;border-radius:4px}
+
+/* ---------------- Board ---------------- */
+.subtab-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.subtab{height:28px;padding:0 12px;border:1px solid #2B5CE6;background:#2B5CE6;color:#fff;font-size:12px;border-radius:2px}
+.update-bar{height:40px;background:#EEF3FF;border:1px solid #D9E4FF;border-radius:3px;display:flex;align-items:center;gap:8px;padding:0 14px;color:#3B5BA9;font-size:12.5px;margin-bottom:16px}
+.board-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.board-table th{background:#F7F8FA;color:var(--ink-2);font-weight:600;text-align:left;height:42px;padding:0 16px;border-bottom:1px solid #EDF0F5;font-size:12.5px}
+.board-table td{height:48px;padding:0 16px;border-bottom:1px solid #F2F3F6;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-table tbody tr:hover td{background:#F8FAFF}
+.board-table .col-rank{width:90px}
+.board-table .col-user{width:190px}
+.board-table .col-f{width:150px}
+.board-table .col-perf{width:150px}
+.board-table .col-score{width:210px}
+.board-table .col-time{width:180px}
+.medal{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#7A4B00;background:linear-gradient(135deg,#FFE9A8,#F5C34A);box-shadow:inset 0 -2px 3px rgba(160,100,0,.2)}
+.medal.silver{background:linear-gradient(135deg,#F2F5FA,#C9D2E0);color:#5A6474}
+.medal.bronze{background:linear-gradient(135deg,#F6D6BE,#D9A06F);color:#7A4A22}
+.tr-top1 td{background:#FFFCF4}
+.tr-top2 td{background:#F9FBFE}
+.tr-top3 td{background:#FFFBF7}
+.board-foot{display:flex;align-items:center;justify-content:space-between;margin-top:18px;font-size:12.5px;color:var(--ink-3)}
+.board-foot .pager button{height:26px}
+.board-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:74px 0 84px;color:#A9B0BD;font-size:13px;gap:14px}
+
+/* ---------------- Annotations ---------------- */
+.annot-wrap{display:inline-block;position:relative}
+.annot-host{position:relative}
+.annot-host::after{content:"";position:absolute;inset:-5px;border:2px solid var(--annot);border-radius:3px;pointer-events:none;z-index:30}
+.annot-badge{position:absolute;top:-13px;left:-13px;width:22px;height:22px;border-radius:50%;background:var(--annot);color:#fff;border:2px solid #fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:31;box-shadow:0 2px 7px rgba(232,17,45,.4);padding:0;line-height:1;transition:transform .15s}
+.annot-badge:hover{transform:scale(1.12)}
+.annot-badge.right{left:auto;right:-13px}
+body.annot-off .annot-host::after{display:none}
+body.annot-off .annot-badge{display:none}
+.annot-flash::after{animation:annotFlash .9s ease 2}
+@keyframes annotFlash{50%{box-shadow:0 0 0 7px rgba(232,17,45,.28);border-color:#FF3B52}}
+
+/* ---------------- Drawer ---------------- */
+.drawer{position:fixed;top:0;right:0;width:440px;max-width:94vw;height:100vh;background:#fff;z-index:96;transform:translateX(105%);transition:transform .26s cubic-bezier(.22,.61,.36,1);display:flex;flex-direction:column;box-shadow:-18px 0 44px rgba(17,24,39,.18)}
+.drawer.open{transform:translateX(0)}
+.drawer-mask{position:fixed;inset:0;background:rgba(17,24,39,.2);z-index:95;opacity:0;pointer-events:none;transition:opacity .26s}
+.drawer-mask.open{opacity:1;pointer-events:auto}
+.drawer-head{background:linear-gradient(120deg,#12215F 0%,#1B3FA8 55%,#2B5CE6 100%);color:#fff;padding:18px 20px;display:flex;gap:12px;align-items:flex-start;flex:none}
+.drawer-head .num{width:34px;height:34px;border-radius:50%;background:var(--annot);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.drawer-kicker{font-size:11px;opacity:.72;letter-spacing:.5px;margin-bottom:3px}
+.drawer-head h3{font-size:17px;margin:0;font-weight:600;line-height:1.4;padding-right:8px}
+.drawer-close{margin-left:auto;width:28px;height:28px;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:3px;font-size:18px;line-height:1;flex:none}
+.drawer-close:hover{background:rgba(255,255,255,.24)}
+.drawer-body{padding:18px 20px 28px;overflow:auto;flex:1}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.meta-cell{background:#F7F8FA;border:1px solid #EDF0F5;border-radius:3px;padding:9px 11px}
+.meta-cell .k{font-size:11px;color:var(--ink-3);margin-bottom:3px}
+.meta-cell .v{font-size:13px;color:var(--ink);font-weight:500}
+.type-pill{display:inline-flex;height:20px;align-items:center;padding:0 7px;border-radius:2px;background:#F2F6FF;color:#2B5CE6;font-size:11px}
+.pri{display:inline-flex;height:20px;align-items:center;padding:0 7px;border-radius:2px;font-size:11px;font-weight:600}
+.pri.p0{background:#FFF0F1;color:#D9233B}
+.pri.p1{background:#FFF7E8;color:#B76A00}
+.drawer-sec{margin-top:18px}
+.drawer-sec h4{margin:0 0 7px;font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
+.drawer-sec h4::before{content:"";width:3px;height:13px;background:#2B5CE6;border-radius:1px}
+.drawer-sec p{margin:0;font-size:13px;line-height:1.8;color:var(--ink-2)}
+.drawer-sec ol,.drawer-sec ul{margin:0;padding-left:19px;font-size:13px;line-height:1.85;color:var(--ink-2)}
+.drawer-sec li{margin:3px 0}
+.check-list{list-style:none!important;padding-left:0!important}
+.check-list li{position:relative;padding-left:20px}
+.check-list li::before{content:"✓";position:absolute;left:0;top:0;color:#2E9E4F;font-weight:700;font-size:12px}
+.drawer-foot{border-top:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:8px;flex:none;background:#fff}
+.drawer-nav{display:flex;gap:6px;margin-right:auto}
+.drawer-nav button{height:30px;padding:0 10px;border:1px solid #E1E5EC;background:#fff;color:var(--ink-2);border-radius:2px;font-size:12px}
+.drawer-nav button:hover{border-color:#B9C2D4;color:var(--ink)}
+.btn-primary{height:32px;padding:0 16px;border:0;border-radius:2px;background:#2B5CE6;color:#fff;font-size:13px;font-weight:500}
+.btn-primary:hover{background:#1D4ED8}
+.btn-ghost{height:32px;padding:0 16px;border:1px solid #DCDFE6;background:#fff;color:var(--ink-2);border-radius:2px;font-size:13px}
+.btn-ghost:hover{border-color:#B9C2D4;color:var(--ink)}
+
+/* ---------------- Modal ---------------- */
+.modal-mask{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{width:430px;max-width:100%;background:#fff;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.25);overflow:hidden;animation:modalIn .18s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.modal-head{padding:17px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{margin:0;font-size:16px;font-weight:600}
+.icon-btn{width:28px;height:28px;border:0;background:transparent;color:var(--ink-3);font-size:20px;line-height:1;border-radius:3px}
+.icon-btn:hover{background:#F2F4F8;color:var(--ink)}
+.modal-body{padding:20px 22px 8px}
+.demo-hint{font-size:11.5px;color:var(--ink-3);margin:2px 0 10px}
+.modal-foot{padding:14px 22px 20px;display:flex;justify-content:flex-end;gap:10px}
+.confirm-item{background:#F7F8FA;border:1px solid #EDF0F5;border-radius:3px;padding:14px 15px;margin-bottom:14px}
+.confirm-item h4{margin:0 0 7px;font-size:15px;font-weight:600}
+.confirm-item p{margin:3px 0;font-size:12.5px;color:var(--ink-2);line-height:1.7}
+.confirm-tip{font-size:12.5px;color:var(--ink-2);line-height:1.8;margin:0 0 6px}
+.confirm-tip b{color:var(--ink)}
+
+/* ---------------- Login page ---------------- */
+body.login-mode{padding-bottom:0}
+body.login-mode .site-header{display:none}
+body.login-mode main{padding:0}
+.login-page{position:relative;min-height:100vh;overflow-x:hidden;background:linear-gradient(180deg,#081C4E 0%,#0F3D9E 38%,#3E7BD6 64%,#D7A46E 100%);display:flex;align-items:center;justify-content:center;padding:60px 24px}
+.login-page::before{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,rgba(4,14,40,0),rgba(4,14,40,.55))}
+.login-glow{position:absolute;width:520px;height:520px;left:12%;top:18%;border-radius:50%;background:radial-gradient(circle,rgba(120,180,255,.35),rgba(120,180,255,0) 68%);filter:blur(10px)}
+.login-building{position:absolute;left:4%;bottom:26%;width:52%;height:30%;background:linear-gradient(120deg,rgba(180,220,255,.2),rgba(80,140,255,.06) 60%,rgba(255,220,160,.08));clip-path:polygon(0 78%,14% 42%,38% 24%,58% 30%,74% 18%,100% 46%,100% 100%,0 100%);filter:blur(1px)}
+.login-building::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 14px)}
+.login-water{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,rgba(20,50,110,.35),rgba(4,12,34,.75))}
+.login-water::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 9px);opacity:.5}
+.login-brand{position:absolute;left:32px;top:26px;z-index:3;min-width:0}
+.login-card{position:relative;z-index:3;width:392px;max-width:100%;background:#fff;border-radius:4px;box-shadow:0 24px 60px rgba(0,10,40,.35);padding:34px 34px 26px;margin-left:auto;margin-right:8%}
+.login-card h1{font-size:22px;text-align:center;color:#1D4ED8;margin:0 0 6px;font-weight:700}
+.login-context{text-align:center;font-size:12px;color:var(--ink-3);margin:0 0 22px;min-height:18px}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:13px;color:var(--ink-2);margin-bottom:7px}
+.login-field input{width:100%;height:40px;border:1px solid #DCDFE6;border-radius:2px;padding:0 12px;font-size:13px;outline:none;color:var(--ink);transition:.15s}
+.login-field input:focus{border-color:#2B5CE6;box-shadow:0 0 0 2px rgba(43,92,230,.08)}
+.login-submit{width:100%;height:40px;border:0;border-radius:2px;background:#1D5BFF;color:#fff;font-size:14px;font-weight:600;letter-spacing:4px;margin-top:4px;transition:.15s}
+.login-submit:hover{background:#1449D8}
+.login-register-page{text-align:center;margin:14px 0 6px;font-size:12.5px;color:var(--ink-3)}
+.login-register-page button{border:0;background:transparent;color:#2B5CE6;font-size:12.5px;padding:0 2px}
+.login-register-page button:hover{text-decoration:underline}
+.login-back{display:block;text-align:center;font-size:12px;color:var(--ink-3);margin-top:10px}
+.login-back:hover{color:#2B5CE6}
+
+/* ---------------- Requirements page ---------------- */
+.req-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#0E2160 0%,#1B3FA8 55%,#2B5CE6 100%);color:#fff;border-radius:6px;padding:32px 36px;box-shadow:0 12px 30px rgba(16,30,94,.22)}
+.req-hero::after{content:"";position:absolute;width:420px;height:420px;border:1px solid rgba(255,255,255,.14);border-radius:50%;right:-120px;top:-180px;transform:scaleY(.6) rotate(-18deg)}
+.req-hero::before{content:"";position:absolute;width:300px;height:300px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-40px;top:-120px;transform:scaleY(.6) rotate(-18deg)}
+.req-eyebrow{font-size:11px;letter-spacing:1.4px;opacity:.72;margin-bottom:9px}
+.req-hero h1{font-size:28px;margin:0 0 10px;font-weight:700;letter-spacing:.5px}
+.req-hero p{margin:0;font-size:13.5px;line-height:1.85;color:rgba(255,255,255,.85);max-width:760px}
+.req-stats{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap}
+.req-stat{font-size:12px;color:rgba(255,255,255,.72)}
+.req-stat b{display:block;font-size:20px;color:#fff;font-weight:700;margin-bottom:2px}
+.research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:20px 0}
+.research-card{background:#fff;border:1px solid #EDF0F5;border-radius:4px;padding:20px 20px 18px;box-shadow:var(--shadow)}
+.research-card h3{font-size:14px;margin:0 0 9px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.research-card h3 .dot{width:7px;height:7px;border-radius:50%;background:#2B5CE6;flex:none}
+.research-card p{font-size:12.5px;line-height:1.85;color:var(--ink-2);margin:0}
+.research-card a{color:#2B5CE6;border-bottom:1px dashed #9BB4F5}
+.req-panel{padding:22px 24px 26px;margin-bottom:20px}
+.req-panel h2{font-size:16px;margin:0 0 14px;font-weight:600;display:flex;align-items:center;gap:9px}
+.req-panel h2 .bar{width:3px;height:15px;background:#2B5CE6;border-radius:1px}
+.req-table{width:100%;border-collapse:collapse;font-size:13px}
+.req-table th{background:#F7F8FA;color:var(--ink-2);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid #EDF0F5;white-space:nowrap;font-size:12.5px}
+.req-table td{padding:11px 12px;border-bottom:1px solid #F2F3F6;color:var(--ink-2);vertical-align:top;line-height:1.65}
+.req-table tbody tr{cursor:pointer}
+.req-table tbody tr:hover td{background:#F8FAFF}
+.req-no{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--annot);color:#fff;font-size:11px;font-weight:700;align-items:center;justify-content:center}
+.req-title{color:var(--ink);font-weight:600}
+.req-desc{font-size:12px;color:var(--ink-3);margin-top:3px}
+.link-btn{border:0;background:transparent;color:#2B5CE6;font-size:12.5px;padding:0;white-space:nowrap}
+.link-btn:hover{text-decoration:underline}
+.req-footnote{font-size:12px;color:var(--ink-3);margin:12px 0 0}
+.rule-id{font-weight:700;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ---------------- Toast ---------------- */
+.toast{position:fixed;left:50%;top:78px;transform:translate(-50%,-14px);background:#1D2129;color:#fff;padding:10px 18px;border-radius:4px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;z-index:120;box-shadow:0 10px 24px rgba(0,0,0,.2);max-width:80vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------------- Prototype bar ---------------- */
+.proto-bar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:90;background:#101828;color:#fff;border-radius:999px;padding:6px 9px;display:flex;align-items:center;gap:4px;box-shadow:0 12px 34px rgba(0,0,0,.32);font-size:12px;max-width:calc(100vw - 20px);overflow-x:auto;white-space:nowrap}
+.proto-label{opacity:.5;padding:0 7px;font-size:11px}
+.proto-btn{border:0;background:transparent;color:#C9D2E3;height:28px;padding:0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:.15s}
+.proto-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+.proto-btn.active{background:#2B5CE6;color:#fff}
+.proto-sep{width:1px;height:18px;background:rgba(255,255,255,.16);margin:0 5px;flex:none}
+.proto-toggle{display:flex;background:rgba(255,255,255,.1);border-radius:999px;padding:2px}
+.proto-toggle .proto-btn{height:24px;padding:0 10px}
+.proto-toggle .proto-btn.active{background:#fff;color:#101828}
+.proto-hint{opacity:.5;padding:0 8px;font-size:11px}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width:1100px){
+  .rank-grid{grid-template-columns:repeat(2,1fr)}
+  .research-grid{grid-template-columns:1fr}
+  .race-card-content{max-width:74%}
+}
+@media (max-width:820px){
+  .header-inner{padding:0 14px;gap:12px}
+  .brand{min-width:0}
+  .brand-text span{display:none}
+  .main-nav{gap:24px;margin:0}
+  .nav-tenant{display:none}
+  .rank-grid{grid-template-columns:1fr}
+  .page-wrap{padding:0 14px}
+  .race-card{height:auto;min-height:200px}
+  .race-card-content{max-width:100%;padding:26px 24px}
+  .race-art{opacity:.45}
+  .board-table{min-width:820px}
+  .board-scroll{overflow-x:auto}
+  .proto-hint{display:none}
+  .login-card{margin:0 auto;padding:28px 22px 22px}
+  .login-brand{left:18px;top:18px}
+  .login-building{opacity:.45}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#/race">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M7 27c0-8 5.6-14.4 13-16.4C19 19 14.5 24.6 7 27Z" fill="#fff" opacity=".92"/>
+        <path d="M33 27c0-8-5.6-14.4-13-16.4C21 19 25.5 24.6 33 27Z" fill="#fff" opacity=".74"/>
+        <path d="M13 33c1.8-6.4 6.6-10.2 13.2-11.4C25 28 19.7 32.2 13 33Z" fill="#fff" opacity=".58"/>
+      </svg>
+      <div class="brand-text">
+        <b>数字城市公司</b>
+        <span>中国雄安集团 · DIGITAL CITY COMPANY</span>
+      </div>
+    </a>
+
+    <nav class="main-nav">
+      <a href="#/race" data-nav="race">竞赛</a>
+      <a href="#/rank" data-nav="rank">打榜</a>
+    </nav>
+
+    <div class="nav-actions">
+      <div id="navAuth" data-note="R1"><div class="auth-slot" id="authSlot"></div></div>
+      <div class="nav-tenant">
+        雄安竞赛
+        <svg width="9" height="9" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <span class="annot-wrap" data-note="R3" data-note-pos="right">
+        <button class="nav-workbench" id="navWorkbench" type="button">工作台</button>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ================= 赛题页（列表） ================= -->
+<section class="view active" id="view-race">
+  <div class="page-wrap">
+    <div class="race-list">
+
+      <article class="race-card" data-route="#/race/180" data-note="R2">
+        <div class="race-card-bg">
+          <div class="race-art">
+            <div class="glow"></div>
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+            <div class="sphere"><span>AI</span></div>
+            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+          </div>
+        </div>
+        <div class="race-card-content">
+          <div class="race-title-row">
+            <h2>渣土车识别（二批次）</h2>
+            <span class="status live">进行中</span>
+          </div>
+          <p class="race-meta"><b>比赛时间：</b>2026-11-01 00:00:00 — 2026-12-20 00:00:00</p>
+          <p class="race-meta"><b>举办方：</b>中国雄安集团数字城市科技有限公司</p>
+        </div>
+      </article>
+
+      <article class="race-card" data-route="#/race/180" data-demo="1" style="background:linear-gradient(110deg,#151C46 0%,#252E71 48%,#34459A 100%)">
+        <div class="race-card-bg">
+          <div class="race-art">
+            <div class="glow"></div>
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+            <div class="sphere"><span>AI</span></div>
+            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+          </div>
+        </div>
+        <div class="race-card-content">
+          <div class="race-title-row">
+            <h2>人流聚集识别（首批次）</h2>
+            <span class="status ended">已结束</span>
+          </div>
+          <p class="race-meta"><b>比赛时间：</b>2026-06-06 00:00:00 — 2026-06-25 00:00:00</p>
+          <p class="race-meta"><b>举办方：</b>中国雄安集团数字城市科技有限公司</p>
+        </div>
+      </article>
+
+      <article class="race-card" data-route="#/race/180" data-demo="1" style="background:linear-gradient(110deg,#151C46 0%,#252E71 48%,#34459A 100%)">
+        <div class="race-card-bg">
+          <div class="race-art">
+            <div class="glow"></div>
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+            <div class="sphere"><span>AI</span></div>
+            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+          </div>
+        </div>
+        <div class="race-card-content">
+          <div class="race-title-row">
+            <h2>反光衣识别（首批次）</h2>
+            <span class="status ended">已结束</span>
+          </div>
+          <p class="race-meta"><b>比赛时间：</b>2026-06-06 00:00:00 — 2026-06-25 00:00:00</p>
+          <p class="race-meta"><b>举办方：</b>中国雄安集团数字城市科技有限公司</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= 赛题详情 ================= -->
+<section class="view" id="view-race-detail">
+  <div class="page-wrap">
+    <div class="panel">
+      <div class="detail-head">
+        <div class="detail-title-wrap" data-note="R4" data-note-pos="right">
+          <span class="crumb-tag">竞赛</span>
+          <div class="detail-title-row">
+            <h1>渣土车识别（二批次）</h1>
+            <span class="status on-light live">进行中</span>
+          </div>
+          <p class="detail-sub"><b>比赛时间：</b>2026-11-01 00:00:00 — 2026-12-20 00:00:00 &nbsp;·&nbsp; <b>报名截止：</b>2026-12-12 00:00:00</p>
+        </div>
+        <span class="annot-wrap" data-note="R5">
+          <button class="btn-outline js-apply" data-kind="race" type="button">报名</button>
+        </span>
+      </div>
+
+      <div class="tabs" data-tabgroup="race" data-note="R6">
+        <button class="tab active" data-tab="rules" type="button">赛制</button>
+        <button class="tab" data-tab="topic" type="button">赛题</button>
+        <button class="tab" data-tab="data" type="button">数据集</button>
+        <button class="tab" data-tab="board" type="button">排行榜</button>
+      </div>
+
+      <!-- 赛制 -->
+      <div class="tab-panel active" data-panelgroup="race" data-panel="rules">
+        <div class="doc">
+          <h3>一、大赛介绍</h3>
+          <p>2026“数城杯”由中国雄安集团数字城市科技有限公司主办，立足雄安新区城市治理实际需求，依托新区视频一张网实景数据资源，开设渣土车、人流聚集、反光衣识别赛道，面向全国团队征集目标检测算法，以实景数据打磨落地型 AI 算法，打通算法研发、测评、落地应用链路。</p>
+          <h3>二、赛程安排</h3>
+          <p>比赛开始：2026-11-01 &nbsp;|&nbsp; 报名截止：2026-12-12 &nbsp;|&nbsp; 赛事整体结束：2026-12-20</p>
+          <h3>三、参赛要求</h3>
+          <ul>
+            <li>面向高等院校、科研院所、企业团队及个人开发者，每队不超过 5 人。</li>
+            <li>参赛作品须为参赛团队原创，严禁抄袭或直接套用他人成果。</li>
+            <li>数据集仅限本赛题使用，不得外传或用于其他用途。</li>
+            <li>直接参与大赛策划、组织、技术服务与评审的人员不得参赛。</li>
+          </ul>
+          <h3>四、评审规则</h3>
+          <table>
+            <thead><tr><th style="width:34%">评审指标</th><th>指标说明</th><th style="width:14%">分值</th></tr></thead>
+            <tbody>
+              <tr><td>算法可行性</td><td>方案能否解决真实场景问题，是否经济合理</td><td>40</td></tr>
+              <tr><td>算法创新性</td><td>技术新颖性、独创性与先进性</td><td>20</td></tr>
+              <tr><td>团队技术水平</td><td>成员技术熟练度、工程与架构能力</td><td>20</td></tr>
+              <tr><td>赛题解决度</td><td>对赛题背景与业务要求的理解程度</td><td>10</td></tr>
+              <tr><td>落地可行性</td><td>是否符合部署场景与主流软硬件要求</td><td>10</td></tr>
+            </tbody>
+          </table>
+          <div class="inline-note">决赛成绩以算法榜为准：选手在平台完成算法开发、模型转换与提交，比赛期间可持续刷新最好成绩。</div>
+        </div>
+      </div>
+
+      <!-- 赛题 -->
+      <div class="tab-panel" data-panelgroup="race" data-panel="topic">
+        <div class="doc">
+          <h3>一、背景描述</h3>
+          <p>依托雄安新区视频一张网，对渣土车运输过程中的未密闭、抛洒滴漏、违规倾倒等行为进行识别。传统人工巡检发现滞后、覆盖不全，需要通过视觉算法实现自动发现与告警联动。</p>
+          <h3>二、目标描述</h3>
+          <p>识别对象：渣土车；识别场景：工地出入口、城市道路、重点区域卡口；环境要求：室外白天或夜间光照良好；算法准确率：≥ 90%。</p>
+          <h3>三、算法内容</h3>
+          <p>算法输入：图片 / 视频流（彩色画面）；输入设备：1080P 摄像头 / NVR；算法输出：callback；最小识别像素：60×60；实时性：常规实时性；部署方式：本地化部署。</p>
+          <h3>四、数据集标注方案</h3>
+          <p>标注方式：2D 框；标签：truck（渣土车）；遮挡超过 2/3 的目标不作标注；训练集与测试集按场景分层抽样，测试集不参与训练。</p>
+          <h3>五、测试指标</h3>
+          <table>
+            <thead><tr><th>评审指标</th><th>指标说明</th><th style="width:14%">权重分</th></tr></thead>
+            <tbody>
+              <tr><td>算法精度</td><td>F-score，IoU 取 0.3</td><td>85</td></tr>
+              <tr><td>算法性能值</td><td>性能分 = fps / 100</td><td>15</td></tr>
+            </tbody>
+          </table>
+          <h3>六、接口协议</h3>
+          <pre>{
+  "algorithm_data": { "is_alert": true, "target_count": 1, "target_info": [] },
+  "model_data": {
+    "objects": [
+      { "x": 716, "y": 716, "height": 646, "width": 233,
+        "confidence": 0.999660, "name": "truck" }
+    ]
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- 数据集 -->
+      <div class="tab-panel" data-panelgroup="race" data-panel="data">
+        <table class="data-table">
+          <thead>
+            <tr><th style="width:26%">名称</th><th>类型</th><th>版本</th><th>大小</th><th>训练集数量</th><th>测试集数量</th><th>样例集数量</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><button class="plus" data-expand="ds-race" type="button">+</button>渣土车数据集</td>
+              <td>目标检测</td><td>V2</td><td>1.86G</td><td>1240</td><td>310</td><td>50</td>
+            </tr>
+            <tr class="expand-row" id="ds-race">
+              <td colspan="7">数据集说明：来源于雄安新区视频一张网实景抽帧，覆盖工地出入口、城市道路、夜间卡口等场景；训练集 1240 张、测试集 310 张、样例集 50 张，VOC 标注格式。数据集下载与使用仍需登录并按赛事协议授权。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 排行榜 -->
+      <div class="tab-panel" data-panelgroup="race" data-panel="board">
+        <div class="subtab-row"><button class="subtab" type="button">模型榜</button></div>
+        <div class="update-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8h.01M11 11.5h1V16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          更新时间：2026-11-18 17:10:00
+        </div>
+        <table class="board-table">
+          <thead><tr><th class="col-rank">排名</th><th class="col-user">用户名</th><th class="col-f">f-score</th><th class="col-perf">性能分</th><th class="col-score">score</th><th class="col-time">提交时间</th></tr></thead>
+        </table>
+        <div class="board-empty">
+          <svg width="74" height="66" viewBox="0 0 74 66" fill="none" aria-hidden="true">
+            <rect x="12" y="14" width="44" height="34" rx="3" fill="#EEF1F6"/>
+            <rect x="18" y="20" width="24" height="3" rx="1.5" fill="#DCE1EA"/>
+            <rect x="18" y="27" width="32" height="3" rx="1.5" fill="#DCE1EA"/>
+            <path d="M48 42l14-9 6 6-14 9-6-6Z" fill="#E3E8F1"/>
+            <path d="M56 52l8-5" stroke="#DCE1EA" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          暂无信息
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 打榜页（列表） ================= -->
+<section class="view" id="view-rank">
+  <div class="page-wrap">
+
+    <div class="filter-bar" data-note="R7">
+      <span class="filter-label">研究方向</span>
+      <button class="chip active" data-cat="全部" type="button">全部</button>
+      <button class="chip" data-cat="其他" type="button">其他</button>
+      <button class="chip" data-cat="目标检测" type="button">目标检测</button>
+      <button class="chip" data-cat="图像分类" type="button">图像分类</button>
+      <button class="chip" data-cat="语义分割" type="button">语义分割</button>
+      <button class="chip" data-cat="千诚测试标签" type="button">千诚测试标签</button>
+    </div>
+
+    <div class="toolbar">
+      <select class="select" id="rankSort" aria-label="排序方式">
+        <option value="default">默认排序</option>
+        <option value="people">报名人数从高到低</option>
+        <option value="score">当前最高分从高到低</option>
+      </select>
+      <div class="search">
+        <input id="rankSearch" type="text" placeholder="请输入榜单名称" aria-label="请输入榜单名称">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="#86909C" stroke-width="1.8"/><path d="m16.5 16.5 4 4" stroke="#86909C" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <div class="rank-grid" id="rankList">
+
+      <article class="rank-card" data-cat="目标检测" data-title="垃圾箱满溢" data-people="9" data-score="0.9823">
+        <div class="rank-card-top">
+          <div class="rank-card-title">
+            <span>垃圾箱满溢</span>
+            <span class="badge-applied" data-applied-card="208">已报名</span>
+          </div>
+          <p class="rank-desc">依托雄安新区视频一张网，开展垃圾箱满溢检测视觉算法研究，如检测到垃圾箱装满或溢出到地上的现象，则立即输出报警。</p>
+          <span class="cat-tag">目标检测</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              报名人数：9人
+            </span>
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              打榜结束时间：2026-12-16 00:00:00
+            </span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block">
+                <div class="label">当前最高分</div>
+                <div class="val-row"><span class="val">0.9823359000000002</span><span class="user">yzhtest2</span></div>
+              </div>
+            </div>
+            <span class="annot-wrap" data-note="R8">
+              <button class="btn-enter" data-go="#/rank/208" type="button">进入打榜</button>
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <article class="rank-card" data-cat="目标检测" data-title="消防通道占用检测" data-people="2" data-score="0">
+        <div class="rank-card-top">
+          <div class="rank-card-title"><span>消防通道占用检测</span></div>
+          <p class="rank-desc">安全消防通道被长时间停放车辆或杂物占用的情形，需要算法识别出来，方便及时清理，保持安全规范。</p>
+          <span class="cat-tag">目标检测</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>报名人数：2人</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>打榜结束时间：2026-11-30 00:00:00</span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block"><div class="label">当前最高分</div><div class="val-row"><span class="val">-</span><span class="user">暂无成绩</span></div></div>
+            </div>
+            <button class="btn-enter" data-go="#/rank/208" data-demo="1" type="button">进入打榜</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="rank-card" data-cat="目标检测" data-title="电梯间电动车识别" data-people="1" data-score="0">
+        <div class="rank-card-top">
+          <div class="rank-card-title"><span>电梯间电动车识别</span></div>
+          <p class="rank-desc">识别电梯间内是否有电动车进入，若检测到电动车则在画面中报警，联动梯控阻止上楼。</p>
+          <span class="cat-tag">目标检测</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>报名人数：1人</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>打榜结束时间：2026-11-30 00:00:00</span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block"><div class="label">当前最高分</div><div class="val-row"><span class="val">-</span><span class="user">暂无成绩</span></div></div>
+            </div>
+            <button class="btn-enter" data-go="#/rank/208" data-demo="1" type="button">进入打榜</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="rank-card" data-cat="其他" data-title="道路垃圾识别" data-people="3" data-score="0">
+        <div class="rank-card-top">
+          <div class="rank-card-title"><span>道路垃圾识别</span></div>
+          <p class="rank-desc">依托雄安新区视频一张网，开展道路垃圾识别算法研发，通过视频输入自动识别监控区域内道路存在垃圾，则算法需要产生报警，将报警信息推送至平台。</p>
+          <span class="cat-tag">其他</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>报名人数：3人</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>打榜结束时间：2026-11-30 00:00:00</span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block"><div class="label">当前最高分</div><div class="val-row"><span class="val">-</span><span class="user">暂无成绩</span></div></div>
+            </div>
+            <button class="btn-enter" data-go="#/rank/208" data-demo="1" type="button">进入打榜</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="rank-card" data-cat="语义分割" data-title="道路积水检测" data-people="1" data-score="0">
+        <div class="rank-card-top">
+          <div class="rank-card-title"><span>道路积水检测</span></div>
+          <p class="rank-desc">通过图像识别技术，检测各低洼路段的积水情况，发布预警，辅助城市防汛调度。</p>
+          <span class="cat-tag">语义分割</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>报名人数：1人</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>打榜结束时间：2026-11-30 00:00:00</span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block"><div class="label">当前最高分</div><div class="val-row"><span class="val">-</span><span class="user">暂无成绩</span></div></div>
+            </div>
+            <button class="btn-enter" data-go="#/rank/208" data-demo="1" type="button">进入打榜</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="rank-card" data-cat="其他" data-title="跑冒滴漏检测" data-people="1" data-score="0">
+        <div class="rank-card-top">
+          <div class="rank-card-title"><span>跑冒滴漏检测</span></div>
+          <p class="rank-desc">依托雄安新区视频一张网，开展跑冒滴漏检测，检测设备是否存在漏油现象，如检测到漏油现象，则立即输出报警。</p>
+          <span class="cat-tag">其他</span>
+        </div>
+        <div class="rank-card-body">
+          <div class="rank-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 14.4c2 .5 3.2 2.1 3.6 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>报名人数：1人</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>打榜结束时间：2026-11-30 00:00:00</span>
+          </div>
+          <div class="rank-foot">
+            <div class="rank-score">
+              <svg class="trophy-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 5H5.5v1.5A3.5 3.5 0 0 0 9 10M16 5h2.5v1.5A3.5 3.5 0 0 1 15 10" stroke="currentColor" stroke-width="1.6"/><path d="M12 12v4M9 20h6M10 16h4l.7 4H9.3l.7-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <div class="score-block"><div class="label">当前最高分</div><div class="val-row"><span class="val">-</span><span class="user">暂无成绩</span></div></div>
+            </div>
+            <button class="btn-enter" data-go="#/rank/208" data-demo="1" type="button">进入打榜</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="empty" id="rankEmpty">
+      <div style="font-size:34px;color:#D5DAE3;margin-bottom:8px">○</div>
+      未找到匹配的榜单
+    </div>
+
+    <div class="list-foot">
+      <span>共 <span id="rankCount">6</span> 条</span>
+      <div class="pager">
+        <button type="button" disabled>上一页</button>
+        <button type="button" class="active">1</button>
+        <button type="button" data-page="2">下一页</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= 打榜详情 ================= -->
+<section class="view" id="view-rank-detail">
+  <div class="page-wrap">
+    <div class="panel">
+      <div class="detail-head">
+        <div class="detail-title-wrap">
+          <span class="crumb-tag">打榜</span>
+          <div class="detail-title-row">
+            <h1>垃圾箱满溢</h1>
+            <span class="status on-light live">进行中</span>
+          </div>
+          <p class="detail-sub"><b>打榜结束时间：</b>2026-12-16 00:00:00 &nbsp;·&nbsp; <b>报名人数：</b>9 人</p>
+        </div>
+        <span class="annot-wrap" data-note="R5">
+          <button class="btn-outline js-apply" data-kind="rank" type="button">报名</button>
+        </span>
+      </div>
+
+      <div class="tabs" data-tabgroup="rank" data-note="R12">
+        <button class="tab active" data-tab="board" type="button">排行榜</button>
+        <button class="tab" data-tab="rules" type="button">打榜规则</button>
+        <button class="tab" data-tab="track" type="button">赛道说明</button>
+        <button class="tab" data-tab="data" type="button">数据集</button>
+      </div>
+
+      <!-- 排行榜 -->
+      <div class="tab-panel active" data-panelgroup="rank" data-panel="board">
+        <div class="board-section" data-note="R10">
+          <div class="subtab-row"><button class="subtab" type="button">模型榜</button></div>
+          <div class="update-bar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8h.01M11 11.5h1V16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            更新时间：2026-11-18 17:10:00
+          </div>
+          <div class="board-scroll">
+            <table class="board-table">
+              <thead>
+                <tr><th class="col-rank">排名</th><th class="col-user">用户名</th><th class="col-f">f-score</th><th class="col-perf">性能分</th><th class="col-score">score</th><th class="col-time">提交时间</th></tr>
+              </thead>
+              <tbody>
+                <tr class="tr-top1"><td><span class="medal">1</span></td><td>yzhtest2</td><td>0.9915</td><td>89.9849</td><td>0.9823359000000002</td><td>2026-11-18 17:10:00</td></tr>
+                <tr class="tr-top2"><td><span class="medal silver">2</span></td><td>vision_xa</td><td>0.9872</td><td>92.3140</td><td>0.9742103000000001</td><td>2026-11-18 16:42:00</td></tr>
+                <tr class="tr-top3"><td><span class="medal bronze">3</span></td><td>dustbin_lab</td><td>0.9841</td><td>88.5620</td><td>0.9688301000000002</td><td>2026-11-18 15:58:00</td></tr>
+                <tr><td>4</td><td>wang_ai</td><td>0.9796</td><td>85.2200</td><td>0.9621408000000001</td><td>2026-11-18 14:30:00</td></tr>
+                <tr><td>5</td><td>lihua_cv</td><td>0.9751</td><td>90.1800</td><td>0.9587204000000003</td><td>2026-11-18 12:11:00</td></tr>
+                <tr><td>6</td><td>xiongan_ml</td><td>0.9688</td><td>81.4500</td><td>0.9493602000000001</td><td>2026-11-17 21:36:00</td></tr>
+                <tr><td>7</td><td>zhangsan</td><td>0.9612</td><td>79.8800</td><td>0.9418706000000002</td><td>2026-11-17 20:05:00</td></tr>
+                <tr><td>8</td><td>algofan</td><td>0.9540</td><td>83.2600</td><td>0.9355409000000001</td><td>2026-11-17 18:47:00</td></tr>
+                <tr><td>9</td><td>yjy_team</td><td>0.9477</td><td>77.5100</td><td>0.9280603000000002</td><td>2026-11-17 17:20:00</td></tr>
+                <tr><td>10</td><td>test_user</td><td>0.9385</td><td>74.2200</td><td>0.9193307000000001</td><td>2026-11-17 15:09:00</td></tr>
+                <tr><td>11</td><td>baseline</td><td>0.9210</td><td>70.0300</td><td>0.9021805000000002</td><td>2026-11-16 19:55:00</td></tr>
+                <tr><td>12</td><td>demo01</td><td>0.9054</td><td>66.8700</td><td>0.8870104000000001</td><td>2026-11-16 18:12:00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="board-foot">
+            <span>共 12 条</span>
+            <div class="pager">
+              <button type="button" disabled>上一页</button>
+              <button type="button" class="active">1</button>
+              <button type="button" disabled>下一页</button>
+              <span style="margin-left:6px">10 条/页</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 打榜规则 -->
+      <div class="tab-panel" data-panelgroup="rank" data-panel="rules">
+        <div class="doc">
+          <h3>“雄客松”专项赛题 · 垃圾桶满溢识别算法挑战赛赛制</h3>
+          <h3>一、赛事背景</h3>
+          <p>为深入推进雄安新区数字化、智能化城市建设，探索人工智能技术在城市场景精细化治理中的落地应用，雄安科创中心雄州园 OPC 孵化社区联合中国雄安集团数字城市科技有限公司，共同发起“雄客松”专项赛题——垃圾桶满溢识别算法挑战赛。</p>
+          <h3>二、赛事目标</h3>
+          <p>训练并产出可在真实场景部署的垃圾桶满溢识别算法模型，在规定数据集与评测标准下达到竞赛要求；从参赛作品中遴选优秀算法方案纳入成果库，供主办单位后续业务场景参考调用。</p>
+          <h3>三、赛题内容</h3>
+          <p>基于主办方提供的真实场景图像数据集，训练目标检测与图像分类算法，实现对监控或抓拍画面中垃圾桶目标的定位与识别，判定垃圾桶“满溢／未满溢”状态（含垃圾溢出至桶外区域的情形），并输出结构化识别结果，支撑告警联动等业务应用。</p>
+          <h3>四、评分与排名规则</h3>
+          <table>
+            <thead><tr><th>评审指标</th><th>指标说明</th><th style="width:14%">权重分</th></tr></thead>
+            <tbody>
+              <tr><td>算法精度</td><td>F-score，IoU 取 0.3</td><td>85</td></tr>
+              <tr><td>算法性能值</td><td>性能分 = fps / 100</td><td>15</td></tr>
+            </tbody>
+          </table>
+          <div class="inline-note">开发者在比赛期间可持续提升、刷新自己的最好成绩，以比赛结束后的成绩排名为最终结果。</div>
+        </div>
+      </div>
+
+      <!-- 赛道说明 -->
+      <div class="tab-panel" data-panelgroup="rank" data-panel="track">
+        <div class="doc">
+          <h3>一、背景描述</h3>
+          <p>垃圾桶、垃圾仓满溢及乱堆乱放影响市容。算法需识别公共场所垃圾桶、垃圾仓满溢的情况，辅助环卫巡检与告警联动。</p>
+          <h3>二、目标描述</h3>
+          <p>指定区域内，如果检测到满溢的垃圾桶，触发报警。识别场景：社区、街道、公园等；识别对象：满溢垃圾桶；环境要求：室外白天、夜间光照良好。</p>
+          <h3>三、算法内容</h3>
+          <p>算法输入：视频流 / 图片；输入设备：摄像头 / NVR；算法输出：callback；最小识别像素：垃圾桶 60×60；实时性：常规实时性；部署方式：本地化部署。</p>
+          <h3>四、软硬件要求</h3>
+          <ul>
+            <li>运行在 X86 架构，显卡支持 RTX / GTX / Tesla 系列。</li>
+            <li>Linux SDK（C++ 实现），支持私有化部署，OpenCV 4.1。</li>
+            <li>英伟达显卡默认支持 30 系列，其他类型显卡另行说明。</li>
+          </ul>
+          <h3>五、数据说明</h3>
+          <p>标注对象：满溢的垃圾桶；标注方式：2D 框；标签：dustbin。遮挡超过 2/3 的目标不作标注。</p>
+        </div>
+      </div>
+
+      <!-- 数据集 -->
+      <div class="tab-panel" data-panelgroup="rank" data-panel="data">
+        <table class="data-table">
+          <thead>
+            <tr><th style="width:26%">名称</th><th>类型</th><th>版本</th><th>大小</th><th>训练集数量</th><th>测试集数量</th><th>样例集数量</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><button class="plus" data-expand="ds-rank" type="button">+</button>垃圾箱满溢</td>
+              <td>目标检测</td><td>V4</td><td>1.417G</td><td>3486</td><td>388</td><td>50</td>
+            </tr>
+            <tr class="expand-row" id="ds-rank">
+              <td colspan="7">数据集说明：覆盖社区、街道、公园等真实场景，标注 dustbin 2D 框；训练集 3486 张、测试集 388 张、样例集 50 张。数据集下载与使用仍需登录并按赛事协议授权。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 登录页 ================= -->
+<section class="view" id="view-login">
+  <div class="login-page">
+    <div class="login-glow"></div>
+    <div class="login-building"></div>
+    <div class="login-water"></div>
+
+    <a class="brand login-brand" href="#/race">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M7 27c0-8 5.6-14.4 13-16.4C19 19 14.5 24.6 7 27Z" fill="#fff" opacity=".92"/>
+        <path d="M33 27c0-8-5.6-14.4-13-16.4C21 19 25.5 24.6 33 27Z" fill="#fff" opacity=".74"/>
+        <path d="M13 33c1.8-6.4 6.6-10.2 13.2-11.4C25 28 19.7 32.2 13 33Z" fill="#fff" opacity=".58"/>
+      </svg>
+      <div class="brand-text">
+        <b>数字城市公司</b>
+        <span>中国雄安集团 · DIGITAL CITY COMPANY</span>
+      </div>
+    </a>
+
+    <div class="login-card">
+      <h1>视觉算法生态平台</h1>
+      <p class="login-context" id="loginContext">登录成功后将返回原页面</p>
+      <div class="login-field">
+        <label>账号</label>
+        <input id="loginAccountPage" type="text" placeholder="请输入账号名称" autocomplete="off">
+      </div>
+      <div class="login-field">
+        <label>密码</label>
+        <input id="loginPwdPage" type="password" placeholder="请输入账号密码" autocomplete="off">
+      </div>
+      <button class="login-submit" id="loginSubmit" type="button">登 录</button>
+      <div class="login-register-page">还未注册账号？<button type="button" data-register-btn>现在注册</button></div>
+      <a class="login-back" href="#/race">返回门户首页</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 需求说明列表 ================= -->
+<section class="view" id="view-requirements">
+  <div class="page-wrap">
+
+    <div class="req-hero">
+      <div class="req-eyebrow">视觉算法生态平台 · 门户公开访问改造</div>
+      <h1>赛题与打榜免登录浏览原型</h1>
+      <p>将四个门户页从「整页登录」改为「内容公开 + 报名登录」：访客可浏览赛题与榜单，点击报名时再登录并回到原页。</p>
+      <div class="req-stats">
+        <div class="req-stat"><b>4</b>个页面</div>
+        <div class="req-stat"><b>10</b>个修改点</div>
+        <div class="req-stat"><b>3</b>条全局规则</div>
+        <div class="req-stat"><b>0</b>处页面主体结构改动</div>
+      </div>
+    </div>
+
+    <div class="research-grid">
+      <div class="research-card">
+        <h3><span class="dot"></span>平台现状</h3>
+        <p>四个页面均在登录体系内，未登录访问会跳转登录页。详情页为「标题 + 报名 + 四个页签」。</p>
+      </div>
+      <div class="research-card">
+        <h3><span class="dot"></span>参考交互</h3>
+        <p>cvmart 榜单公开可读；点击「立即打榜」跳登录页并带 <b>redirect</b>，登录后回到原榜单。详见 <a href="https://www.cvmart.net/topList/11279?tab=RealTime" target="_blank" rel="noopener">参考页面</a>。</p>
+      </div>
+      <div class="research-card">
+        <h3><span class="dot"></span>改造结论</h3>
+        <p>路由白名单 + 读接口公开 + 报名鉴权 + 登录回跳，页面结构不变。</p>
+      </div>
+    </div>
+
+    <div class="req-panel panel">
+      <h2><span class="bar"></span>全局改造规则</h2>
+      <table class="req-table">
+        <thead><tr><th style="width:90px">编号</th><th style="width:170px">规则</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rule-id">G1</span></td><td>前端路由白名单</td><td>四个门户页面免登录；/dashboard 等后台路由保持登录校验。</td></tr>
+          <tr><td><span class="rule-id">G2</span></td><td>接口鉴权拆分</td><td>列表、详情、榜单等读接口匿名可读；报名、提交、下载等操作必须登录。</td></tr>
+          <tr><td><span class="rule-id">G3</span></td><td>登录回跳</td><td>登录入口携带 redirect=当前完整地址；登录（及租户选择）完成后回跳原页面。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="req-panel panel">
+      <h2><span class="bar"></span>修改点清单</h2>
+      <table class="req-table">
+        <thead>
+          <tr><th style="width:56px">编号</th><th style="width:96px">页面</th><th>修改点</th><th style="width:100px">类型</th><th style="width:64px">优先级</th><th style="width:64px">操作</th></tr>
+        </thead>
+        <tbody id="reqTableBody"></tbody>
+      </table>
+      <p class="req-footnote">注：原 09「公开展示字段脱敏」本次不做；原 11「打榜报名登录门禁」已合并至 05，编号保留空缺。</p>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<!-- ================= Drawer ================= -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer" aria-label="需求说明"></aside>
+
+<!-- ================= Modal root ================= -->
+<div id="modalRoot"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= Prototype bar ================= -->
+<div class="proto-bar">
+  <span class="proto-label">原型</span>
+  <button class="proto-btn" data-proto-route="#/race" type="button">赛题页</button>
+  <button class="proto-btn" data-proto-route="#/race/180" type="button">赛题详情</button>
+  <button class="proto-btn" data-proto-route="#/rank" type="button">打榜页</button>
+  <button class="proto-btn" data-proto-route="#/rank/208" type="button">打榜详情</button>
+  <button class="proto-btn" data-proto-route="#/requirements" type="button">需求说明</button>
+  <span class="proto-sep"></span>
+  <span class="proto-label">登录态</span>
+  <div class="proto-toggle">
+    <button class="proto-btn active" data-login-state="out" type="button">访客</button>
+    <button class="proto-btn" data-login-state="in" type="button">已登录</button>
+  </div>
+  <span class="proto-sep"></span>
+  <button class="proto-btn active" id="annotToggle" type="button">标注 开</button>
+  <span class="proto-hint">点击红色角标查看需求说明</span>
+</div>
+
+<script>
+/* =========================================================
+   需求数据
+   ========================================================= */
+const NOTES = {
+  R1: {
+    no: '01', page: '全站', title: '访客态仅展示登录', type: '权限调整', priority: 'P0', route: '/race',
+    short: '未登录时顶部只显示「登录」，登录页内保留注册入口。',
+    current: '未登录访问门户页会跳转登录页，顶部没有访客态。',
+    requirement: '四个页面加入路由白名单；未登录时顶部只显示「登录」，登录页内保留「还未注册账号？现在注册」入口；已登录展示用户信息、租户和工作台。',
+    rules: [
+      '点击「登录」直接进入登录页，携带 redirect=当前地址。',
+      '登录页内提供「还未注册账号？现在注册」入口。',
+      '登录成功后回到原页面。'
+    ],
+    accept: [
+      '未登录可浏览四个页面，顶部仅显示「登录」。',
+      '登录页可进入注册。',
+      '登录后回跳原页面。'
+    ],
+    related: 'G1、G3'
+  },
+  R2: {
+    no: '02', page: '赛题页', title: '赛题列表公开浏览', type: '权限调整', priority: 'P0', route: '/race',
+    short: '列表和卡片无需登录，点击卡片直接进入详情。',
+    current: '赛题列表需要登录，未登录会被拦截。',
+    requirement: '列表接口匿名可读，卡片点击直接进入赛题详情，不再触发登录。',
+    rules: [
+      '访客可打开、刷新列表页。',
+      '点击卡片进入赛题详情。',
+      '接口异常显示空态，不跳登录。'
+    ],
+    accept: [
+      '无 token 可获取列表。',
+      '访客可完成「列表 → 详情」浏览。',
+      '全程不出现登录拦截。'
+    ],
+    related: 'G1、G2'
+  },
+  R3: {
+    no: '03', page: '全站', title: '工作台保留登录门禁', type: '权限调整', priority: 'P0', route: '/race',
+    short: '工作台、算法开发、管理后台等仍需登录。',
+    current: '工作台、算法开发、管理后台均在登录体系内。',
+    requirement: '本次只公开四个浏览页面，工作台、算法开发、管理后台等仍需登录。',
+    rules: [
+      '访客点击「工作台」进入登录。',
+      '登录成功后回跳工作台。',
+      '直接访问后台路由仍被拦截。'
+    ],
+    accept: [
+      '访客无法直接进入 /dashboard。',
+      '点击工作台出现登录。',
+      '登录后可回跳工作台。'
+    ],
+    related: 'G1、G3'
+  },
+  R4: {
+    no: '04', page: '赛题详情', title: '赛题详情匿名访问', type: '权限调整', priority: 'P0', route: '/race/180',
+    short: '详情页及四个页签可直接打开、刷新和分享。',
+    current: '赛题详情需要登录，分享链接会被拦截。',
+    requirement: '详情页及四个页签匿名可读，支持直接打开、刷新和分享。',
+    rules: [
+      '未登录可直接打开详情 URL。',
+      '四个页签均可切换。',
+      '分享链接在无登录态下可打开。'
+    ],
+    accept: [
+      '清除 Cookie 后可打开详情。',
+      '四个页签内容正常。',
+      '分享链接可访问。'
+    ],
+    related: 'G1、G2'
+  },
+  R5: {
+    no: '05', page: '赛题详情 / 打榜详情', title: '报名登录门禁', type: '登录门禁', priority: 'P0', route: '/race/180', altRoute: '/rank/208',
+    short: '未登录点击报名直接跳登录页，登录后回跳原页继续报名。',
+    current: '整页登录后才能看到报名按钮。',
+    requirement: '赛题详情和打榜详情共用一套登录逻辑：未登录点击「报名」直接跳转登录页，登录成功回跳原页并继续报名；已报名显示「已报名」。',
+    rules: [
+      '未登录点击「报名」直接跳转登录页，redirect 指向当前页面。',
+      '登录成功回跳原页并打开报名确认。',
+      '报名成功后按钮变为「已报名」，不可重复报名。'
+    ],
+    accept: [
+      '访客可浏览两个详情页。',
+      '点击报名直接进入登录页，登录后回跳。',
+      '报名成功状态正确。'
+    ],
+    related: 'G3'
+  },
+  R6: {
+    no: '06', page: '赛题详情', title: '赛题内容与排行榜公开', type: '权限调整', priority: 'P1', route: '/race/180',
+    short: '赛制、赛题、数据集、排行榜四个页签匿名可读。',
+    current: '四个页签随整页登录才可见。',
+    requirement: '四个页签匿名可读；数据集仅展示元信息，下载仍鉴权。',
+    rules: [
+      '页签切换不触发登录。',
+      '排行榜调用公开只读接口。',
+      '无数据展示「暂无信息」。'
+    ],
+    accept: [
+      '访客可查看四个页签。',
+      '榜单数据正常。',
+      '下载动作仍要求登录。'
+    ],
+    related: 'G2'
+  },
+  R7: {
+    no: '07', page: '打榜页', title: '列表筛选与搜索公开', type: '权限调整', priority: 'P0', route: '/rank',
+    short: '研究方向筛选、排序和榜单名称搜索均无需登录。',
+    current: '打榜列表需要登录，筛选、排序和搜索不可用。',
+    requirement: '列表、研究方向筛选、排序和榜单名称搜索均匿名可用。',
+    rules: [
+      '筛选和搜索即时刷新。',
+      '无结果展示空态。',
+      '清空后恢复全部列表。'
+    ],
+    accept: [
+      '访客可完成筛选和搜索。',
+      '结果与登录态无关。',
+      '空态正常。'
+    ],
+    related: 'G1、G2'
+  },
+  R8: {
+    no: '08', page: '打榜页', title: '进入打榜详情公开', type: '交互调整', priority: 'P0', route: '/rank',
+    short: '「进入打榜」无需登录，只有报名动作鉴权。',
+    current: '「进入打榜」需要登录。',
+    requirement: '访客可直接进入打榜详情查看榜单，只有报名动作要求登录。',
+    rules: [
+      '点击「进入打榜」直接进入详情。',
+      '详情页公开可读。',
+      '点击「报名」才触发登录。'
+    ],
+    accept: [
+      '未登录可从列表进入详情。',
+      '进入详情不出现登录拦截。',
+      '报名时才要求登录。'
+    ],
+    related: 'G1'
+  },
+  R10: {
+    no: '10', page: '打榜详情', title: '排行榜完整公开', type: '权限调整', priority: 'P0', route: '/rank/208',
+    short: '完整榜单、更新时间和模型榜切换匿名可读。',
+    current: '榜单详情整页需要登录。',
+    requirement: '排行榜、更新时间和模型榜切换匿名可读，分页正常。',
+    rules: [
+      '直接打开榜单详情可查看。',
+      '榜单类型切换可用。',
+      '无数据展示空态。'
+    ],
+    accept: [
+      '清除 Cookie 后详情正常。',
+      '完整榜单可查看。',
+      '分页正常。'
+    ],
+    related: 'G1、G2'
+  },
+  R12: {
+    no: '12', page: '打榜详情', title: '页签状态与登录回跳', type: '交互调整', priority: 'P1', route: '/rank/208',
+    short: '当前页签写入 URL，登录回跳后不丢失浏览位置。',
+    current: '页签状态只保存在页面内，登录拦截后丢失。',
+    requirement: '四个页签公开，当前页签写入 URL；登录回跳后恢复原页签。',
+    rules: [
+      '切换页签更新 URL query。',
+      '分享链接可定位到指定页签。',
+      '登录 redirect 保留完整 URL。'
+    ],
+    accept: [
+      '?tab=rules 可直接定位。',
+      '登录回跳后页签不丢。',
+      '刷新后页签保持。'
+    ],
+    related: 'G3'
+  }
+};
+const NOTE_ORDER = Object.keys(NOTES);
+
+/* =========================================================
+   状态
+   ========================================================= */
+const state = {
+  loggedIn: false,
+  raceRegistered: false,
+  rankRegistered: false
+};
+let currentNoteId = null;
+
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => Array.prototype.slice.call(el.querySelectorAll(s));
+
+/* =========================================================
+   路由
+   ========================================================= */
+const ROUTES = {
+  '/race': { view: 'view-race', nav: 'race' },
+  '/race/180': { view: 'view-race-detail', nav: 'race', tabGroup: 'race', defaultTab: 'rules' },
+  '/rank': { view: 'view-rank', nav: 'rank' },
+  '/rank/208': { view: 'view-rank-detail', nav: 'rank', tabGroup: 'rank', defaultTab: 'board' },
+  '/login': { view: 'view-login', nav: null, login: true },
+  '/requirements': { view: 'view-requirements', nav: null }
+};
+
+function parseHash() {
+  const raw = (location.hash || '').replace(/^#/, '');
+  const parts = raw.split('?');
+  return { path: parts[0] || '/race', params: new URLSearchParams(parts[1] || '') };
+}
+
+function renderRoute() {
+  const { path, params } = parseHash();
+  const cfg = ROUTES[path] || ROUTES['/race'];
+  if (!ROUTES[path]) {
+    history.replaceState(null, '', '#/race');
+  }
+  document.body.classList.toggle('login-mode', !!cfg.login);
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === cfg.view));
+  $$('.main-nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === cfg.nav));
+  $$('.proto-btn[data-proto-route]').forEach(b => {
+    b.classList.toggle('active', b.dataset.protoRoute === '#' + path);
+  });
+  if (cfg.tabGroup) {
+    const tabName = params.get('tab') || cfg.defaultTab;
+    switchTab(cfg.tabGroup, tabName, false);
+  }
+  if (path === '/login') updateLoginPage(params);
+  closeDrawer();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function switchTab(group, name, updateHash) {
+  const groupEl = document.querySelector('[data-tabgroup="' + group + '"]');
+  if (!groupEl) return;
+  const valid = $$('.tab', groupEl).some(t => t.dataset.tab === name);
+  if (!valid) name = group === 'race' ? 'rules' : 'board';
+  $$('.tab', groupEl).forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  $$('[data-panelgroup="' + group + '"]').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+  if (updateHash) {
+    const base = group === 'race' ? '#/race/180' : '#/rank/208';
+    history.replaceState(null, '', base + '?tab=' + name);
+  }
+}
+
+window.addEventListener('hashchange', renderRoute);
+
+/* =========================================================
+   标注
+   ========================================================= */
+function initAnnotations() {
+  $$('[data-note]').forEach(el => {
+    if (el.dataset.noteReady === '1') return;
+    const id = el.dataset.note;
+    const note = NOTES[id];
+    if (!note) return;
+    el.dataset.noteReady = '1';
+    el.classList.add('annot-host');
+    const badge = document.createElement('button');
+    badge.type = 'button';
+    badge.className = 'annot-badge' + (el.dataset.notePos === 'right' ? ' right' : '');
+    badge.textContent = note.no;
+    badge.title = note.page + ' · ' + note.title;
+    badge.addEventListener('click', ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openNote(id);
+    });
+    el.appendChild(badge);
+  });
+}
+
+function refreshAnnotationVisibility() {
+  const off = document.body.classList.contains('annot-off');
+  $('#annotToggle').classList.toggle('active', !off);
+  $('#annotToggle').textContent = off ? '标注 关' : '标注 开';
+}
+
+/* =========================================================
+   需求抽屉
+   ========================================================= */
+function openNote(id) {
+  const n = NOTES[id];
+  if (!n) return;
+  currentNoteId = id;
+  const idx = NOTE_ORDER.indexOf(id);
+  const prev = NOTE_ORDER[(idx - 1 + NOTE_ORDER.length) % NOTE_ORDER.length];
+  const next = NOTE_ORDER[(idx + 1) % NOTE_ORDER.length];
+  $('#drawer').innerHTML = `
+    <div class="drawer-head">
+      <div class="num">${n.no}</div>
+      <div>
+        <div class="drawer-kicker">${n.page} · ${n.type}</div>
+        <h3>${n.title}</h3>
+      </div>
+      <button class="drawer-close" data-close-drawer type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="k">所属页面</div><div class="v">${n.page}</div></div>
+        <div class="meta-cell"><div class="k">修改类型</div><div class="v">${n.type}</div></div>
+        <div class="meta-cell"><div class="k">优先级</div><div class="v"><span class="pri ${n.priority === 'P0' ? 'p0' : 'p1'}">${n.priority}</span></div></div>
+        <div class="meta-cell"><div class="k">关联规则</div><div class="v">${n.related}</div></div>
+      </div>
+      <div class="drawer-sec">
+        <h4>现状</h4>
+        <p>${n.current}</p>
+      </div>
+      <div class="drawer-sec">
+        <h4>改造要求</h4>
+        <p>${n.requirement}</p>
+      </div>
+      <div class="drawer-sec">
+        <h4>交互规则</h4>
+        <ol>${n.rules.map(r => `<li>${r}</li>`).join('')}</ol>
+      </div>
+      <div class="drawer-sec">
+        <h4>验收标准</h4>
+        <ul class="check-list">${n.accept.map(a => `<li>${a}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <div class="drawer-nav">
+        <button type="button" data-prev-note="${prev}">上一条</button>
+        <button type="button" data-next-note="${next}">下一条</button>
+      </div>
+      <button class="btn-primary" type="button" data-locate="${id}">定位到页面</button>
+    </div>
+  `;
+  $('#drawer').classList.add('open');
+  $('#drawerMask').classList.add('open');
+}
+
+function closeDrawer() {
+  $('#drawer').classList.remove('open');
+  $('#drawerMask').classList.remove('open');
+  currentNoteId = null;
+}
+
+function locateNote(id) {
+  const n = NOTES[id];
+  if (!n) return;
+  closeDrawer();
+  document.body.classList.remove('annot-off');
+  refreshAnnotationVisibility();
+  const currentPath = parseHash().path;
+  const targetRoute = (n.altRoute && currentPath === n.altRoute) ? n.altRoute : n.route;
+  if (location.hash.split('?')[0] !== targetRoute) {
+    location.hash = targetRoute;
+    setTimeout(() => flashNote(id), 360);
+  } else {
+    flashNote(id);
+  }
+}
+
+function flashNote(id) {
+  const activeView = document.querySelector('.view.active');
+  const el = activeView ? activeView.querySelector('[data-note="' + id + '"]') : null;
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('annot-flash');
+  void el.offsetWidth;
+  el.classList.add('annot-flash');
+  setTimeout(() => el.classList.remove('annot-flash'), 2100);
+}
+
+/* =========================================================
+   需求清单表格
+   ========================================================= */
+function renderReqTable() {
+  $('#reqTableBody').innerHTML = NOTE_ORDER.map(id => {
+    const n = NOTES[id];
+    return `<tr data-note-row="${id}">
+      <td><span class="req-no">${n.no}</span></td>
+      <td>${n.page}</td>
+      <td><div class="req-title">${n.title}</div><div class="req-desc">${n.short}</div></td>
+      <td><span class="type-pill">${n.type}</span></td>
+      <td><span class="pri ${n.priority === 'P0' ? 'p0' : 'p1'}">${n.priority}</span></td>
+      <td><button class="link-btn" data-locate-row="${id}" type="button">定位 →</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* =========================================================
+   登录态渲染
+   ========================================================= */
+function renderHeaderAuth() {
+  const slot = $('#authSlot');
+  if (state.loggedIn) {
+    slot.innerHTML = `
+      <div class="user-wrap">
+        <button class="user-chip" data-user-menu type="button">
+          <span class="avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.4" r="3.6" fill="#AAB2C0"/><path d="M4.8 20c.9-4 3.6-6.2 7.2-6.2s6.3 2.2 7.2 6.2" fill="#AAB2C0"/></svg>
+          </span>
+          <span>xask_admin</span>
+          <svg width="9" height="9" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+        <div class="user-menu" id="userMenu"><button type="button" data-logout>退出登录</button></div>
+      </div>
+    `;
+  } else {
+    slot.innerHTML = `
+      <button class="btn-header solid" data-login-btn type="button">登录</button>
+    `;
+  }
+}
+
+function renderState() {
+  renderHeaderAuth();
+  $$('.js-apply').forEach(btn => {
+    const kind = btn.dataset.kind;
+    const done = kind === 'race' ? state.raceRegistered : state.rankRegistered;
+    btn.textContent = done ? '已报名' : '报名';
+    btn.classList.toggle('btn-outline', !done);
+    btn.classList.toggle('btn-muted', done);
+    btn.disabled = done;
+  });
+  $$('[data-applied-card]').forEach(el => {
+    el.style.display = (state.loggedIn && state.rankRegistered) ? 'inline-flex' : 'none';
+  });
+  $$('[data-login-state]').forEach(b => {
+    b.classList.toggle('active', (b.dataset.loginState === 'in') === state.loggedIn);
+  });
+}
+
+/* =========================================================
+   Toast
+   ========================================================= */
+let toastTimer = null;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* =========================================================
+   Modal
+   ========================================================= */
+function openModal(html) {
+  $('#modalRoot').innerHTML = html;
+}
+
+function closeModal() {
+  $('#modalRoot').innerHTML = '';
+}
+
+function goLogin(intent) {
+  const current = location.hash.replace(/^#/, '') || '/race';
+  if (current.indexOf('/login') === 0) return;
+  const q = new URLSearchParams();
+  q.set('redirect', current);
+  if (intent) q.set('intent', intent);
+  location.hash = '#/login?' + q.toString();
+}
+
+function updateLoginPage(params) {
+  const intent = params.get('intent') || '';
+  const el = $('#loginContext');
+  if (!el) return;
+  el.textContent = (intent === 'race' || intent === 'rank')
+    ? '登录成功后将返回当前页面并继续报名'
+    : intent === 'workbench'
+      ? '登录成功后将返回并进入工作台'
+      : '登录成功后将返回原页面';
+}
+
+function doPageLogin() {
+  const { params } = parseHash();
+  const redirect = params.get('redirect') || '/race';
+  const intent = params.get('intent') || '';
+  state.loggedIn = true;
+  if (intent === 'race') state.raceRegistered = false;
+  if (intent === 'rank') state.rankRegistered = false;
+  renderState();
+  const target = redirect.charAt(0) === '/' ? redirect : '/race';
+  location.hash = '#' + target;
+  toast('登录成功，已返回原页面');
+  if (intent === 'race' || intent === 'rank') {
+    setTimeout(() => openConfirm(intent), 420);
+  } else if (intent === 'workbench') {
+    setTimeout(() => toast('已登录，可进入工作台（原型略）'), 900);
+  }
+}
+
+function openConfirm(kind) {
+  const isRace = kind === 'race';
+  const name = isRace ? '渣土车识别（二批次）' : '垃圾箱满溢';
+  const deadline = isRace ? '报名截止：2026-12-12 00:00:00' : '打榜结束：2026-12-16 00:00:00';
+  const action = isRace ? '报名赛题' : '报名榜单';
+  openModal(`
+    <div class="modal-mask" data-modal-mask>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="确认报名">
+        <div class="modal-head">
+          <h3>确认报名</h3>
+          <button class="icon-btn" data-modal-close type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-item">
+            <h4>${name}</h4>
+            <p>${deadline}</p>
+            <p>举办方：中国雄安集团数字城市科技有限公司</p>
+          </div>
+          <p class="confirm-tip">点击「确认报名」后，将以 <b>xask_admin</b> 身份${action}。报名成功后可在「算法开发」中创建开发环境并提交成绩。</p>
+          <p class="demo-hint">原型演示：确认后按钮状态变为「已报名」</p>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" data-modal-close type="button">取消</button>
+          <button class="btn-primary" data-do-confirm="${kind}" type="button">确认报名</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+/* =========================================================
+   筛选 / 搜索 / 排序
+   ========================================================= */
+let activeCat = '全部';
+
+function applyRankFilters() {
+  const q = ($('#rankSearch').value || '').trim();
+  const sort = $('#rankSort').value;
+  const cards = $$('.rank-card', $('#rankList'));
+  let visible = 0;
+  cards.forEach(c => {
+    const okCat = activeCat === '全部' || c.dataset.cat === activeCat;
+    const okQ = !q || (c.dataset.title || '').indexOf(q) > -1;
+    const show = okCat && okQ;
+    c.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  $('#rankCount').textContent = visible;
+  $('#rankEmpty').style.display = visible ? 'none' : 'flex';
+
+  const list = $('#rankList');
+  const arr = cards.slice();
+  if (sort === 'people') arr.sort((a, b) => (+b.dataset.people) - (+a.dataset.people));
+  if (sort === 'score') arr.sort((a, b) => (+b.dataset.score) - (+a.dataset.score));
+  arr.forEach(el => list.appendChild(el));
+}
+
+/* =========================================================
+   事件绑定
+   ========================================================= */
+document.addEventListener('click', e => {
+  /* 顶部登录 / 退出 */
+  if (e.target.closest('[data-login-btn]')) { goLogin(null); return; }
+  if (e.target.closest('[data-register-btn]')) { toast('原型演示：注册沿用现有登录页流程'); return; }
+  if (e.target.closest('#loginSubmit')) { doPageLogin(); return; }
+  if (e.target.closest('[data-user-menu]')) {
+    const menu = $('#userMenu');
+    if (menu) menu.classList.toggle('open');
+    return;
+  }
+  if (e.target.closest('[data-logout]')) {
+    state.loggedIn = false;
+    state.raceRegistered = false;
+    state.rankRegistered = false;
+    renderState();
+    toast('已退出登录');
+    return;
+  }
+  if (e.target.closest('#navWorkbench')) {
+    if (!state.loggedIn) goLogin('workbench');
+    else toast('已登录，可进入工作台（原型略）');
+    return;
+  }
+
+  /* 报名 */
+  const apply = e.target.closest('.js-apply');
+  if (apply) {
+    const kind = apply.dataset.kind;
+    const done = kind === 'race' ? state.raceRegistered : state.rankRegistered;
+    if (done) return;
+    if (!state.loggedIn) goLogin(kind);
+    else openConfirm(kind);
+    return;
+  }
+
+  /* 卡片跳转 */
+  const go = e.target.closest('[data-go]');
+  if (go) {
+    if (go.dataset.demo) { toast('原型演示：仅提供「垃圾箱满溢」榜单详情'); return; }
+    location.hash = go.dataset.go;
+    return;
+  }
+  const raceCard = e.target.closest('.race-card[data-route]');
+  if (raceCard) {
+    if (raceCard.dataset.demo) { toast('原型演示：仅提供「渣土车识别」赛题详情'); return; }
+    location.hash = raceCard.dataset.route;
+    return;
+  }
+
+  /* 页签 */
+  const tab = e.target.closest('[data-tabgroup] .tab');
+  if (tab) {
+    const group = tab.closest('[data-tabgroup]').dataset.tabgroup;
+    switchTab(group, tab.dataset.tab, true);
+    return;
+  }
+
+  /* 数据集展开 */
+  const expand = e.target.closest('[data-expand]');
+  if (expand) {
+    const row = document.getElementById(expand.dataset.expand);
+    if (row) {
+      const open = row.classList.toggle('open');
+      expand.textContent = open ? '−' : '+';
+    }
+    return;
+  }
+
+  /* 筛选 */
+  const chip = e.target.closest('.chip');
+  if (chip) {
+    activeCat = chip.dataset.cat;
+    $$('.chip').forEach(c => c.classList.toggle('active', c === chip));
+    applyRankFilters();
+    return;
+  }
+
+  /* 需求清单 */
+  const locateRow = e.target.closest('[data-locate-row]');
+  if (locateRow) {
+    e.stopPropagation();
+    locateNote(locateRow.dataset.locateRow);
+    return;
+  }
+  const noteRow = e.target.closest('[data-note-row]');
+  if (noteRow) { openNote(noteRow.dataset.noteRow); return; }
+
+  /* 抽屉 */
+  if (e.target.closest('[data-close-drawer]') || e.target.id === 'drawerMask') {
+    closeDrawer(); return;
+  }
+  const prev = e.target.closest('[data-prev-note]');
+  if (prev) { openNote(prev.dataset.prevNote); return; }
+  const next = e.target.closest('[data-next-note]');
+  if (next) { openNote(next.dataset.nextNote); return; }
+  const locate = e.target.closest('[data-locate]');
+  if (locate) { locateNote(locate.dataset.locate); return; }
+
+  /* 模态框 */
+  if (e.target.closest('[data-modal-close]')) { closeModal(); return; }
+  if (e.target.matches('[data-modal-mask]')) { closeModal(); return; }
+  const confirm = e.target.closest('[data-do-confirm]');
+  if (confirm) {
+    const kind = confirm.dataset.doConfirm;
+    if (kind === 'race') state.raceRegistered = true;
+    if (kind === 'rank') state.rankRegistered = true;
+    closeModal();
+    renderState();
+    toast('报名成功');
+    return;
+  }
+
+  /* 原型工具条 */
+  const proto = e.target.closest('[data-proto-route]');
+  if (proto) { location.hash = proto.dataset.protoRoute; return; }
+  const loginState = e.target.closest('[data-login-state]');
+  if (loginState) {
+    const toLogin = loginState.dataset.loginState === 'in';
+    state.loggedIn = toLogin;
+    if (!toLogin) {
+      state.raceRegistered = false;
+      state.rankRegistered = false;
+    }
+    renderState();
+    toast(toLogin ? '已切换为登录态' : '已切换为访客态');
+    return;
+  }
+  if (e.target.closest('#annotToggle')) {
+    document.body.classList.toggle('annot-off');
+    refreshAnnotationVisibility();
+    return;
+  }
+
+  /* 分页占位 */
+  if (e.target.closest('[data-page]')) {
+    toast('原型演示：分页数据略');
+    return;
+  }
+
+  /* 关闭用户菜单 */
+  if (!e.target.closest('.user-wrap')) {
+    const menu = $('#userMenu');
+    if (menu) menu.classList.remove('open');
+  }
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'rankSearch') applyRankFilters();
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'rankSort') applyRankFilters();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeDrawer();
+    closeModal();
+  }
+  if (e.key === 'Enter' && document.body.classList.contains('login-mode') && e.target.tagName === 'INPUT') {
+    doPageLogin();
+  }
+});
+
+/* =========================================================
+   初始化
+   ========================================================= */
+renderHeaderAuth();
+renderState();
+renderReqTable();
+initAnnotations();
+refreshAnnotationVisibility();
+applyRankFilters();
+if (!location.hash) history.replaceState(null, '', '#/race');
+renderRoute();
+</script>
+</body>
+</html>
