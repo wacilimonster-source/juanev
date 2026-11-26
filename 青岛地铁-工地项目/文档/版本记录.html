@@ -85,8 +85,36 @@
 
   <header>
     <h1>青岛地铁-工地项目</h1>
-    <p class="desc">原型与文档版本记录 · 共 3 个版本，新记录在最上方</p>
+    <p class="desc">原型与文档版本记录 · 共 4 个版本，新记录在最上方</p>
   </header>
+
+  <article class="entry">
+    <div class="meta">
+      <div class="date">2026-11-26</div>
+      <div class="type">原型</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <a class="file" href="../原型/人脸抓拍机布控库自维护设计稿20261126.html">人脸抓拍机布控库自维护设计稿</a>
+        <span class="badge">最新</span>
+        <span class="ver">2026-11-26 版</span>
+      </div>
+      <ul class="changes">
+        <li><span class="req mod">需求 2 · 改动</span>人脸抓拍机单个添加新增选填抓图连接参数及完整性校验，补全抓图服务模式联动字段</li>
+        <li><span class="req mod">需求 3 · 改动</span>批量添加模板与导入校验补充人脸抓拍机选填抓图参数支持</li>
+        <li><span class="req mod">需求 6 · 改动</span>人脸抓拍机由隐藏抓图改为按配置支持抓图与查看，支持手动抓图刷新在线状态</li>
+        <li><span class="req mod">需求 7 · 改动</span>明确默认绑定允许布控库为空，仅输入源配置手动保存时必选布控库</li>
+        <li><span class="req mod">需求 9 · 改动</span>人脸抓拍机「保存至批量」取消复制布控库，移除 ROI 与间隔选项，改为仅同步算法配置并勾选目标设备</li>
+        <li><span class="req mod">需求 12 · 改动</span>上线前置要求将 channelName 匹配收敛为仅匹配 CID，补充抓图网络访问与 cameraStreamUrl 放开校验要求</li>
+        <li><span class="req mod">需求 13 · 改动</span>取消原按最近上报判断在线规则与列表「最近上报时间」列，将已配抓图参数的人脸抓拍机纳入定时抓图探测（未配参数显示 --）</li>
+        <li><span class="req mod">需求 14 / 15 · 调整</span>原需求 15、16 顺延编号为 14、15，移除无启用布控库时记录上报与在线的说明</li>
+        <li><span class="req">需求 16 · 新增</span>设备列表对同步下发的摄像头禁用删除操作，人脸抓拍机保持可编辑与删除</li>
+        <li><span class="req">需求 17 · 新增</span>补充后台接口要求：工地平台下发删除布控库下摄像头时，删除人脸（出库）增加重试</li>
+        <li><span class="req">需求 18 · 新增</span>补充后台接口要求：工地平台下发删除布控库下摄像头时，删除布控库支持调用算法整库删除</li>
+        <li><span class="req doc">原型 · 调整</span>新增「原型说明」与「界面提示」区分标注，同步更新流程一/四及规则表，设备列表配置信息列统一还原为「算法实例」弹窗</li>
+      </ul>
+    </div>
+  </article>
 
   <article class="entry">
     <div class="meta">
@@ -96,7 +124,7 @@
     <div class="body">
       <div class="head">
         <a class="file" href="../原型/人脸抓拍机布控库自维护设计稿20261112-v2.html">人脸抓拍机布控库自维护设计稿（v2）</a>
-        <span class="badge">最新</span>
+        <span class="badge old">历史</span>
         <span class="ver">2026-11-12 版（v2）</span>
       </div>
       <ul class="changes">
